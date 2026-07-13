@@ -14,7 +14,7 @@ function AnexoPreview({ url }) {
     return (
       <div style={{ marginTop: 6 }}>
         <img src={url} alt="Anexo" style={{ maxWidth: 200, borderRadius: 6, display: 'block' }} />
-        <a href={url} download target="_blank" rel="noopener noreferrer" style={{ fontSize: 11 }}>
+        <a href={url} download="" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11 }}>
           ⬇ Descarregar
         </a>
       </div>
@@ -24,7 +24,7 @@ function AnexoPreview({ url }) {
   return (
     
       href={url}
-      download
+      download=""
       target="_blank"
       rel="noopener noreferrer"
       style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 6, fontSize: 12, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '6px 10px' }}
