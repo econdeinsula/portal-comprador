@@ -8,6 +8,7 @@ export default function DetalheAnomalia() {
   const [anomalia, setAnomalia] = useState(null)
   const [eventos, setEventos] = useState([])
   const [garantia, setGarantia] = useState(null)
+  const [visita, setVisita] = useState(null)
   const [texto, setTexto] = useState('')
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
@@ -38,6 +39,15 @@ export default function DetalheAnomalia() {
       .eq('anomalia_id', id)
       .maybeSingle()
     setGarantia(g)
+
+    const { data: v } = await supabase
+      .from('visitas')
+      .select('id, data_proposta, tecnico, estado')
+      .eq('anomalia_id', id)
+      .order('data_proposta', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    setVisita(v)
 
     setCarregando(false)
   }
@@ -91,6 +101,13 @@ export default function DetalheAnomalia() {
       <p style={{ fontSize: 13, fontWeight: 'bold', color: corGarantia }}>
         {textoGarantia}
       </p>
+      {visita && (
+        <p style={{ fontSize: 13, background: '#F5E6CC', padding: 8, borderRadius: 6, display: 'inline-block' }}>
+          Visita {visita.estado === 'proposta' ? 'proposta' : 'confirmada'} para{' '}
+          <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
+          {visita.tecnico ? ` com ${visita.tecnico}` : ''}
+        </p>
+      )}
 
       <h2 style={{ fontSize: 16, marginTop: 30 }}>Histórico</h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

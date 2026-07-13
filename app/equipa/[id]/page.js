@@ -8,7 +8,10 @@ export default function DetalheEquipa() {
   const [anomalia, setAnomalia] = useState(null)
   const [eventos, setEventos] = useState([])
   const [estados, setEstados] = useState([])
+  const [visita, setVisita] = useState(null)
   const [texto, setTexto] = useState('')
+  const [dataVisita, setDataVisita] = useState('')
+  const [tecnico, setTecnico] = useState('')
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
 
@@ -36,6 +39,15 @@ export default function DetalheEquipa() {
     const { data: ests } = await supabase.from('estados').select('id, nome').order('ordem')
     setEstados(ests || [])
 
+    const { data: v } = await supabase
+      .from('visitas')
+      .select('id, data_proposta, data_confirmada, tecnico, estado')
+      .eq('anomalia_id', id)
+      .order('data_proposta', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    setVisita(v)
+
     setCarregando(false)
   }
 
@@ -58,12 +70,8 @@ export default function DetalheEquipa() {
 
   async function mudarEstado(novoEstadoId) {
     setErro('')
-    const { error } = await supabase
-      .from('anomalias')
-      .update({ estado_id: novoEstadoId })
-      .eq('id', id)
+    const { error } = await supabase.from('anomalias').update({ estado_id: novoEstadoId }).eq('id', id)
     if (error) { setErro(error.message); return }
-
     const novoEstadoNome = estados.find((e) => e.id === novoEstadoId)?.nome
     await supabase.from('timeline_eventos').insert({
       anomalia_id: id,
@@ -72,6 +80,29 @@ export default function DetalheEquipa() {
       texto: `Estado alterado para "${novoEstadoNome}"`,
       ocorrido_em: new Date().toISOString(),
     })
+    carregar()
+  }
+
+  async function agendarVisita(e) {
+    e.preventDefault()
+    setErro('')
+    const { error } = await supabase.from('visitas').insert({
+      anomalia_id: id,
+      data_proposta: dataVisita,
+      tecnico,
+      estado: 'proposta',
+    })
+    if (error) { setErro(error.message); return }
+
+    await supabase.from('timeline_eventos').insert({
+      anomalia_id: id,
+      autor_tipo: 'sistema',
+      tipo_evento: 'agendamento',
+      texto: `Visita proposta para ${new Date(dataVisita).toLocaleString('pt-PT')}${tecnico ? ` com ${tecnico}` : ''}`,
+      ocorrido_em: new Date().toISOString(),
+    })
+    setDataVisita('')
+    setTecnico('')
     carregar()
   }
 
@@ -94,6 +125,36 @@ export default function DetalheEquipa() {
           <option key={e.id} value={e.id}>{e.nome}</option>
         ))}
       </select>
+
+      <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginBottom: 20 }}>
+        <h3 style={{ fontSize: 14, marginTop: 0 }}>Visita</h3>
+        {visita ? (
+          <p style={{ fontSize: 13 }}>
+            {visita.estado === 'proposta' ? 'Proposta' : 'Confirmada'} para{' '}
+            <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
+            {visita.tecnico ? ` com ${visita.tecnico}` : ''}
+          </p>
+        ) : (
+          <p style={{ fontSize: 13, color: '#888' }}>Nenhuma visita agendada ainda.</p>
+        )}
+        <form onSubmit={agendarVisita} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+          <input
+            type="datetime-local"
+            value={dataVisita}
+            onChange={(e) => setDataVisita(e.target.value)}
+            required
+            style={{ padding: 8 }}
+          />
+          <input
+            type="text"
+            placeholder="Técnico (opcional)"
+            value={tecnico}
+            onChange={(e) => setTecnico(e.target.value)}
+            style={{ padding: 8, flex: 1, minWidth: 120 }}
+          />
+          <button type="submit" style={{ padding: '8px 16px' }}>Propor visita</button>
+        </form>
+      </div>
 
       <h2 style={{ fontSize: 16 }}>Histórico</h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
