@@ -14,6 +14,8 @@ export default function PainelEquipa() {
   const [filtroEstado, setFiltroEstado] = useState('')
   const [filtroFracao, setFiltroFracao] = useState('')
   const [filtroTexto, setFiltroTexto] = useState('')
+  const [dataInicio, setDataInicio] = useState('')
+  const [dataFim, setDataFim] = useState('')
 
   useEffect(() => {
     async function carregarListas() {
@@ -44,6 +46,8 @@ export default function PainelEquipa() {
     if (filtroCategoria) query = query.eq('categoria_id', filtroCategoria)
     if (filtroEstado) query = query.eq('estado_id', filtroEstado)
     if (filtroTexto) query = query.ilike('descricao', `%${filtroTexto}%`)
+    if (dataInicio) query = query.gte('criado_em', dataInicio)
+    if (dataFim) query = query.lte('criado_em', dataFim + 'T23:59:59')
 
     const { data, error } = await query
 
@@ -51,8 +55,6 @@ export default function PainelEquipa() {
       setSemAcesso(true)
       setAnomalias([])
     } else {
-      // O filtro de fração é feito aqui, porque a coluna real (codigo_fracao)
-      // está numa tabela ligada, não diretamente em anomalias.
       const filtradas = filtroFracao
         ? data.filter((a) => a.fracoes?.codigo_fracao?.toUpperCase() === filtroFracao.toUpperCase())
         : data
@@ -61,7 +63,7 @@ export default function PainelEquipa() {
     setCarregando(false)
   }
 
-  useEffect(() => { carregarAnomalias() }, [filtroCategoria, filtroEstado, filtroTexto])
+  useEffect(() => { carregarAnomalias() }, [filtroCategoria, filtroEstado, filtroTexto, dataInicio, dataFim])
 
   function aplicarFiltroFracao(e) {
     e.preventDefault()
@@ -72,7 +74,10 @@ export default function PainelEquipa() {
 
   return (
     <main style={{ maxWidth: 1000, margin: '40px auto', fontFamily: 'sans-serif' }}>
-      <h1>Painel da equipa</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1>Painel da equipa</h1>
+        <Link href="/equipa/dashboard" style={{ fontSize: 14 }}>Ver dashboard →</Link>
+      </div>
 
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20, alignItems: 'flex-end' }}>
         <div>
@@ -101,6 +106,16 @@ export default function PainelEquipa() {
             style={{ padding: 6, width: 90 }}
           />
         </form>
+
+        <div>
+          <label style={{ fontSize: 12, display: 'block' }}>De</label>
+          <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} style={{ padding: 6 }} />
+        </div>
+
+        <div>
+          <label style={{ fontSize: 12, display: 'block' }}>Até</label>
+          <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} style={{ padding: 6 }} />
+        </div>
 
         <div style={{ flex: 1, minWidth: 200 }}>
           <label style={{ fontSize: 12, display: 'block' }}>Pesquisar na descrição</label>
