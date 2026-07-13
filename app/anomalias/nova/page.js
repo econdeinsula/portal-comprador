@@ -34,27 +34,32 @@ export default function NovaAnomalia() {
     e.preventDefault()
     setErro('')
 
-    let { data: fracao } = await supabase.from('fracoes').select('id').limit(1).single()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setErro('Sessão não encontrada. Faz login outra vez.'); return }
 
-    if (!fracao) {
-      const { data: empreendimento, error: erroEmp } = await supabase
-        .from('empreendimentos').select('id').limit(1).single()
-      if (erroEmp) { setErro('Erro ao ler empreendimentos: ' + erroEmp.message); return }
+    const { data: proprietario, error: erroProp } = await supabase
+      .from('proprietarios')
+      .select('id')
+      .eq('email', user.email)
+      .single()
 
-      const { data: novaFracao, error: erroFracao } = await supabase
-        .from('fracoes')
-        .insert({ empreendimento_id: empreendimento.id, codigo_fracao: 'TESTE' })
-        .select().single()
-      if (erroFracao) { setErro('Erro ao criar fração: ' + erroFracao.message); return }
-      fracao = novaFracao
-    }
+    if (erroProp || !proprietario) { setErro('Não encontrei o teu registo de proprietário.'); return }
+
+    const { data: ligacao, error: erroLig } = await supabase
+      .from('fracao_proprietarios')
+      .select('fracao_id')
+      .eq('proprietario_id', proprietario.id)
+      .limit(1)
+      .single()
+
+    if (erroLig || !ligacao) { setErro('Não encontrei nenhuma fração associada a ti.'); return }
 
     const { data: estado, error: erroEstado } = await supabase
       .from('estados').select('id').eq('nome', 'Aberta').single()
     if (erroEstado) { setErro('Erro ao ler estados: ' + erroEstado.message); return }
 
     const { error } = await supabase.from('anomalias').insert({
-      fracao_id: fracao.id,
+      fracao_id: ligacao.fracao_id,
       categoria_id: categoriaId || null,
       elemento_id: elementoId || null,
       tipo_anomalia_id: tipoId || null,

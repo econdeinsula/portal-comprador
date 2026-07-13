@@ -8,6 +8,24 @@ export default function ListaAnomalias() {
 
   useEffect(() => {
     async function carregar() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setCarregando(false); return }
+
+      const { data: proprietario } = await supabase
+        .from('proprietarios')
+        .select('id')
+        .eq('email', user.email)
+        .single()
+
+      if (!proprietario) { setCarregando(false); return }
+
+      const { data: ligacoes } = await supabase
+        .from('fracao_proprietarios')
+        .select('fracao_id')
+        .eq('proprietario_id', proprietario.id)
+
+      const fracaoIds = (ligacoes || []).map((l) => l.fracao_id)
+
       const { data, error } = await supabase
         .from('anomalias')
         .select(`
@@ -18,6 +36,7 @@ export default function ListaAnomalias() {
           elementos ( nome ),
           categorias ( nome )
         `)
+        .in('fracao_id', fracaoIds)
         .order('criado_em', { ascending: false })
 
       if (!error) setAnomalias(data)
@@ -31,6 +50,7 @@ export default function ListaAnomalias() {
   return (
     <main style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>As minhas reclamações</h1>
+      {anomalias.length === 0 && <p>Ainda não tens reclamações associadas à tua fração.</p>}
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {anomalias.map((a) => (
           <li key={a.id} style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginTop: 10 }}>
