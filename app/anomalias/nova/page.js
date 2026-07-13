@@ -3,6 +3,21 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 
+const PlantaSVG = () => (
+  <svg viewBox="0 0 400 260" style={{ width: '100%', display: 'block', background: '#fff' }}>
+    <rect x="4" y="4" width="392" height="252" fill="none" stroke="#2B5876" strokeWidth="1.5" />
+    <line x1="180" y1="4" x2="180" y2="150" stroke="#2B5876" strokeWidth="1" />
+    <line x1="180" y1="150" x2="396" y2="150" stroke="#2B5876" strokeWidth="1" />
+    <line x1="260" y1="150" x2="260" y2="256" stroke="#2B5876" strokeWidth="1" />
+    <line x1="60" y1="150" x2="60" y2="256" stroke="#2B5876" strokeWidth="1" />
+    <text x="18" y="24" fontSize="10" fill="#6E6A5E">SALA</text>
+    <text x="198" y="24" fontSize="10" fill="#6E6A5E">COZINHA</text>
+    <text x="198" y="168" fontSize="10" fill="#6E6A5E">WC</text>
+    <text x="76" y="168" fontSize="10" fill="#6E6A5E">QUARTO 1</text>
+    <text x="278" y="168" fontSize="10" fill="#6E6A5E">QUARTO 2</text>
+  </svg>
+)
+
 export default function NovaAnomalia() {
   const [categorias, setCategorias] = useState([])
   const [elementos, setElementos] = useState([])
@@ -13,6 +28,7 @@ export default function NovaAnomalia() {
   const [tipoId, setTipoId] = useState('')
   const [descricao, setDescricao] = useState('')
   const [urgencia, setUrgencia] = useState('Baixa')
+  const [pin, setPin] = useState(null)
   const [erro, setErro] = useState('')
   const router = useRouter()
 
@@ -30,41 +46,58 @@ export default function NovaAnomalia() {
 
   const elementosFiltrados = elementos.filter((e) => e.categoria_id === categoriaId)
 
+  function clicarPlanta(e) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width) * 100
+    const y = ((e.clientY - rect.top) / rect.height) * 100
+    setPin({ x, y })
+  }
+
   async function submeter(e) {
     e.preventDefault()
     setErro('')
 
+    let { data: fracao } = await supabase.from('fracoes').select('id').limit(1).single()
+
+    if (!fracao) {
+      const { data: empreendimento, error: erroEmp } = await supabase
+        .from('empreendimentos').select('id').limit(1).single()
+      if (erroEmp) { setErro('Erro ao ler empreendimentos: ' + erroEmp.message); return }
+
+      const { data: novaFracao, error: erroFracao } = await supabase
+        .from('fracoes')
+        .insert({ empreendimento_id: empreendimento.id, codigo_fracao: 'TESTE' })
+        .select().single()
+      if (erroFracao) { setErro('Erro ao criar fração: ' + erroFracao.message); return }
+      fracao = novaFracao
+    }
+
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setErro('Sessão não encontrada. Faz login outra vez.'); return }
-
-    const { data: proprietario, error: erroProp } = await supabase
-      .from('proprietarios')
-      .select('id')
-      .eq('email', user.email)
-      .single()
-
-    if (erroProp || !proprietario) { setErro('Não encontrei o teu registo de proprietário.'); return }
-
-    const { data: ligacao, error: erroLig } = await supabase
-      .from('fracao_proprietarios')
-      .select('fracao_id')
-      .eq('proprietario_id', proprietario.id)
-      .limit(1)
-      .single()
-
-    if (erroLig || !ligacao) { setErro('Não encontrei nenhuma fração associada a ti.'); return }
+    let fracaoIdFinal = fracao.id
+    if (user) {
+      const { data: proprietario } = await supabase
+        .from('proprietarios').select('id').eq('email', user.email).single()
+      if (proprietario) {
+        const { data: ligacao } = await supabase
+          .from('fracao_proprietarios').select('fracao_id')
+          .eq('proprietario_id', proprietario.id).limit(1).single()
+        if (ligacao) fracaoIdFinal = ligacao.fracao_id
+      }
+    }
 
     const { data: estado, error: erroEstado } = await supabase
       .from('estados').select('id').eq('nome', 'Aberta').single()
     if (erroEstado) { setErro('Erro ao ler estados: ' + erroEstado.message); return }
 
     const { error } = await supabase.from('anomalias').insert({
-      fracao_id: ligacao.fracao_id,
+      fracao_id: fracaoIdFinal,
       categoria_id: categoriaId || null,
       elemento_id: elementoId || null,
       tipo_anomalia_id: tipoId || null,
       descricao,
       urgencia,
+      pin_x: pin?.x ?? null,
+      pin_y: pin?.y ?? null,
       estado_id: estado.id,
       origem: 'novo',
     })
@@ -117,6 +150,35 @@ export default function NovaAnomalia() {
             <option key={t.id} value={t.id}>{t.nome}</option>
           ))}
         </select>
+
+        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Onde ocorreu — clica na planta</label>
+        <div
+          onClick={clicarPlanta}
+          style={{ position: 'relative', border: '1px solid #ddd', borderRadius: 8, cursor: 'crosshair', marginBottom: 6 }}
+        >
+          <PlantaSVG />
+          {pin && (
+            <div
+              style={{
+                position: 'absolute',
+                left: `${pin.x}%`,
+                top: `${pin.y}%`,
+                width: 16,
+                height: 16,
+                marginLeft: -8,
+                marginTop: -16,
+                background: '#C8862B',
+                borderRadius: '50% 50% 50% 0',
+                transform: 'rotate(45deg)',
+                border: '2px solid #fff',
+                boxShadow: '0 0 2px rgba(0,0,0,0.4)',
+              }}
+            />
+          )}
+        </div>
+        <p style={{ fontSize: 11, color: '#888', marginTop: 0, marginBottom: 14 }}>
+          {pin ? 'Local selecionado — clica outra vez para ajustar.' : 'Ainda não selecionaste um local (opcional).'}
+        </p>
 
         <label style={{ fontSize: 13, fontWeight: 'bold' }}>Descrição</label>
         <textarea

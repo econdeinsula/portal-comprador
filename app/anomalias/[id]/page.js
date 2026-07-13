@@ -3,6 +3,21 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabaseClient'
 
+const PlantaSVG = () => (
+  <svg viewBox="0 0 400 260" style={{ width: '100%', display: 'block', background: '#fff' }}>
+    <rect x="4" y="4" width="392" height="252" fill="none" stroke="#2B5876" strokeWidth="1.5" />
+    <line x1="180" y1="4" x2="180" y2="150" stroke="#2B5876" strokeWidth="1" />
+    <line x1="180" y1="150" x2="396" y2="150" stroke="#2B5876" strokeWidth="1" />
+    <line x1="260" y1="150" x2="260" y2="256" stroke="#2B5876" strokeWidth="1" />
+    <line x1="60" y1="150" x2="60" y2="256" stroke="#2B5876" strokeWidth="1" />
+    <text x="18" y="24" fontSize="10" fill="#6E6A5E">SALA</text>
+    <text x="198" y="24" fontSize="10" fill="#6E6A5E">COZINHA</text>
+    <text x="198" y="168" fontSize="10" fill="#6E6A5E">WC</text>
+    <text x="76" y="168" fontSize="10" fill="#6E6A5E">QUARTO 1</text>
+    <text x="278" y="168" fontSize="10" fill="#6E6A5E">QUARTO 2</text>
+  </svg>
+)
+
 export default function DetalheAnomalia() {
   const { id } = useParams()
   const [anomalia, setAnomalia] = useState(null)
@@ -17,7 +32,7 @@ export default function DetalheAnomalia() {
     const { data: a } = await supabase
       .from('anomalias')
       .select(`
-        id, descricao, urgencia, criado_em,
+        id, descricao, urgencia, criado_em, pin_x, pin_y,
         estados ( nome ),
         elementos ( nome ),
         categorias ( nome )
@@ -107,6 +122,27 @@ export default function DetalheAnomalia() {
           <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
           {visita.tecnico ? ` com ${visita.tecnico}` : ''}
         </p>
+      )}
+
+      {anomalia.pin_x != null && (
+        <div style={{ position: 'relative', maxWidth: 300, border: '1px solid #ddd', borderRadius: 8, marginTop: 16 }}>
+          <PlantaSVG />
+          <div
+            style={{
+              position: 'absolute',
+              left: `${anomalia.pin_x}%`,
+              top: `${anomalia.pin_y}%`,
+              width: 16,
+              height: 16,
+              marginLeft: -8,
+              marginTop: -16,
+              background: '#2B5876',
+              borderRadius: '50% 50% 50% 0',
+              transform: 'rotate(45deg)',
+              border: '2px solid #fff',
+            }}
+          />
+        </div>
       )}
 
       <h2 style={{ fontSize: 16, marginTop: 30 }}>Histórico</h2>
