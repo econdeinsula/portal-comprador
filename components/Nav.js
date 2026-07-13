@@ -9,20 +9,30 @@ export default function Nav() {
   const [ehEquipa, setEhEquipa] = useState(false)
   const router = useRouter()
 
+  async function verificarEquipa(currentUser) {
+    if (!currentUser) { setEhEquipa(false); return }
+    const { data } = await supabase
+      .from('membros_equipa')
+      .select('email')
+      .eq('email', currentUser.email)
+      .maybeSingle()
+    setEhEquipa(!!data)
+  }
+
   useEffect(() => {
-    async function carregar() {
+    async function carregarInicial() {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
-      if (user) {
-        const { data } = await supabase
-          .from('membros_equipa')
-          .select('email')
-          .eq('email', user.email)
-          .maybeSingle()
-        setEhEquipa(!!data)
-      }
+      verificarEquipa(user)
     }
-    carregar()
+    carregarInicial()
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      verificarEquipa(session?.user ?? null)
+    })
+
+    return () => listener.subscription.unsubscribe()
   }, [])
 
   async function sair() {
