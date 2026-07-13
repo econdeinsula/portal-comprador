@@ -43,7 +43,7 @@ export default function DetalheAnomalia() {
 
     const { data: evs } = await supabase
       .from('timeline_eventos')
-      .select('id, autor_tipo, tipo_evento, texto, reconstruido, ocorrido_em')
+      .select('id, autor_tipo, tipo_evento, texto, anexo_url, reconstruido, ocorrido_em')
       .eq('anomalia_id', id)
       .order('ocorrido_em', { ascending: true })
     setEventos(evs || [])
@@ -167,6 +167,9 @@ export default function DetalheAnomalia() {
               </div>
             )}
             <div>{ev.texto}</div>
+            {ev.tipo_evento === 'anexo' && ev.anexo_url && (
+              <img src={ev.anexo_url} alt="Anexo" style={{ maxWidth: 200, borderRadius: 6, marginTop: 6, display: 'block' }} />
+            )}
             <div style={{ fontSize: 10, color: '#888', marginTop: 4 }}>
               {new Date(ev.ocorrido_em).toLocaleString('pt-PT')}
               {ev.reconstruido ? ' · reconstruído do histórico' : ''}

@@ -29,6 +29,8 @@ export default function NovaAnomalia() {
   const [descricao, setDescricao] = useState('')
   const [urgencia, setUrgencia] = useState('Baixa')
   const [pin, setPin] = useState(null)
+  const [foto, setFoto] = useState(null)
+  const [aEnviar, setAEnviar] = useState(false)
   const [erro, setErro] = useState('')
   const router = useRouter()
 
@@ -56,19 +58,20 @@ export default function NovaAnomalia() {
   async function submeter(e) {
     e.preventDefault()
     setErro('')
+    setAEnviar(true)
 
     let { data: fracao } = await supabase.from('fracoes').select('id').limit(1).single()
 
     if (!fracao) {
       const { data: empreendimento, error: erroEmp } = await supabase
         .from('empreendimentos').select('id').limit(1).single()
-      if (erroEmp) { setErro('Erro ao ler empreendimentos: ' + erroEmp.message); return }
+      if (erroEmp) { setErro('Erro ao ler empreendimentos: ' + erroEmp.message); setAEnviar(false); return }
 
       const { data: novaFracao, error: erroFracao } = await supabase
         .from('fracoes')
         .insert({ empreendimento_id: empreendimento.id, codigo_fracao: 'TESTE' })
         .select().single()
-      if (erroFracao) { setErro('Erro ao criar fração: ' + erroFracao.message); return }
+      if (erroFracao) { setErro('Erro ao criar fração: ' + erroFracao.message); setAEnviar(false); return }
       fracao = novaFracao
     }
 
@@ -87,22 +90,45 @@ export default function NovaAnomalia() {
 
     const { data: estado, error: erroEstado } = await supabase
       .from('estados').select('id').eq('nome', 'Aberta').single()
-    if (erroEstado) { setErro('Erro ao ler estados: ' + erroEstado.message); return }
+    if (erroEstado) { setErro('Erro ao ler estados: ' + erroEstado.message); setAEnviar(false); return }
 
-    const { error } = await supabase.from('anomalias').insert({
-      fracao_id: fracaoIdFinal,
-      categoria_id: categoriaId || null,
-      elemento_id: elementoId || null,
-      tipo_anomalia_id: tipoId || null,
-      descricao,
-      urgencia,
-      pin_x: pin?.x ?? null,
-      pin_y: pin?.y ?? null,
-      estado_id: estado.id,
-      origem: 'novo',
-    })
+    const { data: novaAnomalia, error } = await supabase
+      .from('anomalias')
+      .insert({
+        fracao_id: fracaoIdFinal,
+        categoria_id: categoriaId || null,
+        elemento_id: elementoId || null,
+        tipo_anomalia_id: tipoId || null,
+        descricao,
+        urgencia,
+        pin_x: pin?.x ?? null,
+        pin_y: pin?.y ?? null,
+        estado_id: estado.id,
+        origem: 'novo',
+      })
+      .select()
+      .single()
 
-    if (error) { setErro('Erro ao criar anomalia: ' + error.message); return }
+    if (error) { setErro('Erro ao criar anomalia: ' + error.message); setAEnviar(false); return }
+
+    if (foto) {
+      const extensao = foto.name.split('.').pop()
+      const caminho = `${novaAnomalia.id}/${Date.now()}.${extensao}`
+      const { error: erroUpload } = await supabase.storage.from('anexos').upload(caminho, foto)
+
+      if (!erroUpload) {
+        const { data: urlPublico } = supabase.storage.from('anexos').getPublicUrl(caminho)
+        await supabase.from('timeline_eventos').insert({
+          anomalia_id: novaAnomalia.id,
+          autor_tipo: 'proprietario',
+          tipo_evento: 'anexo',
+          texto: 'Foto anexada',
+          anexo_url: urlPublico.publicUrl,
+          ocorrido_em: new Date().toISOString(),
+        })
+      }
+    }
+
     router.push('/anomalias')
   }
 
@@ -189,6 +215,14 @@ export default function NovaAnomalia() {
           style={{ width: '100%', minHeight: 100, padding: 10, marginBottom: 10 }}
         />
 
+        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Foto (opcional)</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setFoto(e.target.files?.[0] || null)}
+          style={{ display: 'block', marginBottom: 10 }}
+        />
+
         <label style={{ fontSize: 13, fontWeight: 'bold' }}>Urgência</label>
         <select value={urgencia} onChange={(e) => setUrgencia(e.target.value)} style={{ marginBottom: 10, display: 'block', padding: 10, width: '100%' }}>
           <option>Baixa</option>
@@ -197,8 +231,8 @@ export default function NovaAnomalia() {
           <option>Emergência</option>
         </select>
 
-        <button type="submit" style={{ padding: 10, width: '100%' }}>
-          Submeter
+        <button type="submit" disabled={aEnviar} style={{ padding: 10, width: '100%' }}>
+          {aEnviar ? 'A submeter...' : 'Submeter'}
         </button>
       </form>
     </main>
