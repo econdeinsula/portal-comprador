@@ -25,6 +25,8 @@ export default function DetalheAnomalia() {
   const [garantia, setGarantia] = useState(null)
   const [visita, setVisita] = useState(null)
   const [texto, setTexto] = useState('')
+  const [anexo, setAnexo] = useState(null)
+  const [aEnviar, setAEnviar] = useState(false)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
 
@@ -72,15 +74,30 @@ export default function DetalheAnomalia() {
   async function enviarMensagem(e) {
     e.preventDefault()
     setErro('')
+    setAEnviar(true)
+
+    let anexoUrl = null
+    if (anexo) {
+      const extensao = anexo.name.split('.').pop()
+      const caminho = `${id}/${Date.now()}.${extensao}`
+      const { error: erroUpload } = await supabase.storage.from('anexos').upload(caminho, anexo)
+      if (erroUpload) { setErro('Erro ao enviar anexo: ' + erroUpload.message); setAEnviar(false); return }
+      const { data: urlPublico } = supabase.storage.from('anexos').getPublicUrl(caminho)
+      anexoUrl = urlPublico.publicUrl
+    }
+
     const { error } = await supabase.from('timeline_eventos').insert({
       anomalia_id: id,
       autor_tipo: 'proprietario',
-      tipo_evento: 'mensagem',
-      texto,
+      tipo_evento: anexoUrl ? 'anexo' : 'mensagem',
+      texto: texto || (anexoUrl ? 'Anexo enviado' : ''),
+      anexo_url: anexoUrl,
       ocorrido_em: new Date().toISOString(),
     })
-    if (error) { setErro(error.message); return }
+    if (error) { setErro(error.message); setAEnviar(false); return }
     setTexto('')
+    setAnexo(null)
+    setAEnviar(false)
     carregar()
   }
 
@@ -179,16 +196,31 @@ export default function DetalheAnomalia() {
       </div>
 
       {erro && <p style={{ color: 'red' }}>{erro}</p>}
-      <form onSubmit={enviarMensagem} style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+      {anexo && (
+        <p style={{ fontSize: 12, color: '#666', marginTop: 12, marginBottom: 0 }}>
+          📎 {anexo.name} <a href="#" onClick={(e) => { e.preventDefault(); setAnexo(null) }}>remover</a>
+        </p>
+      )}
+      <form onSubmit={enviarMensagem} style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
+        <label style={{ cursor: 'pointer', fontSize: 20, padding: '4px 8px' }}>
+          📎
+          <input
+            type="file"
+            accept="image/*,.pdf,.doc,.docx"
+            onChange={(e) => setAnexo(e.target.files?.[0] || null)}
+            style={{ display: 'none' }}
+          />
+        </label>
         <input
           type="text"
           placeholder="Escreve uma mensagem..."
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
-          required
           style={{ flex: 1, padding: 10 }}
         />
-        <button type="submit" style={{ padding: '0 16px' }}>Enviar</button>
+        <button type="submit" disabled={aEnviar || (!texto && !anexo)} style={{ padding: '0 16px' }}>
+          {aEnviar ? 'A enviar...' : 'Enviar'}
+        </button>
       </form>
     </main>
   )
