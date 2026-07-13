@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
+import Link from 'next/link'
 
 export default function ListaAnomalias() {
   const [anomalias, setAnomalias] = useState([])
@@ -53,10 +54,14 @@ export default function ListaAnomalias() {
       {anomalias.length === 0 && <p>Ainda não tens reclamações associadas à tua fração.</p>}
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {anomalias.map((a) => (
-          <li key={a.id} style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginTop: 10 }}>
-            <strong>{a.categorias?.nome ? `${a.categorias.nome} — ${a.elementos?.nome}` : 'Por classificar'}</strong>
-            <div>{a.descricao}</div>
-            <span style={{ fontSize: 12, color: '#666' }}>{a.estados?.nome}</span>
+          <li key={a.id} style={{ marginTop: 10 }}>
+            <Link href={`/anomalias/${a.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, cursor: 'pointer' }}>
+                <strong>{a.categorias?.nome ? `${a.categorias.nome} — ${a.elementos?.nome}` : 'Por classificar'}</strong>
+                <div>{a.descricao}</div>
+                <span style={{ fontSize: 12, color: '#666' }}>{a.estados?.nome}</span>
+              </div>
+            </Link>
           </li>
         ))}
       </ul>
