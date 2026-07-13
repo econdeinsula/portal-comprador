@@ -3,6 +3,37 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabaseClient'
 
+const EXTENSOES_IMAGEM = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+
+function AnexoPreview({ url }) {
+  const nomeFicheiro = decodeURIComponent(url.split('/').pop().split('?')[0])
+  const extensao = nomeFicheiro.split('.').pop().toLowerCase()
+  const ehImagem = EXTENSOES_IMAGEM.includes(extensao)
+
+  if (ehImagem) {
+    return (
+      <div style={{ marginTop: 6 }}>
+        <img src={url} alt="Anexo" style={{ maxWidth: 200, borderRadius: 6, display: 'block' }} />
+        <a href={url} download target="_blank" rel="noopener noreferrer" style={{ fontSize: 11 }}>
+          ⬇ Descarregar
+        </a>
+      </div>
+    )
+  }
+
+  return (
+    
+      href={url}
+      download
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 6, fontSize: 12, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '6px 10px' }}
+    >
+      📄 {nomeFicheiro}
+    </a>
+  )
+}
+
 export default function DetalheEquipa() {
   const { id } = useParams()
   const [anomalia, setAnomalia] = useState(null)
@@ -272,7 +303,7 @@ export default function DetalheEquipa() {
             )}
             <div>{ev.texto}</div>
             {ev.tipo_evento === 'anexo' && ev.anexo_url && (
-              <img src={ev.anexo_url} alt="Anexo" style={{ maxWidth: 200, borderRadius: 6, marginTop: 6, display: 'block' }} />
+              <AnexoPreview url={ev.anexo_url} />
             )}
             <div style={{ fontSize: 10, color: '#888', marginTop: 4 }}>
               {new Date(ev.ocorrido_em).toLocaleString('pt-PT')}

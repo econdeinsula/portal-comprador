@@ -29,7 +29,7 @@ export default function NovaAnomalia() {
   const [descricao, setDescricao] = useState('')
   const [urgencia, setUrgencia] = useState('Baixa')
   const [pin, setPin] = useState(null)
-  const [foto, setFoto] = useState(null)
+  const [fotos, setFotos] = useState([])
   const [aEnviar, setAEnviar] = useState(false)
   const [erro, setErro] = useState('')
   const router = useRouter()
@@ -111,9 +111,8 @@ export default function NovaAnomalia() {
 
     if (error) { setErro('Erro ao criar anomalia: ' + error.message); setAEnviar(false); return }
 
-    if (foto) {
-      const extensao = foto.name.split('.').pop()
-      const caminho = `${novaAnomalia.id}/${Date.now()}.${extensao}`
+    for (const foto of fotos) {
+      const caminho = `${novaAnomalia.id}/${Date.now()}-${foto.name}`
       const { error: erroUpload } = await supabase.storage.from('anexos').upload(caminho, foto)
 
       if (!erroUpload) {
@@ -122,7 +121,7 @@ export default function NovaAnomalia() {
           anomalia_id: novaAnomalia.id,
           autor_tipo: 'proprietario',
           tipo_evento: 'anexo',
-          texto: 'Foto anexada',
+          texto: `Foto anexada: ${foto.name}`,
           anexo_url: urlPublico.publicUrl,
           ocorrido_em: new Date().toISOString(),
         })
@@ -215,13 +214,19 @@ export default function NovaAnomalia() {
           style={{ width: '100%', minHeight: 100, padding: 10, marginBottom: 10 }}
         />
 
-        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Foto (opcional)</label>
+        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Fotos (opcional, podes escolher várias)</label>
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => setFoto(e.target.files?.[0] || null)}
-          style={{ display: 'block', marginBottom: 10 }}
+          multiple
+          onChange={(e) => setFotos(Array.from(e.target.files || []))}
+          style={{ display: 'block', marginBottom: 6 }}
         />
+        {fotos.length > 0 && (
+          <ul style={{ fontSize: 12, color: '#666', marginTop: 0, marginBottom: 10 }}>
+            {fotos.map((f, i) => <li key={i}>{f.name}</li>)}
+          </ul>
+        )}
 
         <label style={{ fontSize: 13, fontWeight: 'bold' }}>Urgência</label>
         <select value={urgencia} onChange={(e) => setUrgencia(e.target.value)} style={{ marginBottom: 10, display: 'block', padding: 10, width: '100%' }}>
