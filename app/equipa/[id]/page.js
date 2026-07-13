@@ -8,18 +8,25 @@ export default function DetalheEquipa() {
   const [anomalia, setAnomalia] = useState(null)
   const [eventos, setEventos] = useState([])
   const [estados, setEstados] = useState([])
+  const [categorias, setCategorias] = useState([])
+  const [elementos, setElementos] = useState([])
+  const [tipos, setTipos] = useState([])
   const [visita, setVisita] = useState(null)
   const [texto, setTexto] = useState('')
   const [dataVisita, setDataVisita] = useState('')
   const [tecnico, setTecnico] = useState('')
+  const [categoriaId, setCategoriaId] = useState('')
+  const [elementoId, setElementoId] = useState('')
+  const [tipoId, setTipoId] = useState('')
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
+  const [sucesso, setSucesso] = useState('')
 
   async function carregar() {
     const { data: a } = await supabase
       .from('anomalias')
       .select(`
-        id, descricao, urgencia, estado_id,
+        id, descricao, urgencia, estado_id, categoria_id, elemento_id, tipo_anomalia_id,
         estados ( nome ),
         elementos ( nome ),
         categorias ( nome ),
@@ -28,6 +35,9 @@ export default function DetalheEquipa() {
       .eq('id', id)
       .single()
     setAnomalia(a)
+    setCategoriaId(a?.categoria_id || '')
+    setElementoId(a?.elemento_id || '')
+    setTipoId(a?.tipo_anomalia_id || '')
 
     const { data: evs } = await supabase
       .from('timeline_eventos')
@@ -38,6 +48,15 @@ export default function DetalheEquipa() {
 
     const { data: ests } = await supabase.from('estados').select('id, nome').order('ordem')
     setEstados(ests || [])
+
+    const { data: cats } = await supabase.from('categorias').select('id, nome').order('nome')
+    setCategorias(cats || [])
+
+    const { data: elems } = await supabase.from('elementos').select('id, nome, categoria_id').order('nome')
+    setElementos(elems || [])
+
+    const { data: tps } = await supabase.from('tipos_anomalia').select('id, nome').order('ordem')
+    setTipos(tps || [])
 
     const { data: v } = await supabase
       .from('visitas')
@@ -52,6 +71,8 @@ export default function DetalheEquipa() {
   }
 
   useEffect(() => { carregar() }, [id])
+
+  const elementosFiltrados = elementos.filter((e) => e.categoria_id === categoriaId)
 
   async function enviarMensagem(e) {
     e.preventDefault()
@@ -80,6 +101,23 @@ export default function DetalheEquipa() {
       texto: `Estado alterado para "${novoEstadoNome}"`,
       ocorrido_em: new Date().toISOString(),
     })
+    carregar()
+  }
+
+  async function guardarClassificacao(e) {
+    e.preventDefault()
+    setErro('')
+    setSucesso('')
+    const { error } = await supabase
+      .from('anomalias')
+      .update({
+        categoria_id: categoriaId || null,
+        elemento_id: elementoId || null,
+        tipo_anomalia_id: tipoId || null,
+      })
+      .eq('id', id)
+    if (error) { setErro(error.message); return }
+    setSucesso('Classificação guardada.')
     carregar()
   }
 
@@ -125,6 +163,45 @@ export default function DetalheEquipa() {
           <option key={e.id} value={e.id}>{e.nome}</option>
         ))}
       </select>
+
+      <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginBottom: 20 }}>
+        <h3 style={{ fontSize: 14, marginTop: 0 }}>Classificação</h3>
+        <form onSubmit={guardarClassificacao}>
+          <label style={{ fontSize: 12, display: 'block' }}>Categoria</label>
+          <select
+            value={categoriaId}
+            onChange={(e) => { setCategoriaId(e.target.value); setElementoId('') }}
+            style={{ padding: 6, marginBottom: 8, display: 'block', width: '100%' }}
+          >
+            <option value="">Por classificar</option>
+            {categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+          </select>
+
+          <label style={{ fontSize: 12, display: 'block' }}>Elemento</label>
+          <select
+            value={elementoId}
+            onChange={(e) => setElementoId(e.target.value)}
+            disabled={!categoriaId}
+            style={{ padding: 6, marginBottom: 8, display: 'block', width: '100%' }}
+          >
+            <option value="">—</option>
+            {elementosFiltrados.map((el) => <option key={el.id} value={el.id}>{el.nome}</option>)}
+          </select>
+
+          <label style={{ fontSize: 12, display: 'block' }}>Tipo de anomalia</label>
+          <select
+            value={tipoId}
+            onChange={(e) => setTipoId(e.target.value)}
+            style={{ padding: 6, marginBottom: 8, display: 'block', width: '100%' }}
+          >
+            <option value="">—</option>
+            {tipos.map((t) => <option key={t.id} value={t.id}>{t.nome}</option>)}
+          </select>
+
+          {sucesso && <p style={{ color: 'green', fontSize: 13 }}>{sucesso}</p>}
+          <button type="submit" style={{ padding: '8px 16px' }}>Guardar classificação</button>
+        </form>
+      </div>
 
       <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginBottom: 20 }}>
         <h3 style={{ fontSize: 14, marginTop: 0 }}>Visita</h3>

@@ -43,7 +43,8 @@ export default function PainelEquipa() {
       .order('criado_em', { ascending: false })
       .limit(200)
 
-    if (filtroCategoria) query = query.eq('categoria_id', filtroCategoria)
+    if (filtroCategoria === 'sem') query = query.is('categoria_id', null)
+    else if (filtroCategoria) query = query.eq('categoria_id', filtroCategoria)
     if (filtroEstado) query = query.eq('estado_id', filtroEstado)
     if (filtroTexto) query = query.ilike('descricao', `%${filtroTexto}%`)
     if (dataInicio) query = query.gte('criado_em', dataInicio)
@@ -84,6 +85,7 @@ export default function PainelEquipa() {
           <label style={{ fontSize: 12, display: 'block' }}>Categoria</label>
           <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} style={{ padding: 6 }}>
             <option value="">Todas</option>
+            <option value="sem">Por classificar</option>
             {categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select>
         </div>
