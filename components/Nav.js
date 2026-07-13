@@ -4,6 +4,17 @@ import { supabase } from '../lib/supabaseClient'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
+function Iniciais(user) {
+  const nome = user?.user_metadata?.full_name
+  if (nome) {
+    const partes = nome.trim().split(/\s+/)
+    const primeira = partes[0]?.[0] || ''
+    const ultima = partes.length > 1 ? partes[partes.length - 1][0] : ''
+    return (primeira + ultima).toUpperCase()
+  }
+  return user?.email?.[0]?.toUpperCase() || '?'
+}
+
 export default function Nav() {
   const [user, setUser] = useState(null)
   const [ehEquipa, setEhEquipa] = useState(false)
@@ -54,8 +65,17 @@ export default function Nav() {
           <Link href="/anomalias/nova">Nova reclamação</Link>
           {ehEquipa && <Link href="/equipa">Painel da equipa</Link>}
           {ehEquipa && <Link href="/equipa/proprietarios">Gerir proprietários</Link>}
-          <span style={{ marginLeft: 'auto', color: '#666' }}>{user.email}</span>
-          <button onClick={sair} style={{ padding: '4px 10px' }}>Sair</button>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Link href="/definicoes" title={user.email} style={{ textDecoration: 'none' }}>
+              <div style={{
+                width: 30, height: 30, borderRadius: '50%', background: '#2B5876', color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 'bold',
+              }}>
+                {Iniciais(user)}
+              </div>
+            </Link>
+            <button onClick={sair} style={{ padding: '4px 10px' }}>Sair</button>
+          </div>
         </>
       )}
       {!user && <Link href="/login" style={{ marginLeft: 'auto' }}>Entrar</Link>}
