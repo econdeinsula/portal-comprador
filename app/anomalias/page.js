@@ -5,24 +5,29 @@ import { supabase } from '../../lib/supabaseClient'
 export default function ListaAnomalias() {
   const [anomalias, setAnomalias] = useState([])
   const [carregando, setCarregando] = useState(true)
+  const [debug, setDebug] = useState({})
 
   useEffect(() => {
     async function carregar() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user }, error: erroUser } = await supabase.auth.getUser()
+      setDebug((d) => ({ ...d, user: user?.email, erroUser: erroUser?.message }))
+
       if (!user) { setCarregando(false); return }
 
-      const { data: proprietario } = await supabase
+      const { data: proprietario, error: erroProp } = await supabase
         .from('proprietarios')
         .select('id')
         .eq('email', user.email)
         .single()
+      setDebug((d) => ({ ...d, proprietario, erroProp: erroProp?.message }))
 
       if (!proprietario) { setCarregando(false); return }
 
-      const { data: ligacoes } = await supabase
+      const { data: ligacoes, error: erroLig } = await supabase
         .from('fracao_proprietarios')
         .select('fracao_id')
         .eq('proprietario_id', proprietario.id)
+      setDebug((d) => ({ ...d, ligacoes, erroLig: erroLig?.message }))
 
       const fracaoIds = (ligacoes || []).map((l) => l.fracao_id)
 
@@ -38,6 +43,7 @@ export default function ListaAnomalias() {
         `)
         .in('fracao_id', fracaoIds)
         .order('criado_em', { ascending: false })
+      setDebug((d) => ({ ...d, erroAnomalias: error?.message, numAnomalias: data?.length }))
 
       if (!error) setAnomalias(data)
       setCarregando(false)
@@ -50,6 +56,11 @@ export default function ListaAnomalias() {
   return (
     <main style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>As minhas reclamações</h1>
+
+      <pre style={{ background: '#f5f5f5', padding: 10, fontSize: 12, whiteSpace: 'pre-wrap' }}>
+        {JSON.stringify(debug, null, 2)}
+      </pre>
+
       {anomalias.length === 0 && <p>Ainda não tens reclamações associadas à tua fração.</p>}
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {anomalias.map((a) => (
