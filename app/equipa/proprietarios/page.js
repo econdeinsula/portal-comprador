@@ -15,6 +15,7 @@ export default function GerirProprietarios() {
       .from('fracao_proprietarios')
       .select(`
         fracao_id,
+        proprietario_id,
         proprietarios ( nome, email ),
         fracoes ( codigo_fracao )
       `)
@@ -68,6 +69,19 @@ export default function GerirProprietarios() {
     carregar()
   }
 
+  async function removerLigacao(ligacao) {
+    if (!confirm(`Remover ${ligacao.proprietarios?.nome} da fração ${ligacao.fracoes?.codigo_fracao}?`)) return
+
+    const { error } = await supabase
+      .from('fracao_proprietarios')
+      .delete()
+      .eq('fracao_id', ligacao.fracao_id)
+      .eq('proprietario_id', ligacao.proprietario_id)
+
+    if (error) { setErro(error.message); return }
+    carregar()
+  }
+
   return (
     <main style={{ maxWidth: 600, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>Gerir proprietários</h1>
@@ -101,6 +115,7 @@ export default function GerirProprietarios() {
             <th style={{ padding: 6 }}>Fração</th>
             <th style={{ padding: 6 }}>Nome</th>
             <th style={{ padding: 6 }}>Email</th>
+            <th style={{ padding: 6 }}></th>
           </tr>
         </thead>
         <tbody>
@@ -109,6 +124,15 @@ export default function GerirProprietarios() {
               <td style={{ padding: 6 }}>{l.fracoes?.codigo_fracao}</td>
               <td style={{ padding: 6 }}>{l.proprietarios?.nome}</td>
               <td style={{ padding: 6 }}>{l.proprietarios?.email}</td>
+              <td style={{ padding: 6 }}>
+                <button
+                  type="button"
+                  onClick={() => removerLigacao(l)}
+                  style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 13 }}
+                >
+                  Remover
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

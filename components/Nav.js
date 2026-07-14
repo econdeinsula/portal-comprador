@@ -130,6 +130,7 @@ export default function Nav() {
             <ItemMenu href="/equipa/dashboard" ativo={pathname === '/equipa/dashboard'}>Dashboard</ItemMenu>
             <ItemMenu href="/equipa/proprietarios" ativo={pathname === '/equipa/proprietarios'}>Gerir proprietários</ItemMenu>
             <ItemMenu href="/equipa/documentos" ativo={pathname === '/equipa/documentos'}>Documentos</ItemMenu>
+            <ItemMenu href="/equipa/membros" ativo={pathname === '/equipa/membros'}>Membros da equipa</ItemMenu>
           </>
         )}
       </nav>
