@@ -117,6 +117,7 @@ export default function Nav() {
             </div>
             <ItemMenu href="/anomalias" ativo={pathname === '/anomalias'}>As minhas reclamações</ItemMenu>
             <ItemMenu href="/anomalias/nova" ativo={pathname === '/anomalias/nova'}>+ Nova reclamação</ItemMenu>
+            <ItemMenu href="/documentos" ativo={pathname === '/documentos'}>Documentos</ItemMenu>
             <div style={{ height: 16 }} />
           </>
         )}
@@ -128,6 +129,7 @@ export default function Nav() {
             <ItemMenu href="/equipa" ativo={pathname === '/equipa'}>Painel</ItemMenu>
             <ItemMenu href="/equipa/dashboard" ativo={pathname === '/equipa/dashboard'}>Dashboard</ItemMenu>
             <ItemMenu href="/equipa/proprietarios" ativo={pathname === '/equipa/proprietarios'}>Gerir proprietários</ItemMenu>
+            <ItemMenu href="/equipa/documentos" ativo={pathname === '/equipa/documentos'}>Documentos</ItemMenu>
           </>
         )}
       </nav>
