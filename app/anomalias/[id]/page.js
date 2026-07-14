@@ -71,6 +71,25 @@ export default function DetalheAnomalia() {
 
   useEffect(() => { carregar() }, [id])
 
+  async function notificarEquipa(mensagemTexto) {
+    try {
+      const { data: membros } = await supabase.from('membros_equipa').select('email')
+      for (const m of membros || []) {
+        fetch('/api/notificar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            destinatario: m.email,
+            assunto: 'Nova mensagem de um proprietário',
+            mensagem: `Um proprietário escreveu: "${mensagemTexto}". Consulta em https://portal-comprador.vercel.app/equipa/${id}`,
+          }),
+        })
+      }
+    } catch {
+      // notificação é um extra -- uma falha aqui nunca deve travar o fluxo principal
+    }
+  }
+
   async function enviarMensagem(e) {
     e.preventDefault()
     setErro('')
@@ -86,15 +105,20 @@ export default function DetalheAnomalia() {
       anexoUrl = urlPublico.publicUrl
     }
 
+    const textoFinal = texto || (anexoUrl ? 'Anexo enviado' : '')
+
     const { error } = await supabase.from('timeline_eventos').insert({
       anomalia_id: id,
       autor_tipo: 'proprietario',
       tipo_evento: anexoUrl ? 'anexo' : 'mensagem',
-      texto: texto || (anexoUrl ? 'Anexo enviado' : ''),
+      texto: textoFinal,
       anexo_url: anexoUrl,
       ocorrido_em: new Date().toISOString(),
     })
     if (error) { setErro(error.message); setAEnviar(false); return }
+
+    await notificarEquipa(textoFinal)
+
     setTexto('')
     setAnexo(null)
     setAEnviar(false)
