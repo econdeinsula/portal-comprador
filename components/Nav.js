@@ -105,9 +105,9 @@ export default function Nav() {
       display: 'flex', flexDirection: 'column', padding: '22px 14px',
       fontFamily: 'sans-serif', position: 'sticky', top: 0, alignSelf: 'flex-start',
     }}>
-      <div style={{ padding: '0 8px 24px', fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 18, color: '#fff' }}>
+      <Link href="/" style={{ display: 'block', padding: '0 8px 24px', fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 18, color: '#fff', textDecoration: 'none' }}>
         Portal do<br />Comprador
-      </div>
+      </Link>
 
       <nav style={{ flex: 1 }}>
         {ehProprietario && (
