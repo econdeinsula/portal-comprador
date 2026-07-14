@@ -11,6 +11,7 @@ const WIDGETS_DEFAULT = {
   estado: true,
   lote: true,
   empresas: true,
+  desempenhoEmpresas: true,
   evolucao: true,
 }
 
@@ -75,6 +76,7 @@ export default function Dashboard() {
   const [porEstado, setPorEstado] = useState([])
   const [porLote, setPorLote] = useState([])
   const [porEmpresa, setPorEmpresa] = useState([])
+  const [desempenhoEmpresas, setDesempenhoEmpresas] = useState([])
   const [porMes, setPorMes] = useState([])
 
   // carregar preferências guardadas + listas de referência, uma vez
@@ -116,7 +118,7 @@ export default function Dashboard() {
       // lote sem frações -- não há nada a mostrar, evita continuar com filtros inválidos
       setSemAcesso(false)
       setKpis({ total: 0, abertas: 0, resolvidas: 0, semClassificar: 0, aExpirar: 0 })
-      setPorCategoria([]); setPorEstado([]); setPorLote([]); setPorEmpresa([]); setPorMes([])
+      setPorCategoria([]); setPorEstado([]); setPorLote([]); setPorEmpresa([]); setDesempenhoEmpresas([]); setPorMes([])
       setCarregando(false)
       return
     }
@@ -225,6 +227,34 @@ export default function Dashboard() {
       setPorEmpresa([])
     }
 
+    // --- desempenho por empresa: abertas vs resolvidas ---
+    let queryDesempenho = supabase
+      .from('anomalia_empresas')
+      .select('empresa_id, empresas ( nome ), anomalias!inner ( id, estado_id, criado_em )')
+      .limit(3000)
+    if (dataInicio) queryDesempenho = queryDesempenho.gte('anomalias.criado_em', dataInicio)
+    if (dataFim) queryDesempenho = queryDesempenho.lte('anomalias.criado_em', dataFim + 'T23:59:59')
+    const { data: ligacoesDesempenho, error: erroDesempenho } = await queryDesempenho
+
+    if (!erroDesempenho) {
+      const porNome = {}
+      for (const l of ligacoesDesempenho || []) {
+        const nome = l.empresas?.nome
+        if (!nome) continue
+        if (!porNome[nome]) porNome[nome] = { nome, total: 0, abertas: 0, resolvidas: 0 }
+        porNome[nome].total += 1
+        if (l.anomalias?.estado_id === estadoAberta?.id) porNome[nome].abertas += 1
+        if (l.anomalias?.estado_id === estadoResolvida?.id) porNome[nome].resolvidas += 1
+      }
+      const listaDesempenho = Object.values(porNome)
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 10)
+        .map((e) => ({ ...e, taxa: e.total ? Math.round((e.resolvidas / e.total) * 100) : 0 }))
+      setDesempenhoEmpresas(listaDesempenho)
+    } else {
+      setDesempenhoEmpresas([])
+    }
+
     // --- evolução mensal (respeita apenas o intervalo de datas) ---
     let queryMensal = supabase.from('anomalias').select('criado_em').limit(6000)
     if (dataInicio) queryMensal = queryMensal.gte('criado_em', dataInicio)
@@ -266,6 +296,7 @@ export default function Dashboard() {
           <label><input type="checkbox" checked={widgets.estado} onChange={() => alternarWidget('estado')} /> Por estado</label>
           <label><input type="checkbox" checked={widgets.lote} onChange={() => alternarWidget('lote')} /> Por lote</label>
           <label><input type="checkbox" checked={widgets.empresas} onChange={() => alternarWidget('empresas')} /> Empresas</label>
+          <label><input type="checkbox" checked={widgets.desempenhoEmpresas} onChange={() => alternarWidget('desempenhoEmpresas')} /> Desempenho por empresa</label>
           <label><input type="checkbox" checked={widgets.evolucao} onChange={() => alternarWidget('evolucao')} /> Evolução mensal</label>
         </div>
       )}
@@ -338,6 +369,44 @@ export default function Dashboard() {
           {widgets.empresas && (
             <Painel titulo="Empresas com mais reclamações associadas">
               <BarraContagem itens={porEmpresa} total={porEmpresa.reduce((s, i) => s + i.count, 0)} />
+            </Painel>
+          )}
+
+          {widgets.desempenhoEmpresas && (
+            <Painel titulo="Desempenho por empresa">
+              {desempenhoEmpresas.length === 0 ? (
+                <p style={{ fontSize: 13, color: '#888' }}>Sem dados para os filtros escolhidos.</p>
+              ) : (
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <thead>
+                    <tr style={{ textAlign: 'left', borderBottom: '2px solid #ddd' }}>
+                      <th style={{ padding: 6 }}>Empresa</th>
+                      <th style={{ padding: 6 }}>Total</th>
+                      <th style={{ padding: 6 }}>Abertas</th>
+                      <th style={{ padding: 6 }}>Resolvidas</th>
+                      <th style={{ padding: 6 }}>Taxa de resolução</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {desempenhoEmpresas.map((e) => (
+                      <tr key={e.nome} style={{ borderBottom: '1px solid #eee' }}>
+                        <td style={{ padding: 6 }}>{e.nome}</td>
+                        <td style={{ padding: 6 }}>{e.total}</td>
+                        <td style={{ padding: 6, color: '#B4462F' }}>{e.abertas}</td>
+                        <td style={{ padding: 6, color: '#4B7A51' }}>{e.resolvidas}</td>
+                        <td style={{ padding: 6 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <div style={{ flex: 1, background: '#eee', borderRadius: 4, height: 6, maxWidth: 80 }}>
+                              <div style={{ width: `${e.taxa}%`, background: '#4B7A51', height: '100%', borderRadius: 4 }} />
+                            </div>
+                            <span style={{ color: '#666' }}>{e.taxa}%</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </Painel>
           )}
 
