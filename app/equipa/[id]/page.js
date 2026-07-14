@@ -23,6 +23,8 @@ export default function DetalheEquipa() {
   const [empresas, setEmpresas] = useState([])
   const [empresasDaAnomalia, setEmpresasDaAnomalia] = useState([])
   const [empresaParaAdicionar, setEmpresaParaAdicionar] = useState('')
+  const [novaEmpresaNome, setNovaEmpresaNome] = useState('')
+  const [aCriarEmpresa, setACriarEmpresa] = useState(false)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState('')
@@ -209,6 +211,29 @@ export default function DetalheEquipa() {
     carregar()
   }
 
+  async function criarEEmpresa() {
+    if (!novaEmpresaNome.trim()) return
+    setErro('')
+
+    const { data: novaEmpresa, error } = await supabase
+      .from('empresas')
+      .insert({ nome: novaEmpresaNome.trim() })
+      .select()
+      .single()
+
+    if (error) { setErro('Erro ao criar empresa: ' + error.message); return }
+
+    const { error: erroLigacao } = await supabase
+      .from('anomalia_empresas')
+      .insert({ anomalia_id: id, empresa_id: novaEmpresa.id })
+
+    if (erroLigacao) { setErro(erroLigacao.message); return }
+
+    setNovaEmpresaNome('')
+    setACriarEmpresa(false)
+    carregar()
+  }
+
   async function removerEmpresa(empresaId) {
     setErro('')
     const { error } = await supabase
@@ -319,15 +344,35 @@ export default function DetalheEquipa() {
             </span>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <select value={empresaParaAdicionar} onChange={(e) => setEmpresaParaAdicionar(e.target.value)} style={{ padding: 8, flex: 1 }}>
-            <option value="">Escolhe uma empresa...</option>
-            {empresas
-              .filter((e) => !empresasDaAnomalia.some((ea) => ea.id === e.id))
-              .map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
-          </select>
-          <button type="button" onClick={adicionarEmpresa} style={{ padding: '8px 16px' }}>Adicionar</button>
-        </div>
+        {!aCriarEmpresa ? (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <select value={empresaParaAdicionar} onChange={(e) => setEmpresaParaAdicionar(e.target.value)} style={{ padding: 8, flex: 1 }}>
+              <option value="">Escolhe uma empresa...</option>
+              {empresas
+                .filter((e) => !empresasDaAnomalia.some((ea) => ea.id === e.id))
+                .map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
+            </select>
+            <button type="button" onClick={adicionarEmpresa} style={{ padding: '8px 16px' }}>Adicionar</button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              type="text"
+              placeholder="Nome da nova empresa"
+              value={novaEmpresaNome}
+              onChange={(e) => setNovaEmpresaNome(e.target.value)}
+              style={{ padding: 8, flex: 1 }}
+            />
+            <button type="button" onClick={criarEEmpresa} style={{ padding: '8px 16px' }}>Criar e adicionar</button>
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => setACriarEmpresa((v) => !v)}
+          style={{ background: 'transparent', color: '#2B5876', padding: 0, fontSize: 12, marginTop: 8 }}
+        >
+          {aCriarEmpresa ? '← Escolher de entre as existentes' : '+ Empresa não está na lista? Criar nova'}
+        </button>
       </div>
 
       <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginBottom: 20 }}>
