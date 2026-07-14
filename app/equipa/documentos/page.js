@@ -72,6 +72,22 @@ export default function DocumentosEquipa() {
     carregar()
   }
 
+  async function apagar(documento) {
+    if (!confirm(`Apagar "${documento.nome}"? Esta ação não pode ser desfeita.`)) return
+
+    // Extrai o caminho do ficheiro a partir do URL público, para o remover também do armazenamento
+    const partes = documento.ficheiro_url.split('/documentos/')
+    const caminho = partes[1]
+
+    if (caminho) {
+      await supabase.storage.from('documentos').remove([caminho])
+    }
+
+    const { error } = await supabase.from('documentos').delete().eq('id', documento.id)
+    if (error) { setErro(error.message); return }
+    carregar()
+  }
+
   return (
     <main style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>Documentos</h1>
@@ -133,6 +149,7 @@ export default function DocumentosEquipa() {
               <th style={{ padding: 6 }}>Nome</th>
               <th style={{ padding: 6 }}>Âmbito</th>
               <th style={{ padding: 6 }}></th>
+              <th style={{ padding: 6 }}></th>
             </tr>
           </thead>
           <tbody>
@@ -143,6 +160,15 @@ export default function DocumentosEquipa() {
                 <td style={{ padding: 6 }}>{d.fracoes?.codigo_fracao || 'Todo o empreendimento'}</td>
                 <td style={{ padding: 6 }}>
                   <a href={d.ficheiro_url} target="_blank" rel="noopener noreferrer">Abrir</a>
+                </td>
+                <td style={{ padding: 6 }}>
+                  <button
+                    type="button"
+                    onClick={() => apagar(d)}
+                    style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 13 }}
+                  >
+                    Apagar
+                  </button>
                 </td>
               </tr>
             ))}
