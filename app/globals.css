@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
   --navy: #14293A;
@@ -35,9 +35,9 @@ body {
 a { color: var(--blue); }
 
 h1, h2, h3 {
-  font-family: 'Fraunces', serif;
+  font-family: 'Space Grotesk', sans-serif;
   color: var(--navy);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
   font-weight: 600;
 }
 
