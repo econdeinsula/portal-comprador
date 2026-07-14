@@ -1,105 +1,128 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --navy: #16344A;
+  --navy: #14293A;
+  --navy-deep: #0D1D29;
   --blue: #2B5876;
-  --blue-light: #DCEAF0;
+  --blue-light: #E4EEF3;
   --amber: #C8862B;
+  --amber-light: #F7EBD6;
   --green: #4B7A51;
+  --green-light: #E5EEE6;
   --red: #B4462F;
-  --paper: #FAFAF8;
-  --line: #E2E0D8;
+  --red-light: #F6E4DF;
+  --paper: #F7F5F0;
+  --card: #FFFFFF;
+  --line: #E7E4DA;
+  --ink: #24292E;
+  --muted: #6B7178;
+  --shadow-sm: 0 1px 2px rgba(20, 41, 58, 0.06);
+  --shadow-md: 0 4px 16px rgba(20, 41, 58, 0.08);
+  --shadow-lg: 0 12px 32px rgba(20, 41, 58, 0.12);
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  height: 100%;
-}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
 
 body {
   margin: 0;
   background: var(--paper);
-  color: #24292E;
+  color: var(--ink);
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-a {
-  color: var(--blue);
-}
+a { color: var(--blue); }
 
-h1 {
+h1, h2, h3 {
+  font-family: 'Fraunces', serif;
   color: var(--navy);
   letter-spacing: -0.3px;
+  font-weight: 600;
 }
 
-h2, h3 {
-  color: var(--navy);
+h1 { font-size: 28px; margin-bottom: 4px; }
+h2 { font-size: 19px; }
+h3 { font-size: 16px; }
+
+/* -------- estrutura com barra lateral -------- */
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
 }
+
+.app-content {
+  flex: 1;
+  padding: 8px 24px 60px;
+  min-width: 0;
+}
+
+/* -------- botões -------- */
 
 button {
   background: var(--blue);
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-family: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition: filter 0.15s ease, transform 0.05s ease;
+  box-shadow: var(--shadow-sm);
+  transition: filter 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
 }
 
 button:hover:not(:disabled) {
   filter: brightness(1.08);
+  box-shadow: var(--shadow-md);
 }
 
-button:active:not(:disabled) {
-  transform: scale(0.98);
-}
+button:active:not(:disabled) { transform: scale(0.98); }
 
 button:disabled {
-  background: #B8C4CC;
+  background: #C7CDD2;
+  box-shadow: none;
   cursor: not-allowed;
 }
+
+/* -------- campos -------- */
 
 input, select, textarea {
   font-family: inherit;
   border: 1px solid var(--line) !important;
-  border-radius: 8px !important;
+  border-radius: 10px !important;
   outline: none;
-  transition: border-color 0.15s ease;
   background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 input:focus, select:focus, textarea:focus {
   border-color: var(--blue) !important;
-  box-shadow: 0 0 0 3px rgba(43, 88, 118, 0.12);
+  box-shadow: 0 0 0 4px rgba(43, 88, 118, 0.14);
 }
 
-main {
-  animation: fadeIn 0.2s ease;
-}
+/* -------- cartões (aplica-se aos blocos já existentes com esta borda inline) -------- */
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* cartões e blocos com fundo branco ganham sombra suave */
 div[style*="border: 1px solid #ddd"],
 li[style*="border: 1px solid #ddd"] {
-  box-shadow: 0 1px 3px rgba(22, 52, 74, 0.06);
-  transition: box-shadow 0.15s ease;
+  background: var(--card);
+  border-color: var(--line) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 div[style*="border: 1px solid #ddd"]:hover,
 li[style*="border: 1px solid #ddd"]:hover {
-  box-shadow: 0 2px 8px rgba(22, 52, 74, 0.1);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
-nav {
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+main {
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
