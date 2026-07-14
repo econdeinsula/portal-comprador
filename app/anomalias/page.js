@@ -6,6 +6,7 @@ import Link from 'next/link'
 export default function ListaAnomalias() {
   const [anomalias, setAnomalias] = useState([])
   const [carregando, setCarregando] = useState(true)
+  const [mostrarFracao, setMostrarFracao] = useState(false)
 
   useEffect(() => {
     async function carregar() {
@@ -35,12 +36,14 @@ export default function ListaAnomalias() {
           criado_em,
           estados ( nome ),
           elementos ( nome ),
-          categorias ( nome )
+          categorias ( nome ),
+          fracoes ( codigo_fracao )
         `)
         .in('fracao_id', fracaoIds)
         .order('criado_em', { ascending: false })
 
       if (!error) setAnomalias(data)
+      setMostrarFracao(fracaoIds.length > 1)
       setCarregando(false)
     }
     carregar()
@@ -58,6 +61,11 @@ export default function ListaAnomalias() {
             <Link href={`/anomalias/${a.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
               <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, cursor: 'pointer' }}>
                 <strong>{a.categorias?.nome ? `${a.categorias.nome} — ${a.elementos?.nome}` : 'Por classificar'}</strong>
+                {mostrarFracao && (
+                  <span style={{ fontSize: 11, background: '#DCEAF0', color: '#2B5876', padding: '2px 8px', borderRadius: 20, marginLeft: 8 }}>
+                    {a.fracoes?.codigo_fracao}
+                  </span>
+                )}
                 <div>{a.descricao}</div>
                 <span style={{ fontSize: 12, color: '#666' }}>{a.estados?.nome}</span>
               </div>
