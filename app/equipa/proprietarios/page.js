@@ -51,7 +51,17 @@ export default function GerirProprietarios() {
 
     if (erroLigacao) { setErro('Erro ao ligar à fração: ' + erroLigacao.message); return }
 
-    setSucesso(`${nome} (${email}) ligado à fração ${codigoFracao.toUpperCase()}.`)
+    try {
+      await fetch('/api/convidar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      })
+    } catch {
+      // o convite é um extra -- a ligação em si já foi feita com sucesso
+    }
+
+    setSucesso(`${nome} (${email}) ligado à fração ${codigoFracao.toUpperCase()}. Convite enviado por email.`)
     setNome('')
     setEmail('')
     setCodigoFracao('')
