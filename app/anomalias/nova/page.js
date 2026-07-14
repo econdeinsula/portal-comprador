@@ -80,6 +80,7 @@ export default function NovaAnomalia() {
       .select('ficheiro_url')
       .eq('fracao_id', fracaoId)
       .eq('tipo', 'planta')
+      .order('carregado_em', { ascending: false })
       .limit(1)
       .maybeSingle()
     setPlantaUrl(data?.ficheiro_url || null)
