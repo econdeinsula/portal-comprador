@@ -43,10 +43,20 @@ export default function DetalheEquipa() {
 
     const { data: evs } = await supabase
       .from('timeline_eventos')
-      .select('id, autor_tipo, tipo_evento, texto, anexo_url, reconstruido, ocorrido_em')
+      .select('id, autor_tipo, autor_id, tipo_evento, texto, anexo_url, reconstruido, ocorrido_em')
       .eq('anomalia_id', id)
       .order('ocorrido_em', { ascending: true })
-    setEventos(evs || [])
+
+    const { data: membros } = await supabase.from('membros_equipa').select('email, auth_user_id')
+    const nomesPorId = {}
+    for (const m of membros || []) {
+      if (m.auth_user_id) nomesPorId[m.auth_user_id] = m.email
+    }
+    const eventosComNome = (evs || []).map((ev) => ({
+      ...ev,
+      autor_nome: ev.autor_id ? (nomesPorId[ev.autor_id] || 'Equipa') : null,
+    }))
+    setEventos(eventosComNome)
 
     const { data: ests } = await supabase.from('estados').select('id, nome').order('ordem')
     setEstados(ests || [])
@@ -81,6 +91,8 @@ export default function DetalheEquipa() {
     setErro('')
     setAEnviar(true)
 
+    const { data: { user } } = await supabase.auth.getUser()
+
     let anexoUrl = null
     if (anexo) {
       const extensao = anexo.name.split('.').pop()
@@ -94,6 +106,7 @@ export default function DetalheEquipa() {
     const { error } = await supabase.from('timeline_eventos').insert({
       anomalia_id: id,
       autor_tipo: 'equipa',
+      autor_id: user?.id || null,
       tipo_evento: anexoUrl ? 'anexo' : 'mensagem',
       texto: texto || (anexoUrl ? 'Anexo enviado' : ''),
       anexo_url: anexoUrl,
@@ -108,14 +121,16 @@ export default function DetalheEquipa() {
 
   async function mudarEstado(novoEstadoId) {
     setErro('')
+    const { data: { user } } = await supabase.auth.getUser()
     const { error } = await supabase.from('anomalias').update({ estado_id: novoEstadoId }).eq('id', id)
     if (error) { setErro(error.message); return }
     const novoEstadoNome = estados.find((e) => e.id === novoEstadoId)?.nome
     await supabase.from('timeline_eventos').insert({
       anomalia_id: id,
       autor_tipo: 'sistema',
+      autor_id: user?.id || null,
       tipo_evento: 'mudanca_estado',
-      texto: `Estado alterado para "${novoEstadoNome}"`,
+      texto: `Estado alterado para "${novoEstadoNome}"${user?.user_metadata?.full_name ? ` por ${user.user_metadata.full_name}` : ''}`,
       ocorrido_em: new Date().toISOString(),
     })
     carregar()
@@ -267,7 +282,7 @@ export default function DetalheEquipa() {
           >
             {ev.autor_tipo !== 'sistema' && (
               <div style={{ fontSize: 11, fontWeight: 'bold', opacity: 0.7 }}>
-                {ev.autor_tipo === 'proprietario' ? 'Proprietário' : 'Equipa'}
+                {ev.autor_tipo === 'proprietario' ? 'Proprietário' : (ev.autor_nome || 'Equipa')}
               </div>
             )}
             <div>{ev.texto}</div>
