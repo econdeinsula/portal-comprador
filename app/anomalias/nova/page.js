@@ -18,6 +18,13 @@ const PlantaSVG = () => (
   </svg>
 )
 
+function Planta({ url }) {
+  if (url) {
+    return <img src={url} alt="Planta da fração" style={{ width: '100%', display: 'block' }} />
+  }
+  return <PlantaSVG />
+}
+
 export default function NovaAnomalia() {
   const [categorias, setCategorias] = useState([])
   const [elementos, setElementos] = useState([])
@@ -32,6 +39,7 @@ export default function NovaAnomalia() {
   const [fotos, setFotos] = useState([])
   const [fracoesDisponiveis, setFracoesDisponiveis] = useState([])
   const [fracaoEscolhida, setFracaoEscolhida] = useState('')
+  const [plantaUrl, setPlantaUrl] = useState(null)
   const [aEnviar, setAEnviar] = useState(false)
   const [erro, setErro] = useState('')
   const router = useRouter()
@@ -56,12 +64,26 @@ export default function NovaAnomalia() {
             .eq('proprietario_id', proprietario.id)
           const lista = (ligacoes || []).map((l) => l.fracoes).filter(Boolean)
           setFracoesDisponiveis(lista)
-          if (lista.length === 1) setFracaoEscolhida(lista[0].id)
+          if (lista.length === 1) {
+            setFracaoEscolhida(lista[0].id)
+            carregarPlanta(lista[0].id)
+          }
         }
       }
     }
     carregarListas()
   }, [])
+
+  async function carregarPlanta(fracaoId) {
+    const { data } = await supabase
+      .from('documentos')
+      .select('ficheiro_url')
+      .eq('fracao_id', fracaoId)
+      .eq('tipo', 'planta')
+      .limit(1)
+      .maybeSingle()
+    setPlantaUrl(data?.ficheiro_url || null)
+  }
 
   const elementosFiltrados = elementos.filter((e) => e.categoria_id === categoriaId)
 
@@ -162,7 +184,7 @@ export default function NovaAnomalia() {
             <label style={{ fontSize: 13, fontWeight: 'bold' }}>Qual fração?</label>
             <select
               value={fracaoEscolhida}
-              onChange={(e) => setFracaoEscolhida(e.target.value)}
+              onChange={(e) => { setFracaoEscolhida(e.target.value); carregarPlanta(e.target.value) }}
               required
               style={{ width: '100%', padding: 10, display: 'block' }}
             >
@@ -219,7 +241,7 @@ export default function NovaAnomalia() {
           onClick={clicarPlanta}
           style={{ position: 'relative', border: '1px solid #ddd', borderRadius: 8, cursor: 'crosshair', marginBottom: 6 }}
         >
-          <PlantaSVG />
+          <Planta url={plantaUrl} />
           {pin && (
             <div
               style={{
