@@ -28,7 +28,7 @@ export default function DetalheEquipa() {
     const { data: a } = await supabase
       .from('anomalias')
       .select(`
-        id, descricao, urgencia, estado_id, categoria_id, elemento_id, tipo_anomalia_id,
+        id, descricao, urgencia, estado_id, categoria_id, elemento_id, tipo_anomalia_id, fracao_id,
         estados ( nome ),
         elementos ( nome ),
         categorias ( nome ),
@@ -86,6 +86,34 @@ export default function DetalheEquipa() {
 
   const elementosFiltrados = elementos.filter((e) => e.categoria_id === categoriaId)
 
+  async function notificarProprietario(mensagemTexto) {
+    try {
+      if (!anomalia?.fracao_id) return
+
+      const { data: ligacao } = await supabase
+        .from('fracao_proprietarios')
+        .select('proprietarios ( email )')
+        .eq('fracao_id', anomalia.fracao_id)
+        .limit(1)
+        .maybeSingle()
+
+      const emailProprietario = ligacao?.proprietarios?.email
+      if (!emailProprietario) return
+
+      await fetch('/api/notificar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          destinatario: emailProprietario,
+          assunto: 'Nova resposta na tua reclamação',
+          mensagem: `A equipa respondeu à tua reclamação: "${mensagemTexto}". Consulta em https://portal-comprador.vercel.app/anomalias/${id}`,
+        }),
+      })
+    } catch {
+      // notificação é um extra -- uma falha aqui nunca deve travar o fluxo principal
+    }
+  }
+
   async function enviarMensagem(e) {
     e.preventDefault()
     setErro('')
@@ -103,16 +131,21 @@ export default function DetalheEquipa() {
       anexoUrl = urlPublico.publicUrl
     }
 
+    const textoFinal = texto || (anexoUrl ? 'Anexo enviado' : '')
+
     const { error } = await supabase.from('timeline_eventos').insert({
       anomalia_id: id,
       autor_tipo: 'equipa',
       autor_id: user?.id || null,
       tipo_evento: anexoUrl ? 'anexo' : 'mensagem',
-      texto: texto || (anexoUrl ? 'Anexo enviado' : ''),
+      texto: textoFinal,
       anexo_url: anexoUrl,
       ocorrido_em: new Date().toISOString(),
     })
     if (error) { setErro(error.message); setAEnviar(false); return }
+
+    await notificarProprietario(textoFinal)
+
     setTexto('')
     setAnexo(null)
     setAEnviar(false)
