@@ -16,7 +16,7 @@ export default function LoginPage() {
     setErro('')
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { setErro(error.message); return }
-    router.push('/anomalias')
+    router.push('/')
   }
 
   async function pedirRecuperacao(e) {
