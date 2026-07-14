@@ -20,6 +20,9 @@ export default function DetalheEquipa() {
   const [categoriaId, setCategoriaId] = useState('')
   const [elementoId, setElementoId] = useState('')
   const [tipoId, setTipoId] = useState('')
+  const [empresas, setEmpresas] = useState([])
+  const [empresasDaAnomalia, setEmpresasDaAnomalia] = useState([])
+  const [empresaParaAdicionar, setEmpresaParaAdicionar] = useState('')
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState('')
@@ -69,6 +72,15 @@ export default function DetalheEquipa() {
 
     const { data: tps } = await supabase.from('tipos_anomalia').select('id, nome').order('ordem')
     setTipos(tps || [])
+
+    const { data: todasEmpresas } = await supabase.from('empresas').select('id, nome').order('nome')
+    setEmpresas(todasEmpresas || [])
+
+    const { data: ligacoesEmpresa } = await supabase
+      .from('anomalia_empresas')
+      .select('empresa_id, empresas ( id, nome )')
+      .eq('anomalia_id', id)
+    setEmpresasDaAnomalia((ligacoesEmpresa || []).map((l) => l.empresas).filter(Boolean))
 
     const { data: v } = await supabase
       .from('visitas')
@@ -186,6 +198,28 @@ export default function DetalheEquipa() {
     carregar()
   }
 
+  async function adicionarEmpresa() {
+    if (!empresaParaAdicionar) return
+    setErro('')
+    const { error } = await supabase
+      .from('anomalia_empresas')
+      .insert({ anomalia_id: id, empresa_id: empresaParaAdicionar })
+    if (error) { setErro(error.message); return }
+    setEmpresaParaAdicionar('')
+    carregar()
+  }
+
+  async function removerEmpresa(empresaId) {
+    setErro('')
+    const { error } = await supabase
+      .from('anomalia_empresas')
+      .delete()
+      .eq('anomalia_id', id)
+      .eq('empresa_id', empresaId)
+    if (error) { setErro(error.message); return }
+    carregar()
+  }
+
   async function agendarVisita(e) {
     e.preventDefault()
     setErro('')
@@ -266,6 +300,34 @@ export default function DetalheEquipa() {
           {sucesso && <p style={{ color: 'green', fontSize: 13 }}>{sucesso}</p>}
           <button type="submit" style={{ padding: '8px 16px' }}>Guardar classificação</button>
         </form>
+      </div>
+
+      <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginBottom: 20 }}>
+        <h3 style={{ fontSize: 14, marginTop: 0 }}>Empresa(s) responsável(eis)</h3>
+        {empresasDaAnomalia.length === 0 && <p style={{ fontSize: 13, color: '#888' }}>Nenhuma empresa atribuída ainda.</p>}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+          {empresasDaAnomalia.map((e) => (
+            <span key={e.id} style={{ background: '#DCEAF0', color: '#2B5876', padding: '4px 10px', borderRadius: 20, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+              {e.nome}
+              <button
+                type="button"
+                onClick={() => removerEmpresa(e.id)}
+                style={{ background: 'transparent', color: '#2B5876', padding: 0, fontSize: 13, lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <select value={empresaParaAdicionar} onChange={(e) => setEmpresaParaAdicionar(e.target.value)} style={{ padding: 8, flex: 1 }}>
+            <option value="">Escolhe uma empresa...</option>
+            {empresas
+              .filter((e) => !empresasDaAnomalia.some((ea) => ea.id === e.id))
+              .map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
+          </select>
+          <button type="button" onClick={adicionarEmpresa} style={{ padding: '8px 16px' }}>Adicionar</button>
+        </div>
       </div>
 
       <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginBottom: 20 }}>

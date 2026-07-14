@@ -24,6 +24,7 @@ export default function DetalheAnomalia() {
   const [eventos, setEventos] = useState([])
   const [garantia, setGarantia] = useState(null)
   const [visita, setVisita] = useState(null)
+  const [empresasDaAnomalia, setEmpresasDaAnomalia] = useState([])
   const [texto, setTexto] = useState('')
   const [anexo, setAnexo] = useState(null)
   const [aEnviar, setAEnviar] = useState(false)
@@ -65,6 +66,12 @@ export default function DetalheAnomalia() {
       .limit(1)
       .maybeSingle()
     setVisita(v)
+
+    const { data: ligacoesEmpresa } = await supabase
+      .from('anomalia_empresas')
+      .select('empresas ( nome )')
+      .eq('anomalia_id', id)
+    setEmpresasDaAnomalia((ligacoesEmpresa || []).map((l) => l.empresas?.nome).filter(Boolean))
 
     setCarregando(false)
   }
@@ -162,6 +169,11 @@ export default function DetalheAnomalia() {
           Visita {visita.estado === 'proposta' ? 'proposta' : 'confirmada'} para{' '}
           <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
           {visita.tecnico ? ` com ${visita.tecnico}` : ''}
+        </p>
+      )}
+      {empresasDaAnomalia.length > 0 && (
+        <p style={{ fontSize: 13, color: '#666' }}>
+          Empresa(s) responsável(eis): <strong>{empresasDaAnomalia.join(', ')}</strong>
         </p>
       )}
 
