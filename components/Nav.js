@@ -90,7 +90,7 @@ export default function Nav() {
         padding: '16px 24px', background: 'linear-gradient(135deg, #14293A, #0D1D29)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'sans-serif',
       }}>
-        <Link href="/" style={{ color: '#fff', fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 18, textDecoration: 'none' }}>
+        <Link href="/" style={{ color: '#fff', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, textDecoration: 'none' }}>
           Portal do Comprador
         </Link>
         <Link href="/login" style={{ color: '#fff', fontSize: 14, textDecoration: 'none' }}>Entrar</Link>
@@ -105,7 +105,7 @@ export default function Nav() {
       display: 'flex', flexDirection: 'column', padding: '22px 14px',
       fontFamily: 'sans-serif', position: 'sticky', top: 0, alignSelf: 'flex-start',
     }}>
-      <Link href="/" style={{ display: 'block', padding: '0 8px 24px', fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 18, color: '#fff', textDecoration: 'none' }}>
+      <Link href="/" style={{ display: 'block', padding: '0 8px 24px', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, color: '#fff', textDecoration: 'none' }}>
         Portal do<br />Comprador
       </Link>
 
