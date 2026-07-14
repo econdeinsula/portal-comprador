@@ -18,29 +18,49 @@ function Iniciais(user) {
 export default function Nav() {
   const [user, setUser] = useState(null)
   const [ehEquipa, setEhEquipa] = useState(false)
+  const [ehProprietario, setEhProprietario] = useState(false)
   const router = useRouter()
 
-  async function verificarEquipa(currentUser) {
-    if (!currentUser) { setEhEquipa(false); return }
-    const { data } = await supabase
+  async function verificarPerfis(currentUser) {
+    if (!currentUser) { setEhEquipa(false); setEhProprietario(false); return }
+
+    const { data: equipa } = await supabase
       .from('membros_equipa')
       .select('email')
       .eq('email', currentUser.email)
       .maybeSingle()
-    setEhEquipa(!!data)
+    setEhEquipa(!!equipa)
+
+    const { data: proprietario } = await supabase
+      .from('proprietarios')
+      .select('id')
+      .eq('email', currentUser.email)
+      .maybeSingle()
+
+    if (proprietario) {
+      const { data: ligacao } = await supabase
+        .from('fracao_proprietarios')
+        .select('fracao_id')
+        .eq('proprietario_id', proprietario.id)
+        .limit(1)
+        .maybeSingle()
+      setEhProprietario(!!ligacao)
+    } else {
+      setEhProprietario(false)
+    }
   }
 
   useEffect(() => {
     async function carregarInicial() {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
-      verificarEquipa(user)
+      verificarPerfis(user)
     }
     carregarInicial()
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
-      verificarEquipa(session?.user ?? null)
+      verificarPerfis(session?.user ?? null)
     })
 
     return () => listener.subscription.unsubscribe()
@@ -61,8 +81,8 @@ export default function Nav() {
       </Link>
       {user && (
         <>
-          <Link href="/anomalias">As minhas reclamações</Link>
-          <Link href="/anomalias/nova">Nova reclamação</Link>
+          {ehProprietario && <Link href="/anomalias">As minhas reclamações</Link>}
+          {ehProprietario && <Link href="/anomalias/nova">Nova reclamação</Link>}
           {ehEquipa && <Link href="/equipa">Painel da equipa</Link>}
           {ehEquipa && <Link href="/equipa/proprietarios">Gerir proprietários</Link>}
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
