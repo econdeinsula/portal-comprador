@@ -86,9 +86,9 @@ export default function DetalheEquipa() {
 
     const { data: v } = await supabase
       .from('visitas')
-      .select('id, data_proposta, data_confirmada, tecnico, estado')
+      .select('id, data_proposta, data_confirmada, tecnico, estado, proposta_por')
       .eq('anomalia_id', id)
-      .order('data_proposta', { ascending: false })
+      .order('criado_em', { ascending: false })
       .limit(1)
       .maybeSingle()
     setVisita(v)
@@ -245,6 +245,26 @@ export default function DetalheEquipa() {
     carregar()
   }
 
+  async function responderVisitaProprietario(novoEstado) {
+    setErro('')
+    const { error } = await supabase
+      .from('visitas')
+      .update({ estado: novoEstado })
+      .eq('id', visita.id)
+    if (error) { setErro(error.message); return }
+
+    await supabase.from('timeline_eventos').insert({
+      anomalia_id: id,
+      autor_tipo: 'sistema',
+      tipo_evento: 'agendamento',
+      texto: novoEstado === 'confirmada'
+        ? `Equipa aceitou a data proposta pelo proprietário: ${new Date(visita.data_proposta).toLocaleString('pt-PT')}`
+        : `Equipa recusou a data proposta pelo proprietário`,
+      ocorrido_em: new Date().toISOString(),
+    })
+    carregar()
+  }
+
   async function agendarVisita(e) {
     e.preventDefault()
     setErro('')
@@ -253,6 +273,7 @@ export default function DetalheEquipa() {
       data_proposta: dataVisita,
       tecnico,
       estado: 'proposta',
+      proposta_por: 'equipa',
     })
     if (error) { setErro(error.message); return }
 
@@ -378,11 +399,20 @@ export default function DetalheEquipa() {
       <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginBottom: 20 }}>
         <h3 style={{ fontSize: 14, marginTop: 0 }}>Visita</h3>
         {visita ? (
-          <p style={{ fontSize: 13 }}>
-            {visita.estado === 'proposta' ? 'Proposta' : 'Confirmada'} para{' '}
-            <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
-            {visita.tecnico ? ` com ${visita.tecnico}` : ''}
-          </p>
+          <>
+            <p style={{ fontSize: 13 }}>
+              {visita.estado === 'confirmada' ? 'Confirmada' : visita.estado === 'recusada' ? 'Recusada' : 'Proposta'} para{' '}
+              <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
+              {visita.tecnico ? ` com ${visita.tecnico}` : ''}
+              {visita.proposta_por === 'proprietario' && visita.estado === 'proposta' ? ' (data proposta pelo proprietário)' : ''}
+            </p>
+            {visita.estado === 'proposta' && visita.proposta_por === 'proprietario' && (
+              <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                <button type="button" onClick={() => responderVisitaProprietario('confirmada')}>Aceitar</button>
+                <button type="button" onClick={() => responderVisitaProprietario('recusada')} style={{ background: '#B4462F' }}>Recusar</button>
+              </div>
+            )}
+          </>
         ) : (
           <p style={{ fontSize: 13, color: '#888' }}>Nenhuma visita agendada ainda.</p>
         )}

@@ -24,6 +24,8 @@ export default function DetalheAnomalia() {
   const [eventos, setEventos] = useState([])
   const [garantia, setGarantia] = useState(null)
   const [visita, setVisita] = useState(null)
+  const [aContrapropor, setAContrapropor] = useState(false)
+  const [novaDataProposta, setNovaDataProposta] = useState('')
   const [empresasDaAnomalia, setEmpresasDaAnomalia] = useState([])
   const [texto, setTexto] = useState('')
   const [anexo, setAnexo] = useState(null)
@@ -60,9 +62,9 @@ export default function DetalheAnomalia() {
 
     const { data: v } = await supabase
       .from('visitas')
-      .select('id, data_proposta, tecnico, estado')
+      .select('id, data_proposta, tecnico, estado, proposta_por')
       .eq('anomalia_id', id)
-      .order('data_proposta', { ascending: false })
+      .order('criado_em', { ascending: false })
       .limit(1)
       .maybeSingle()
     setVisita(v)
@@ -132,6 +134,51 @@ export default function DetalheAnomalia() {
     carregar()
   }
 
+  async function responderVisita(novoEstado) {
+    setErro('')
+    const { error } = await supabase
+      .from('visitas')
+      .update({ estado: novoEstado })
+      .eq('id', visita.id)
+    if (error) { setErro(error.message); return }
+
+    await supabase.from('timeline_eventos').insert({
+      anomalia_id: id,
+      autor_tipo: 'sistema',
+      tipo_evento: 'agendamento',
+      texto: novoEstado === 'confirmada'
+        ? `Visita de ${new Date(visita.data_proposta).toLocaleString('pt-PT')} aceite pelo proprietário`
+        : `Visita de ${new Date(visita.data_proposta).toLocaleString('pt-PT')} recusada pelo proprietário`,
+      ocorrido_em: new Date().toISOString(),
+    })
+    carregar()
+  }
+
+  async function enviarContraproposta(e) {
+    e.preventDefault()
+    setErro('')
+    const { error } = await supabase.from('visitas').insert({
+      anomalia_id: id,
+      data_proposta: novaDataProposta,
+      tecnico: visita?.tecnico || null,
+      estado: 'proposta',
+      proposta_por: 'proprietario',
+    })
+    if (error) { setErro(error.message); return }
+
+    await supabase.from('timeline_eventos').insert({
+      anomalia_id: id,
+      autor_tipo: 'sistema',
+      tipo_evento: 'agendamento',
+      texto: `Proprietário propôs nova data para a visita: ${new Date(novaDataProposta).toLocaleString('pt-PT')}`,
+      ocorrido_em: new Date().toISOString(),
+    })
+
+    setNovaDataProposta('')
+    setAContrapropor(false)
+    carregar()
+  }
+
   if (carregando) return <p>A carregar...</p>
   if (!anomalia) return <p>Reclamação não encontrada (ou sem acesso).</p>
 
@@ -164,13 +211,60 @@ export default function DetalheAnomalia() {
       <p style={{ fontSize: 13, fontWeight: 'bold', color: corGarantia }}>
         {textoGarantia}
       </p>
+
       {visita && (
-        <p style={{ fontSize: 13, background: '#F5E6CC', padding: 8, borderRadius: 6, display: 'inline-block' }}>
-          Visita {visita.estado === 'proposta' ? 'proposta' : 'confirmada'} para{' '}
-          <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
-          {visita.tecnico ? ` com ${visita.tecnico}` : ''}
-        </p>
+        <div style={{ fontSize: 13, background: '#F5E6CC', padding: 10, borderRadius: 6, marginBottom: 10 }}>
+          {visita.estado === 'confirmada' && new Date(visita.data_proposta) >= new Date() && (
+            <p style={{ margin: 0 }}>
+              Visita marcada para <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
+              {visita.tecnico ? ` com ${visita.tecnico}` : ''}
+            </p>
+          )}
+
+          {visita.estado === 'proposta' && visita.proposta_por === 'equipa' && (
+            <>
+              <p style={{ margin: '0 0 8px' }}>
+                Visita proposta para <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
+                {visita.tecnico ? ` com ${visita.tecnico}` : ''}
+              </p>
+              {!aContrapropor ? (
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button type="button" onClick={() => responderVisita('confirmada')}>Aceitar</button>
+                  <button type="button" onClick={() => responderVisita('recusada')} style={{ background: '#B4462F' }}>Recusar</button>
+                  <button type="button" onClick={() => setAContrapropor(true)} style={{ background: 'transparent', color: '#2B5876', padding: '8px 0' }}>
+                    Propor outra data
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={enviarContraproposta} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <input
+                    type="datetime-local"
+                    value={novaDataProposta}
+                    onChange={(e) => setNovaDataProposta(e.target.value)}
+                    required
+                    style={{ padding: 8 }}
+                  />
+                  <button type="submit">Enviar</button>
+                  <button type="button" onClick={() => setAContrapropor(false)} style={{ background: 'transparent', color: '#2B5876' }}>
+                    Cancelar
+                  </button>
+                </form>
+              )}
+            </>
+          )}
+
+          {visita.estado === 'proposta' && visita.proposta_por === 'proprietario' && (
+            <p style={{ margin: 0 }}>
+              Aguardas resposta da equipa à data que propuseste: <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
+            </p>
+          )}
+
+          {visita.estado === 'recusada' && (
+            <p style={{ margin: 0, color: '#B4462F' }}>Recusaste a última data proposta. A equipa vai propor outra.</p>
+          )}
+        </div>
       )}
+
       {empresasDaAnomalia.length > 0 && (
         <p style={{ fontSize: 13, color: '#666' }}>
           Empresa(s) responsável(eis): <strong>{empresasDaAnomalia.join(', ')}</strong>
