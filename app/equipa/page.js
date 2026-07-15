@@ -29,6 +29,17 @@ export default function PainelEquipa() {
 
   async function carregarAnomalias() {
     setCarregando(true)
+
+    let idsFracao = null
+    if (filtroFracao) {
+      const { data: fracao } = await supabase
+        .from('fracoes')
+        .select('id')
+        .ilike('codigo_fracao', filtroFracao.trim())
+        .maybeSingle()
+      idsFracao = fracao ? [fracao.id] : []
+    }
+
     let query = supabase
       .from('anomalias')
       .select(`
@@ -49,6 +60,7 @@ export default function PainelEquipa() {
     if (filtroTexto) query = query.ilike('descricao', `%${filtroTexto}%`)
     if (dataInicio) query = query.gte('criado_em', dataInicio)
     if (dataFim) query = query.lte('criado_em', dataFim + 'T23:59:59')
+    if (idsFracao !== null) query = query.in('fracao_id', idsFracao)
 
     const { data, error } = await query
 
@@ -56,10 +68,7 @@ export default function PainelEquipa() {
       setSemAcesso(true)
       setAnomalias([])
     } else {
-      const filtradas = filtroFracao
-        ? data.filter((a) => a.fracoes?.codigo_fracao?.toUpperCase() === filtroFracao.toUpperCase())
-        : data
-      setAnomalias(filtradas)
+      setAnomalias(data)
     }
     setCarregando(false)
   }
