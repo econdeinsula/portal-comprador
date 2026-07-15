@@ -206,7 +206,7 @@ export default function Dashboard() {
     let queryEmpresas = supabase
       .from('anomalia_empresas')
       .select('empresa_id, empresas ( nome ), anomalias!inner ( id, criado_em )')
-      .limit(3000)
+      .limit(200000)
     if (dataInicio) queryEmpresas = queryEmpresas.gte('anomalias.criado_em', dataInicio)
     if (dataFim) queryEmpresas = queryEmpresas.lte('anomalias.criado_em', dataFim + 'T23:59:59')
     const { data: ligacoesEmpresas, error: erroEmpresas } = await queryEmpresas
@@ -231,7 +231,7 @@ export default function Dashboard() {
     let queryDesempenho = supabase
       .from('anomalia_empresas')
       .select('empresa_id, empresas ( nome ), anomalias!inner ( id, estado_id, criado_em )')
-      .limit(3000)
+      .limit(200000)
     if (dataInicio) queryDesempenho = queryDesempenho.gte('anomalias.criado_em', dataInicio)
     if (dataFim) queryDesempenho = queryDesempenho.lte('anomalias.criado_em', dataFim + 'T23:59:59')
     const { data: ligacoesDesempenho, error: erroDesempenho } = await queryDesempenho
@@ -256,7 +256,7 @@ export default function Dashboard() {
     }
 
     // --- evolução mensal (respeita apenas o intervalo de datas) ---
-    let queryMensal = supabase.from('anomalias').select('criado_em').limit(6000)
+    let queryMensal = supabase.from('anomalias').select('criado_em').limit(200000)
     if (dataInicio) queryMensal = queryMensal.gte('criado_em', dataInicio)
     if (dataFim) queryMensal = queryMensal.lte('criado_em', dataFim + 'T23:59:59')
     const { data: datasAnomalias } = await queryMensal
