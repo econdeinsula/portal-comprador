@@ -22,6 +22,7 @@ export default function DocumentosEquipa() {
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState('')
   const [carregando, setCarregando] = useState(true)
+  const [filtroFracaoBusca, setFiltroFracaoBusca] = useState('')
 
   async function carregar() {
     const { data: docs, error } = await supabase
@@ -88,6 +89,12 @@ export default function DocumentosEquipa() {
     carregar()
   }
 
+  const documentosFiltrados = filtroFracaoBusca
+    ? documentos.filter((d) =>
+        d.fracoes?.codigo_fracao?.toLowerCase().includes(filtroFracaoBusca.trim().toLowerCase())
+      )
+    : documentos
+
   return (
     <main style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>Documentos</h1>
@@ -140,7 +147,16 @@ export default function DocumentosEquipa() {
         </form>
       </div>
 
-      <h2 style={{ fontSize: 16 }}>Documentos existentes</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <h2 style={{ fontSize: 16, margin: 0 }}>Documentos existentes</h2>
+        <input
+          type="text"
+          placeholder="Procurar por fração (ex: BA)"
+          value={filtroFracaoBusca}
+          onChange={(e) => setFiltroFracaoBusca(e.target.value)}
+          style={{ padding: 6, width: 200 }}
+        />
+      </div>
       {carregando ? <p>A carregar...</p> : (
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
@@ -153,7 +169,7 @@ export default function DocumentosEquipa() {
             </tr>
           </thead>
           <tbody>
-            {documentos.map((d) => (
+            {documentosFiltrados.map((d) => (
               <tr key={d.id} style={{ borderBottom: '1px solid #eee' }}>
                 <td style={{ padding: 6 }}>{TIPOS.find((t) => t.valor === d.tipo)?.nome || d.tipo}</td>
                 <td style={{ padding: 6 }}>{d.nome}</td>
