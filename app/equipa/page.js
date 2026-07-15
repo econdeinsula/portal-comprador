@@ -7,12 +7,14 @@ export default function PainelEquipa() {
   const [anomalias, setAnomalias] = useState([])
   const [categorias, setCategorias] = useState([])
   const [estados, setEstados] = useState([])
+  const [empresas, setEmpresas] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [semAcesso, setSemAcesso] = useState(false)
 
   const [filtroCategoria, setFiltroCategoria] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('')
   const [filtroFracao, setFiltroFracao] = useState('')
+  const [filtroEmpresa, setFiltroEmpresa] = useState('')
   const [filtroTexto, setFiltroTexto] = useState('')
   const [dataInicio, setDataInicio] = useState('')
   const [dataFim, setDataFim] = useState('')
@@ -21,8 +23,10 @@ export default function PainelEquipa() {
     async function carregarListas() {
       const { data: cats } = await supabase.from('categorias').select('id, nome').order('nome')
       const { data: ests } = await supabase.from('estados').select('id, nome').order('ordem')
+      const { data: emps } = await supabase.from('empresas').select('id, nome').order('nome')
       setCategorias(cats || [])
       setEstados(ests || [])
+      setEmpresas(emps || [])
     }
     carregarListas()
   }, [])
@@ -38,6 +42,15 @@ export default function PainelEquipa() {
         .ilike('codigo_fracao', filtroFracao.trim())
         .maybeSingle()
       idsFracao = fracao ? [fracao.id] : []
+    }
+
+    let idsAnomaliaEmpresa = null
+    if (filtroEmpresa) {
+      const { data: ligacoes } = await supabase
+        .from('anomalia_empresas')
+        .select('anomalia_id')
+        .eq('empresa_id', filtroEmpresa)
+      idsAnomaliaEmpresa = (ligacoes || []).map((l) => l.anomalia_id)
     }
 
     let query = supabase
@@ -61,6 +74,7 @@ export default function PainelEquipa() {
     if (dataInicio) query = query.gte('criado_em', dataInicio)
     if (dataFim) query = query.lte('criado_em', dataFim + 'T23:59:59')
     if (idsFracao !== null) query = query.in('fracao_id', idsFracao)
+    if (idsAnomaliaEmpresa !== null) query = query.in('id', idsAnomaliaEmpresa)
 
     const { data, error } = await query
 
@@ -73,7 +87,7 @@ export default function PainelEquipa() {
     setCarregando(false)
   }
 
-  useEffect(() => { carregarAnomalias() }, [filtroCategoria, filtroEstado, filtroTexto, dataInicio, dataFim])
+  useEffect(() => { carregarAnomalias() }, [filtroCategoria, filtroEstado, filtroEmpresa, filtroTexto, dataInicio, dataFim])
 
   function aplicarFiltroFracao(e) {
     e.preventDefault()
@@ -104,6 +118,14 @@ export default function PainelEquipa() {
           <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} style={{ padding: 6 }}>
             <option value="">Todos</option>
             {estados.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
+          </select>
+        </div>
+
+        <div>
+          <label style={{ fontSize: 12, display: 'block' }}>Empresa</label>
+          <select value={filtroEmpresa} onChange={(e) => setFiltroEmpresa(e.target.value)} style={{ padding: 6 }}>
+            <option value="">Todas</option>
+            {empresas.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
           </select>
         </div>
 
