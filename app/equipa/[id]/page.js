@@ -265,6 +265,25 @@ export default function DetalheEquipa() {
     carregar()
   }
 
+  async function cancelarVisita() {
+    if (!confirm('Cancelar esta visita?')) return
+    setErro('')
+    const { error } = await supabase
+      .from('visitas')
+      .update({ estado: 'cancelada' })
+      .eq('id', visita.id)
+    if (error) { setErro(error.message); return }
+
+    await supabase.from('timeline_eventos').insert({
+      anomalia_id: id,
+      autor_tipo: 'sistema',
+      tipo_evento: 'agendamento',
+      texto: `Visita de ${new Date(visita.data_proposta).toLocaleString('pt-PT')} cancelada pela equipa`,
+      ocorrido_em: new Date().toISOString(),
+    })
+    carregar()
+  }
+
   async function agendarVisita(e) {
     e.preventDefault()
     setErro('')
@@ -401,7 +420,7 @@ export default function DetalheEquipa() {
         {visita ? (
           <>
             <p style={{ fontSize: 13 }}>
-              {visita.estado === 'confirmada' ? 'Confirmada' : visita.estado === 'recusada' ? 'Recusada' : 'Proposta'} para{' '}
+              {visita.estado === 'confirmada' ? 'Confirmada' : visita.estado === 'recusada' ? 'Recusada' : visita.estado === 'cancelada' ? 'Cancelada' : 'Proposta'} para{' '}
               <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
               {visita.tecnico ? ` com ${visita.tecnico}` : ''}
               {visita.proposta_por === 'proprietario' && visita.estado === 'proposta' ? ' (data proposta pelo proprietário)' : ''}
@@ -411,6 +430,11 @@ export default function DetalheEquipa() {
                 <button type="button" onClick={() => responderVisitaProprietario('confirmada')}>Aceitar</button>
                 <button type="button" onClick={() => responderVisitaProprietario('recusada')} style={{ background: '#B4462F' }}>Recusar</button>
               </div>
+            )}
+            {visita.estado === 'confirmada' && (
+              <button type="button" onClick={cancelarVisita} style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 12, marginBottom: 10 }}>
+                Cancelar visita
+              </button>
             )}
           </>
         ) : (

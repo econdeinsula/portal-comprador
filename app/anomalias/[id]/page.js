@@ -154,6 +154,25 @@ export default function DetalheAnomalia() {
     carregar()
   }
 
+  async function cancelarVisita() {
+    if (!confirm('Cancelar esta visita?')) return
+    setErro('')
+    const { error } = await supabase
+      .from('visitas')
+      .update({ estado: 'cancelada' })
+      .eq('id', visita.id)
+    if (error) { setErro(error.message); return }
+
+    await supabase.from('timeline_eventos').insert({
+      anomalia_id: id,
+      autor_tipo: 'sistema',
+      tipo_evento: 'agendamento',
+      texto: `Visita de ${new Date(visita.data_proposta).toLocaleString('pt-PT')} cancelada pelo proprietário`,
+      ocorrido_em: new Date().toISOString(),
+    })
+    carregar()
+  }
+
   async function enviarContraproposta(e) {
     e.preventDefault()
     setErro('')
@@ -215,10 +234,19 @@ export default function DetalheAnomalia() {
       {visita && (
         <div style={{ fontSize: 13, background: '#F5E6CC', padding: 10, borderRadius: 6, marginBottom: 10 }}>
           {visita.estado === 'confirmada' && new Date(visita.data_proposta) >= new Date() && (
-            <p style={{ margin: 0 }}>
-              Visita marcada para <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
-              {visita.tecnico ? ` com ${visita.tecnico}` : ''}
-            </p>
+            <div>
+              <p style={{ margin: '0 0 8px' }}>
+                Visita marcada para <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
+                {visita.tecnico ? ` com ${visita.tecnico}` : ''}
+              </p>
+              <button type="button" onClick={cancelarVisita} style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 12 }}>
+                Cancelar visita
+              </button>
+            </div>
+          )}
+
+          {visita.estado === 'cancelada' && (
+            <p style={{ margin: 0, color: '#B4462F' }}>Visita cancelada. A equipa vai propor uma nova data.</p>
           )}
 
           {visita.estado === 'proposta' && visita.proposta_por === 'equipa' && (
