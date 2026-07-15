@@ -22,7 +22,20 @@ export default function LoginPage() {
   async function pedirRecuperacao(e) {
     e.preventDefault()
     setErro('')
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+
+    const emailNormalizado = email.trim().toLowerCase()
+
+    const { data: proprietario } = await supabase
+      .from('proprietarios').select('id').eq('email', emailNormalizado).maybeSingle()
+    const { data: membro } = await supabase
+      .from('membros_equipa').select('email').eq('email', emailNormalizado).maybeSingle()
+
+    if (!proprietario && !membro) {
+      setErro('Este email não está registado. Contacta a equipa se achas que devia ter acesso.')
+      return
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(emailNormalizado, {
       redirectTo: `${window.location.origin}/definir-password`,
     })
     if (error) { setErro(error.message); return }
@@ -59,7 +72,7 @@ export default function LoginPage() {
           </form>
           <p style={{ fontSize: 13, marginTop: 12 }}>
             <a href="#" onClick={(e) => { e.preventDefault(); setARecuperar(true); setErro('') }}>
-              Ainda não tenho password / esqueci-me
+              Esqueci-me da password
             </a>
           </p>
         </>
