@@ -52,17 +52,22 @@ export default function GerirProprietarios() {
 
     if (erroLigacao) { setErro('Erro ao ligar à fração: ' + erroLigacao.message); return }
 
+    let mensagemConvite = 'Convite enviado por email.'
     try {
-      await fetch('/api/convidar', {
+      const respostaConvite = await fetch('/api/convidar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim().toLowerCase() }),
       })
-    } catch {
-      // o convite é um extra -- a ligação em si já foi feita com sucesso
+      const dadosConvite = await respostaConvite.json()
+      if (!respostaConvite.ok) {
+        mensagemConvite = `Convite NÃO enviado: ${dadosConvite.erro}`
+      }
+    } catch (e) {
+      mensagemConvite = `Convite NÃO enviado (erro de rede): ${e.message}`
     }
 
-    setSucesso(`${nome} (${email}) ligado à fração ${codigoFracao.toUpperCase()}. Convite enviado por email.`)
+    setSucesso(`${nome} (${email}) ligado à fração ${codigoFracao.toUpperCase()}. ${mensagemConvite}`)
     setNome('')
     setEmail('')
     setCodigoFracao('')
