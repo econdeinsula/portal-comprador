@@ -18,6 +18,8 @@ export default function PainelEquipa() {
   const [filtroTexto, setFiltroTexto] = useState('')
   const [dataInicio, setDataInicio] = useState('')
   const [dataFim, setDataFim] = useState('')
+  const [pagina, setPagina] = useState(0)
+  const [totalResultados, setTotalResultados] = useState(0)
 
   useEffect(() => {
     async function carregarListas() {
@@ -53,6 +55,10 @@ export default function PainelEquipa() {
       idsAnomaliaEmpresa = (ligacoes || []).map((l) => l.anomalia_id)
     }
 
+    const POR_PAGINA = 50
+    const inicio = pagina * POR_PAGINA
+    const fim = inicio + POR_PAGINA - 1
+
     let query = supabase
       .from('anomalias')
       .select(`
@@ -63,9 +69,9 @@ export default function PainelEquipa() {
         elementos ( nome ),
         categorias ( id, nome ),
         fracoes ( codigo_fracao )
-      `)
+      `, { count: 'exact' })
       .order('criado_em', { ascending: false })
-      .limit(200)
+      .range(inicio, fim)
 
     if (filtroCategoria === 'sem') query = query.is('categoria_id', null)
     else if (filtroCategoria) query = query.eq('categoria_id', filtroCategoria)
@@ -76,21 +82,25 @@ export default function PainelEquipa() {
     if (idsFracao !== null) query = query.in('fracao_id', idsFracao)
     if (idsAnomaliaEmpresa !== null) query = query.in('id', idsAnomaliaEmpresa)
 
-    const { data, error } = await query
+    const { data, error, count } = await query
 
     if (error || !data) {
       setSemAcesso(true)
       setAnomalias([])
     } else {
       setAnomalias(data)
+      setTotalResultados(count || 0)
     }
     setCarregando(false)
   }
 
-  useEffect(() => { carregarAnomalias() }, [filtroCategoria, filtroEstado, filtroEmpresa, filtroTexto, dataInicio, dataFim])
+  useEffect(() => { carregarAnomalias() }, [filtroCategoria, filtroEstado, filtroEmpresa, filtroTexto, dataInicio, dataFim, pagina])
+
+  useEffect(() => { setPagina(0) }, [filtroCategoria, filtroEstado, filtroEmpresa, filtroTexto, dataInicio, dataFim])
 
   function aplicarFiltroFracao(e) {
     e.preventDefault()
+    setPagina(0)
     carregarAnomalias()
   }
 
@@ -165,7 +175,7 @@ export default function PainelEquipa() {
       </div>
 
       <p style={{ fontSize: 12, color: '#888' }}>
-        {carregando ? 'A carregar...' : `${anomalias.length} reclamações encontradas (máximo 200 por página)`}
+        {carregando ? 'A carregar...' : `${totalResultados} reclamações encontradas`}
       </p>
 
       <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
@@ -190,6 +200,28 @@ export default function PainelEquipa() {
           ))}
         </tbody>
       </table>
+
+      {!carregando && totalResultados > 50 && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, marginTop: 20 }}>
+          <button
+            onClick={() => setPagina((p) => Math.max(0, p - 1))}
+            disabled={pagina === 0}
+            style={{ padding: '6px 14px' }}
+          >
+            ← Anterior
+          </button>
+          <span style={{ fontSize: 13, color: '#666' }}>
+            Página {pagina + 1} de {Math.ceil(totalResultados / 50)}
+          </span>
+          <button
+            onClick={() => setPagina((p) => p + 1)}
+            disabled={(pagina + 1) * 50 >= totalResultados}
+            style={{ padding: '6px 14px' }}
+          >
+            Seguinte →
+          </button>
+        </div>
+      )}
     </main>
   )
 }
