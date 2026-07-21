@@ -12,6 +12,7 @@ export default function DetalheEquipa() {
   const [elementos, setElementos] = useState([])
   const [tipos, setTipos] = useState([])
   const [visita, setVisita] = useState(null)
+  const [garantia, setGarantia] = useState(null)
   const [texto, setTexto] = useState('')
   const [anexo, setAnexo] = useState(null)
   const [aEnviar, setAEnviar] = useState(false)
@@ -92,6 +93,13 @@ export default function DetalheEquipa() {
       .limit(1)
       .maybeSingle()
     setVisita(v)
+
+    const { data: g } = await supabase
+      .from('v_garantia_restante')
+      .select('dias_restantes, data_fim_garantia')
+      .eq('anomalia_id', id)
+      .maybeSingle()
+    setGarantia(g)
 
     setCarregando(false)
   }
@@ -311,11 +319,33 @@ export default function DetalheEquipa() {
   if (carregando) return <p>A carregar...</p>
   if (!anomalia) return <p>Reclamação não encontrada (ou sem acesso).</p>
 
+  let textoGarantia = 'Garantia por calcular (falta classificar por elemento construtivo)'
+  let corGarantia = '#888'
+  if (garantia) {
+    const meses = Math.round(garantia.dias_restantes / 30)
+    if (garantia.dias_restantes < 0) {
+      textoGarantia = 'Garantia expirada'
+      corGarantia = '#B4462F'
+    } else if (meses <= 6) {
+      textoGarantia = `Faltam ${meses} meses de garantia`
+      corGarantia = '#B4462F'
+    } else if (meses <= 18) {
+      textoGarantia = `Faltam ${meses} meses de garantia`
+      corGarantia = '#C8862B'
+    } else {
+      textoGarantia = `Faltam ${meses} meses de garantia`
+      corGarantia = '#4B7A51'
+    }
+  }
+
   return (
     <main style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>{anomalia.categorias?.nome ? `${anomalia.categorias.nome} — ${anomalia.elementos?.nome}` : 'Reclamação por classificar'}</h1>
       <p>Fração: <strong>{anomalia.fracoes?.codigo_fracao}</strong></p>
       <p>{anomalia.descricao}</p>
+      <p style={{ fontSize: 13, fontWeight: 'bold', color: corGarantia }}>
+        {textoGarantia}
+      </p>
 
       <label style={{ fontSize: 13, fontWeight: 'bold' }}>Estado</label>
       <select

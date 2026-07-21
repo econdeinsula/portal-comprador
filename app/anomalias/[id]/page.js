@@ -22,7 +22,6 @@ export default function DetalheAnomalia() {
   const { id } = useParams()
   const [anomalia, setAnomalia] = useState(null)
   const [eventos, setEventos] = useState([])
-  const [garantia, setGarantia] = useState(null)
   const [visita, setVisita] = useState(null)
   const [aContrapropor, setAContrapropor] = useState(false)
   const [novaDataProposta, setNovaDataProposta] = useState('')
@@ -52,13 +51,6 @@ export default function DetalheAnomalia() {
       .eq('anomalia_id', id)
       .order('ocorrido_em', { ascending: true })
     setEventos(evs || [])
-
-    const { data: g } = await supabase
-      .from('v_garantia_restante')
-      .select('dias_restantes, data_fim_garantia')
-      .eq('anomalia_id', id)
-      .maybeSingle()
-    setGarantia(g)
 
     const { data: v } = await supabase
       .from('visitas')
@@ -201,34 +193,12 @@ export default function DetalheAnomalia() {
   if (carregando) return <p>A carregar...</p>
   if (!anomalia) return <p>Reclamação não encontrada (ou sem acesso).</p>
 
-  let textoGarantia = 'Garantia por calcular (falta classificar por elemento construtivo)'
-  let corGarantia = '#888'
-  if (garantia) {
-    const meses = Math.round(garantia.dias_restantes / 30)
-    if (garantia.dias_restantes < 0) {
-      textoGarantia = 'Garantia expirada'
-      corGarantia = '#B4462F'
-    } else if (meses <= 6) {
-      textoGarantia = `Faltam ${meses} meses de garantia`
-      corGarantia = '#B4462F'
-    } else if (meses <= 18) {
-      textoGarantia = `Faltam ${meses} meses de garantia`
-      corGarantia = '#C8862B'
-    } else {
-      textoGarantia = `Faltam ${meses} meses de garantia`
-      corGarantia = '#4B7A51'
-    }
-  }
-
   return (
     <main style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>{anomalia.categorias?.nome ? `${anomalia.categorias.nome} — ${anomalia.elementos?.nome}` : 'Reclamação por classificar'}</h1>
       <p>{anomalia.descricao}</p>
       <p style={{ fontSize: 13, color: '#666' }}>
         Estado: <strong>{anomalia.estados?.nome}</strong> · Urgência: {anomalia.urgencia || 'não definida'}
-      </p>
-      <p style={{ fontSize: 13, fontWeight: 'bold', color: corGarantia }}>
-        {textoGarantia}
       </p>
 
       {visita && (
