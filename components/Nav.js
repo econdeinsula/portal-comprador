@@ -129,6 +129,7 @@ export default function Nav() {
             <ItemMenu href="/equipa" ativo={pathname === '/equipa'}>Painel</ItemMenu>
             <ItemMenu href="/equipa/dashboard" ativo={pathname === '/equipa/dashboard'}>Dashboard</ItemMenu>
             <ItemMenu href="/equipa/fracoes" ativo={pathname === '/equipa/fracoes'}>Consultar fração</ItemMenu>
+            <ItemMenu href="/equipa/empreendimentos" ativo={pathname === '/equipa/empreendimentos'}>Empreendimentos e frações</ItemMenu>
             <ItemMenu href="/equipa/proprietarios" ativo={pathname === '/equipa/proprietarios'}>Gerir proprietários</ItemMenu>
             <ItemMenu href="/equipa/documentos" ativo={pathname === '/equipa/documentos'}>Documentos</ItemMenu>
             <ItemMenu href="/equipa/membros" ativo={pathname === '/equipa/membros'}>Membros da equipa</ItemMenu>
