@@ -63,14 +63,7 @@ export default function LoginPage() {
         boxShadow: '0 12px 32px rgba(20,41,58,0.12)',
         border: '1px solid #E7E4DA',
       }}>
-        <div style={{
-          width: 48, height: 48, borderRadius: 12,
-          background: 'linear-gradient(135deg, #2B5876, #14293A)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          marginBottom: 20,
-        }}>
-          <span style={{ color: '#fff', fontSize: 20, fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700 }}>P</span>
-        </div>
+        <img src="/logo.png" alt="Portal do Comprador" style={{ height: 44, marginBottom: 20, display: 'block' }} />
 
         <h1 style={{
           fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, color: '#16344A',
