@@ -3,6 +3,24 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import Link from 'next/link'
 
+function EtiquetaEstado({ nome }) {
+  const cores = {
+    'Aberta': { bg: '#F6E4DF', cor: '#B4462F' },
+    'Resolvida': { bg: '#E5EEE6', cor: '#4B7A51' },
+    'Em análise': { bg: '#F7EBD6', cor: '#C8862B' },
+    'Agendada': { bg: '#E4EEF3', cor: '#2B5876' },
+  }
+  const c = cores[nome] || { bg: '#F3F1EA', cor: '#6B7178' }
+  return (
+    <span style={{
+      fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 20, whiteSpace: 'nowrap',
+      background: c.bg, color: c.cor,
+    }}>
+      {nome}
+    </span>
+  )
+}
+
 export default function PainelEquipa() {
   const [anomalias, setAnomalias] = useState([])
   const [categorias, setCategorias] = useState([])
@@ -106,117 +124,128 @@ export default function PainelEquipa() {
 
   if (semAcesso) return <p style={{ padding: 40 }}>Sem acesso ao painel da equipa (não estás na lista de membros da equipa).</p>
 
+  const estiloInput = { padding: '7px 10px', border: '1px solid #E7E4DA', borderRadius: 8, fontSize: 13 }
+  const estiloLabel = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
+
   return (
     <main style={{ maxWidth: 1000, margin: '40px auto', fontFamily: 'sans-serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Painel da equipa</h1>
-        <Link href="/equipa/dashboard" style={{ fontSize: 14 }}>Ver dashboard →</Link>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <h1 style={{ marginBottom: 2 }}>Painel da equipa</h1>
+        <Link href="/equipa/dashboard" style={{ fontSize: 14, fontWeight: 600 }}>Ver dashboard →</Link>
       </div>
-
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20, alignItems: 'flex-end' }}>
-        <div>
-          <label style={{ fontSize: 12, display: 'block' }}>Categoria</label>
-          <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} style={{ padding: 6 }}>
-            <option value="">Todas</option>
-            <option value="sem">Por classificar</option>
-            {categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
-          </select>
-        </div>
-
-        <div>
-          <label style={{ fontSize: 12, display: 'block' }}>Estado</label>
-          <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} style={{ padding: 6 }}>
-            <option value="">Todos</option>
-            {estados.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
-          </select>
-        </div>
-
-        <div>
-          <label style={{ fontSize: 12, display: 'block' }}>Empresa</label>
-          <select value={filtroEmpresa} onChange={(e) => setFiltroEmpresa(e.target.value)} style={{ padding: 6 }}>
-            <option value="">Todas</option>
-            {empresas.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
-          </select>
-        </div>
-
-        <form onSubmit={aplicarFiltroFracao}>
-          <label style={{ fontSize: 12, display: 'block' }}>Fração (código exato)</label>
-          <input
-            type="text"
-            value={filtroFracao}
-            onChange={(e) => setFiltroFracao(e.target.value)}
-            placeholder="ex: BA"
-            style={{ padding: 6, width: 90 }}
-          />
-        </form>
-
-        <div>
-          <label style={{ fontSize: 12, display: 'block' }}>De</label>
-          <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} style={{ padding: 6 }} />
-        </div>
-
-        <div>
-          <label style={{ fontSize: 12, display: 'block' }}>Até</label>
-          <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} style={{ padding: 6 }} />
-        </div>
-
-        <div style={{ flex: 1, minWidth: 200 }}>
-          <label style={{ fontSize: 12, display: 'block' }}>Pesquisar na descrição</label>
-          <input
-            type="text"
-            value={filtroTexto}
-            onChange={(e) => setFiltroTexto(e.target.value)}
-            placeholder="ex: torneira, azulejo..."
-            style={{ padding: 6, width: '100%' }}
-          />
-        </div>
-
-        <button onClick={carregarAnomalias} style={{ padding: '7px 14px' }}>Filtrar</button>
-      </div>
-
-      <p style={{ fontSize: 12, color: '#888' }}>
+      <p style={{ color: '#6B7178', marginTop: 0, marginBottom: 22, fontSize: 14 }}>
         {carregando ? 'A carregar...' : `${totalResultados} reclamações encontradas`}
       </p>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
-        <thead>
-          <tr style={{ textAlign: 'left', borderBottom: '2px solid #ddd' }}>
-            <th style={{ padding: 8 }}>Fração</th>
-            <th style={{ padding: 8 }}>Categoria</th>
-            <th style={{ padding: 8 }}>Descrição</th>
-            <th style={{ padding: 8 }}>Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          {anomalias.map((a) => (
-            <tr key={a.id} style={{ borderBottom: '1px solid #eee' }}>
-              <td style={{ padding: 8 }}>{a.fracoes?.codigo_fracao}</td>
-              <td style={{ padding: 8 }}>{a.categorias?.nome || 'Por classificar'}</td>
-              <td style={{ padding: 8 }}>
-                <Link href={`/equipa/${a.id}`}>{a.descricao}</Link>
-              </td>
-              <td style={{ padding: 8 }}>{a.estados?.nome}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div style={{
+        background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 18, marginBottom: 20,
+        boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+      }}>
+        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div>
+            <label style={estiloLabel}>Categoria</label>
+            <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} style={estiloInput}>
+              <option value="">Todas</option>
+              <option value="sem">Por classificar</option>
+              {categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label style={estiloLabel}>Estado</label>
+            <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} style={estiloInput}>
+              <option value="">Todos</option>
+              {estados.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label style={estiloLabel}>Empresa</label>
+            <select value={filtroEmpresa} onChange={(e) => setFiltroEmpresa(e.target.value)} style={estiloInput}>
+              <option value="">Todas</option>
+              {empresas.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
+            </select>
+          </div>
+
+          <form onSubmit={aplicarFiltroFracao}>
+            <label style={estiloLabel}>Fração</label>
+            <input
+              type="text"
+              value={filtroFracao}
+              onChange={(e) => setFiltroFracao(e.target.value)}
+              placeholder="ex: BA"
+              style={{ ...estiloInput, width: 90 }}
+            />
+          </form>
+
+          <div>
+            <label style={estiloLabel}>De</label>
+            <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} style={estiloInput} />
+          </div>
+
+          <div>
+            <label style={estiloLabel}>Até</label>
+            <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} style={estiloInput} />
+          </div>
+
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <label style={estiloLabel}>Pesquisar</label>
+            <input
+              type="text"
+              value={filtroTexto}
+              onChange={(e) => setFiltroTexto(e.target.value)}
+              placeholder="torneira, azulejo..."
+              style={{ ...estiloInput, width: '100%' }}
+            />
+          </div>
+
+          <button onClick={carregarAnomalias} style={{ padding: '8px 16px' }}>Filtrar</button>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {anomalias.map((a) => (
+          <Link key={a.id} href={`/equipa/${a.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div style={{
+              background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: '14px 18px',
+              boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                <span style={{ fontSize: 11, background: '#E4EEF3', color: '#2B5876', padding: '3px 9px', borderRadius: 20, fontWeight: 600, flexShrink: 0 }}>
+                  {a.fracoes?.codigo_fracao}
+                </span>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#16344A' }}>
+                    {a.categorias?.nome || 'Por classificar'}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#6B7178', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {a.descricao}
+                  </div>
+                </div>
+              </div>
+              <EtiquetaEstado nome={a.estados?.nome} />
+            </div>
+          </Link>
+        ))}
+      </div>
 
       {!carregando && totalResultados > 50 && (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, marginTop: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, marginTop: 24 }}>
           <button
             onClick={() => setPagina((p) => Math.max(0, p - 1))}
             disabled={pagina === 0}
-            style={{ padding: '6px 14px' }}
+            style={{ padding: '7px 16px' }}
           >
             ← Anterior
           </button>
-          <span style={{ fontSize: 13, color: '#666' }}>
+          <span style={{ fontSize: 13, color: '#6B7178' }}>
             Página {pagina + 1} de {Math.ceil(totalResultados / 50)}
           </span>
           <button
             onClick={() => setPagina((p) => p + 1)}
             disabled={(pagina + 1) * 50 >= totalResultados}
-            style={{ padding: '6px 14px' }}
+            style={{ padding: '7px 16px' }}
           >
             Seguinte →
           </button>
