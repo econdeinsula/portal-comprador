@@ -2,6 +2,13 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
 
+const cartao = {
+  background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 20, marginBottom: 20,
+  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+}
+const rotulo = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
+const campo = { padding: '9px 12px', border: '1px solid #E7E4DA', borderRadius: 8, fontSize: 14, width: '100%', marginBottom: 12 }
+
 export default function GerirProprietarios() {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
@@ -100,74 +107,75 @@ export default function GerirProprietarios() {
   }
 
   return (
-    <main style={{ maxWidth: 600, margin: '40px auto', fontFamily: 'sans-serif' }}>
+    <main style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>Gerir proprietários</h1>
 
-      <form onSubmit={adicionar} style={{ marginBottom: 30 }}>
-        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Nome</label>
-        <input
-          type="text" value={nome} onChange={(e) => setNome(e.target.value)} required
-          style={{ width: '100%', padding: 8, marginBottom: 8 }}
-        />
-        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Email</label>
-        <input
-          type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-          style={{ width: '100%', padding: 8, marginBottom: 8 }}
-        />
+      <div style={cartao}>
+        <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 14, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Adicionar proprietário</h3>
+        <form onSubmit={adicionar}>
+          <label style={rotulo}>Nome</label>
+          <input
+            type="text" value={nome} onChange={(e) => setNome(e.target.value)} required
+            style={campo}
+          />
+          <label style={rotulo}>Email</label>
+          <input
+            type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+            style={campo}
+          />
 
-        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Empreendimento/Lote</label>
-        <select
-          value={empreendimentoId}
-          onChange={(e) => setEmpreendimentoId(e.target.value)}
-          required
-          style={{ width: '100%', padding: 8, marginBottom: 8 }}
-        >
-          <option value="">Escolhe o empreendimento...</option>
-          {empreendimentos.map((emp) => (
-            <option key={emp.id} value={emp.id}>{emp.lote}</option>
-          ))}
-        </select>
+          <label style={rotulo}>Empreendimento/Lote</label>
+          <select
+            value={empreendimentoId}
+            onChange={(e) => setEmpreendimentoId(e.target.value)}
+            required
+            style={campo}
+          >
+            <option value="">Escolhe o empreendimento...</option>
+            {empreendimentos.map((emp) => (
+              <option key={emp.id} value={emp.id}>{emp.lote}</option>
+            ))}
+          </select>
 
-        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Código da fração (ex: BA, A, AB)</label>
-        <input
-          type="text" value={codigoFracao} onChange={(e) => setCodigoFracao(e.target.value)} required
-          style={{ width: '100%', padding: 8, marginBottom: 8 }}
-        />
-        <button type="submit" style={{ padding: 8, width: '100%' }}>Adicionar e ligar à fração</button>
-      </form>
+          <label style={rotulo}>Código da fração (ex: BA, A, AB)</label>
+          <input
+            type="text" value={codigoFracao} onChange={(e) => setCodigoFracao(e.target.value)} required
+            style={campo}
+          />
 
-      {erro && <p style={{ color: 'red' }}>{erro}</p>}
-      {sucesso && <p style={{ color: 'green' }}>{sucesso}</p>}
+          {erro && <p style={{ color: '#B4462F', fontSize: 13 }}>{erro}</p>}
+          {sucesso && <p style={{ color: '#4B7A51', fontSize: 13 }}>{sucesso}</p>}
+          <button type="submit">Adicionar e ligar à fração</button>
+        </form>
+      </div>
 
       <h2 style={{ fontSize: 16 }}>Proprietários já ligados</h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ textAlign: 'left', borderBottom: '2px solid #ddd' }}>
-            <th style={{ padding: 6 }}>Fração</th>
-            <th style={{ padding: 6 }}>Nome</th>
-            <th style={{ padding: 6 }}>Email</th>
-            <th style={{ padding: 6 }}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {ligacoes.map((l, i) => (
-            <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
-              <td style={{ padding: 6 }}>{l.fracoes?.codigo_fracao} <span style={{ color: '#888', fontSize: 12 }}>({l.fracoes?.empreendimentos?.lote})</span></td>
-              <td style={{ padding: 6 }}>{l.proprietarios?.nome}</td>
-              <td style={{ padding: 6 }}>{l.proprietarios?.email}</td>
-              <td style={{ padding: 6 }}>
-                <button
-                  type="button"
-                  onClick={() => removerLigacao(l)}
-                  style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 13 }}
-                >
-                  Remover
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {ligacoes.map((l, i) => (
+          <div key={i} style={{
+            background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: '12px 16px',
+            boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+              <span style={{ fontSize: 11, background: '#E4EEF3', color: '#2B5876', padding: '3px 9px', borderRadius: 20, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                {l.fracoes?.codigo_fracao} · {l.fracoes?.empreendimentos?.lote}
+              </span>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#16344A' }}>{l.proprietarios?.nome}</div>
+                <div style={{ fontSize: 12, color: '#6B7178' }}>{l.proprietarios?.email}</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => removerLigacao(l)}
+              style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 13, boxShadow: 'none', flexShrink: 0 }}
+            >
+              Remover
+            </button>
+          </div>
+        ))}
+      </div>
     </main>
   )
 }
