@@ -29,6 +29,9 @@ export default function DetalheEquipa() {
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState('')
+  const [descricaoEditavel, setDescricaoEditavel] = useState('')
+  const [urgenciaEditavel, setUrgenciaEditavel] = useState('')
+  const [sucessoDescricao, setSucessoDescricao] = useState('')
 
   async function carregar() {
     const { data: a } = await supabase
@@ -46,6 +49,8 @@ export default function DetalheEquipa() {
     setCategoriaId(a?.categoria_id || '')
     setElementoId(a?.elemento_id || '')
     setTipoId(a?.tipo_anomalia_id || '')
+    setDescricaoEditavel(a?.descricao || '')
+    setUrgenciaEditavel(a?.urgencia || 'Baixa')
 
     const { data: evs } = await supabase
       .from('timeline_eventos')
@@ -208,6 +213,22 @@ export default function DetalheEquipa() {
     carregar()
   }
 
+  async function guardarDescricao(e) {
+    e.preventDefault()
+    setErro('')
+    setSucessoDescricao('')
+    const { error } = await supabase
+      .from('anomalias')
+      .update({
+        descricao: descricaoEditavel,
+        urgencia: urgenciaEditavel,
+      })
+      .eq('id', id)
+    if (error) { setErro(error.message); return }
+    setSucessoDescricao('Descrição e urgência atualizadas.')
+    carregar()
+  }
+
   async function adicionarEmpresa() {
     if (!empresaParaAdicionar) return
     setErro('')
@@ -342,10 +363,34 @@ export default function DetalheEquipa() {
     <main style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>{anomalia.categorias?.nome ? `${anomalia.categorias.nome} — ${anomalia.elementos?.nome}` : 'Reclamação por classificar'}</h1>
       <p>Fração: <strong>{anomalia.fracoes?.codigo_fracao}</strong></p>
-      <p>{anomalia.descricao}</p>
       <p style={{ fontSize: 13, fontWeight: 'bold', color: corGarantia }}>
         {textoGarantia}
       </p>
+
+      <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginBottom: 20 }}>
+        <h3 style={{ fontSize: 14, marginTop: 0 }}>Descrição e urgência</h3>
+        <form onSubmit={guardarDescricao}>
+          <label style={{ fontSize: 12, display: 'block' }}>Descrição</label>
+          <textarea
+            value={descricaoEditavel}
+            onChange={(e) => setDescricaoEditavel(e.target.value)}
+            style={{ width: '100%', minHeight: 80, padding: 8, marginBottom: 8 }}
+          />
+          <label style={{ fontSize: 12, display: 'block' }}>Urgência</label>
+          <select
+            value={urgenciaEditavel}
+            onChange={(e) => setUrgenciaEditavel(e.target.value)}
+            style={{ padding: 6, marginBottom: 8, display: 'block' }}
+          >
+            <option>Baixa</option>
+            <option>Média</option>
+            <option>Alta</option>
+            <option>Emergência</option>
+          </select>
+          {sucessoDescricao && <p style={{ color: 'green', fontSize: 13 }}>{sucessoDescricao}</p>}
+          <button type="submit" style={{ padding: '8px 16px' }}>Guardar alterações</button>
+        </form>
+      </div>
 
       <label style={{ fontSize: 13, fontWeight: 'bold' }}>Estado</label>
       <select
