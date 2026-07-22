@@ -2,6 +2,13 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
 
+const cartao = {
+  background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 20, marginBottom: 20,
+  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+}
+const rotulo = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
+const campo = { padding: '9px 12px', border: '1px solid #E7E4DA', borderRadius: 8, fontSize: 14, width: '100%', marginBottom: 12 }
+
 export default function GerirMembrosEquipa() {
   const [membros, setMembros] = useState([])
   const [email, setEmail] = useState('')
@@ -39,39 +46,46 @@ export default function GerirMembrosEquipa() {
   }
 
   return (
-    <main style={{ maxWidth: 500, margin: '40px auto', fontFamily: 'sans-serif' }}>
+    <main style={{ maxWidth: 520, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>Membros da equipa</h1>
 
-      <form onSubmit={adicionar} style={{ marginBottom: 30 }}>
-        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{ width: '100%', padding: 8, marginBottom: 8 }}
-        />
-        {erro && <p style={{ color: 'red', fontSize: 13 }}>{erro}</p>}
-        {sucesso && <p style={{ color: 'green', fontSize: 13 }}>{sucesso}</p>}
-        <button type="submit" style={{ padding: 8, width: '100%' }}>Adicionar à equipa</button>
-      </form>
+      <div style={cartao}>
+        <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 14, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Adicionar membro</h3>
+        <form onSubmit={adicionar}>
+          <label style={rotulo}>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={campo}
+          />
+          {erro && <p style={{ color: '#B4462F', fontSize: 13 }}>{erro}</p>}
+          {sucesso && <p style={{ color: '#4B7A51', fontSize: 13 }}>{sucesso}</p>}
+          <button type="submit">Adicionar à equipa</button>
+        </form>
+      </div>
 
       <h2 style={{ fontSize: 16 }}>Membros atuais</h2>
-      {carregando ? <p>A carregar...</p> : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+      {carregando ? <p style={{ color: '#6B7178' }}>A carregar...</p> : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {membros.map((m) => (
-            <li key={m.email} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #eee' }}>
-              <span style={{ fontSize: 14 }}>{m.email}</span>
+            <div key={m.email} style={{
+              background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: '12px 16px',
+              boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }}>
+              <span style={{ fontSize: 14, color: '#16344A' }}>{m.email}</span>
               <button
                 type="button"
                 onClick={() => remover(m.email)}
-                style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 13 }}
+                style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 13, boxShadow: 'none' }}
               >
                 Remover
               </button>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </main>
   )
