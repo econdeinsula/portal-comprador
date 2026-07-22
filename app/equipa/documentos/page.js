@@ -10,6 +10,13 @@ const TIPOS = [
   { valor: 'outro', nome: 'Outro' },
 ]
 
+const cartao = {
+  background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 20, marginBottom: 20,
+  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+}
+const rotulo = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
+const campo = { padding: '9px 12px', border: '1px solid #E7E4DA', borderRadius: 8, fontSize: 14, width: '100%', marginBottom: 12 }
+
 export default function DocumentosEquipa() {
   const [documentos, setDocumentos] = useState([])
   const [fracoes, setFracoes] = useState([])
@@ -76,7 +83,6 @@ export default function DocumentosEquipa() {
   async function apagar(documento) {
     if (!confirm(`Apagar "${documento.nome}"? Esta ação não pode ser desfeita.`)) return
 
-    // Extrai o caminho do ficheiro a partir do URL público, para o remover também do armazenamento
     const partes = documento.ficheiro_url.split('/documentos/')
     const caminho = partes[1]
 
@@ -96,100 +102,101 @@ export default function DocumentosEquipa() {
     : documentos
 
   return (
-    <main style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
+    <main style={{ maxWidth: 760, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>Documentos</h1>
 
-      <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16, marginBottom: 20 }}>
-        <h3 style={{ marginTop: 0, fontSize: 14 }}>Carregar novo documento</h3>
+      <div style={cartao}>
+        <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 14, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Carregar novo documento</h3>
         <form onSubmit={enviar}>
-          <label style={{ fontSize: 12, fontWeight: 'bold', display: 'block' }}>Tipo</label>
-          <select value={tipo} onChange={(e) => setTipo(e.target.value)} style={{ padding: 8, marginBottom: 10, width: '100%' }}>
+          <label style={rotulo}>Tipo</label>
+          <select value={tipo} onChange={(e) => setTipo(e.target.value)} style={campo}>
             {TIPOS.map((t) => <option key={t.valor} value={t.valor}>{t.nome}</option>)}
           </select>
 
-          <label style={{ fontSize: 12, fontWeight: 'bold', display: 'block' }}>Nome (opcional — usa o nome do ficheiro se vazio)</label>
+          <label style={rotulo}>Nome (opcional — usa o nome do ficheiro se vazio)</label>
           <input
             type="text"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
-            style={{ padding: 8, marginBottom: 10, width: '100%' }}
+            style={campo}
           />
 
-          <label style={{ fontSize: 12, fontWeight: 'bold', display: 'block' }}>Aplica-se a</label>
-          <div style={{ display: 'flex', gap: 16, marginBottom: 10, fontSize: 13 }}>
-            <label>
+          <label style={rotulo}>Aplica-se a</label>
+          <div style={{ display: 'flex', gap: 16, marginBottom: 12, fontSize: 13 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <input type="radio" checked={ambito === 'fracao'} onChange={() => setAmbito('fracao')} /> Uma fração específica
             </label>
-            <label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <input type="radio" checked={ambito === 'empreendimento'} onChange={() => setAmbito('empreendimento')} /> Todo o empreendimento
             </label>
           </div>
 
           {ambito === 'fracao' && (
-            <select value={fracaoId} onChange={(e) => setFracaoId(e.target.value)} style={{ padding: 8, marginBottom: 10, width: '100%' }}>
+            <select value={fracaoId} onChange={(e) => setFracaoId(e.target.value)} style={campo}>
               <option value="">Escolhe a fração...</option>
               {fracoes.map((f) => <option key={f.id} value={f.id}>{f.codigo_fracao}</option>)}
             </select>
           )}
 
-          <label style={{ fontSize: 12, fontWeight: 'bold', display: 'block' }}>Ficheiro</label>
+          <label style={rotulo}>Ficheiro</label>
           <input
             type="file"
             onChange={(e) => setFicheiro(e.target.files?.[0] || null)}
-            style={{ marginBottom: 10, display: 'block' }}
+            style={{ marginBottom: 12, display: 'block', fontSize: 13 }}
           />
 
-          {erro && <p style={{ color: 'red', fontSize: 13 }}>{erro}</p>}
-          {sucesso && <p style={{ color: 'green', fontSize: 13 }}>{sucesso}</p>}
-          <button type="submit" disabled={aEnviar} style={{ padding: '8px 16px' }}>
+          {erro && <p style={{ color: '#B4462F', fontSize: 13 }}>{erro}</p>}
+          {sucesso && <p style={{ color: '#4B7A51', fontSize: 13 }}>{sucesso}</p>}
+          <button type="submit" disabled={aEnviar}>
             {aEnviar ? 'A carregar...' : 'Carregar documento'}
           </button>
         </form>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <h2 style={{ fontSize: 16, margin: 0 }}>Documentos existentes</h2>
         <input
           type="text"
           placeholder="Procurar por fração (ex: BA)"
           value={filtroFracaoBusca}
           onChange={(e) => setFiltroFracaoBusca(e.target.value)}
-          style={{ padding: 6, width: 200 }}
+          style={{ ...campo, width: 200, marginBottom: 0 }}
         />
       </div>
-      {carregando ? <p>A carregar...</p> : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '2px solid #ddd' }}>
-              <th style={{ padding: 6 }}>Tipo</th>
-              <th style={{ padding: 6 }}>Nome</th>
-              <th style={{ padding: 6 }}>Âmbito</th>
-              <th style={{ padding: 6 }}></th>
-              <th style={{ padding: 6 }}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {documentosFiltrados.map((d) => (
-              <tr key={d.id} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: 6 }}>{TIPOS.find((t) => t.valor === d.tipo)?.nome || d.tipo}</td>
-                <td style={{ padding: 6 }}>{d.nome}</td>
-                <td style={{ padding: 6 }}>{d.fracoes?.codigo_fracao || 'Todo o empreendimento'}</td>
-                <td style={{ padding: 6 }}>
-                  <a href={d.ficheiro_url} target="_blank" rel="noopener noreferrer">Abrir</a>
-                </td>
-                <td style={{ padding: 6 }}>
-                  <button
-                    type="button"
-                    onClick={() => apagar(d)}
-                    style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 13 }}
-                  >
-                    Apagar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+      {carregando ? <p style={{ color: '#6B7178' }}>A carregar...</p> : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {documentosFiltrados.length === 0 && (
+            <p style={{ color: '#6B7178', fontSize: 13 }}>Nenhum documento encontrado.</p>
+          )}
+          {documentosFiltrados.map((d) => (
+            <div key={d.id} style={{
+              background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: '12px 16px',
+              boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                <span style={{ fontSize: 11, background: '#F3F1EA', color: '#6B7178', padding: '3px 9px', borderRadius: 20, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                  {TIPOS.find((t) => t.valor === d.tipo)?.nome || d.tipo}
+                </span>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#16344A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.nome}</div>
+                  <div style={{ fontSize: 12, color: '#6B7178' }}>{d.fracoes?.codigo_fracao || 'Todo o empreendimento'}</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0 }}>
+                <a href={d.ficheiro_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, fontWeight: 600 }}>Abrir</a>
+                <button
+                  type="button"
+                  onClick={() => apagar(d)}
+                  style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 13, boxShadow: 'none' }}
+                >
+                  Apagar
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </main>
   )
