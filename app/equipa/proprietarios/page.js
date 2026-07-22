@@ -6,6 +6,8 @@ export default function GerirProprietarios() {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [codigoFracao, setCodigoFracao] = useState('')
+  const [empreendimentos, setEmpreendimentos] = useState([])
+  const [empreendimentoId, setEmpreendimentoId] = useState('')
   const [ligacoes, setLigacoes] = useState([])
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState('')
@@ -17,10 +19,16 @@ export default function GerirProprietarios() {
         fracao_id,
         proprietario_id,
         proprietarios ( nome, email ),
-        fracoes ( codigo_fracao )
+        fracoes ( codigo_fracao, empreendimentos ( lote ) )
       `)
       .order('fracao_id')
     setLigacoes(data || [])
+
+    const { data: emps } = await supabase
+      .from('empreendimentos')
+      .select('id, lote')
+      .order('lote')
+    setEmpreendimentos(emps || [])
   }
 
   useEffect(() => { carregar() }, [])
@@ -30,13 +38,16 @@ export default function GerirProprietarios() {
     setErro('')
     setSucesso('')
 
+    if (!empreendimentoId) { setErro('Escolhe o empreendimento/lote.'); return }
+
     const { data: fracao, error: erroFracao } = await supabase
       .from('fracoes')
       .select('id')
       .eq('codigo_fracao', codigoFracao.trim().toUpperCase())
+      .eq('empreendimento_id', empreendimentoId)
       .maybeSingle()
 
-    if (erroFracao || !fracao) { setErro(`Fração "${codigoFracao}" não encontrada.`); return }
+    if (erroFracao || !fracao) { setErro(`Fração "${codigoFracao}" não encontrada nesse empreendimento.`); return }
 
     const { data: proprietario, error: erroProp } = await supabase
       .from('proprietarios')
@@ -71,6 +82,7 @@ export default function GerirProprietarios() {
     setNome('')
     setEmail('')
     setCodigoFracao('')
+    setEmpreendimentoId('')
     carregar()
   }
 
@@ -102,6 +114,20 @@ export default function GerirProprietarios() {
           type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
           style={{ width: '100%', padding: 8, marginBottom: 8 }}
         />
+
+        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Empreendimento/Lote</label>
+        <select
+          value={empreendimentoId}
+          onChange={(e) => setEmpreendimentoId(e.target.value)}
+          required
+          style={{ width: '100%', padding: 8, marginBottom: 8 }}
+        >
+          <option value="">Escolhe o empreendimento...</option>
+          {empreendimentos.map((emp) => (
+            <option key={emp.id} value={emp.id}>{emp.lote}</option>
+          ))}
+        </select>
+
         <label style={{ fontSize: 13, fontWeight: 'bold' }}>Código da fração (ex: BA, A, AB)</label>
         <input
           type="text" value={codigoFracao} onChange={(e) => setCodigoFracao(e.target.value)} required
@@ -126,7 +152,7 @@ export default function GerirProprietarios() {
         <tbody>
           {ligacoes.map((l, i) => (
             <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
-              <td style={{ padding: 6 }}>{l.fracoes?.codigo_fracao}</td>
+              <td style={{ padding: 6 }}>{l.fracoes?.codigo_fracao} <span style={{ color: '#888', fontSize: 12 }}>({l.fracoes?.empreendimentos?.lote})</span></td>
               <td style={{ padding: 6 }}>{l.proprietarios?.nome}</td>
               <td style={{ padding: 6 }}>{l.proprietarios?.email}</td>
               <td style={{ padding: 6 }}>
