@@ -2,6 +2,13 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
 
+const cartao = {
+  background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 20, marginBottom: 20,
+  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+}
+const rotulo = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
+const campo = { padding: '9px 12px', border: '1px solid #E7E4DA', borderRadius: 8, fontSize: 14, width: '100%', marginBottom: 12 }
+
 export default function GerirEmpreendimentos() {
   const [empreendimentos, setEmpreendimentos] = useState([])
   const [fracoes, setFracoes] = useState([])
@@ -71,39 +78,39 @@ export default function GerirEmpreendimentos() {
     <main style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>Empreendimentos e frações</h1>
 
-      <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16, marginBottom: 20 }}>
-        <h3 style={{ marginTop: 0, fontSize: 14 }}>Criar novo empreendimento/lote</h3>
+      <div style={cartao}>
+        <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 14, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Criar novo empreendimento/lote</h3>
         <form onSubmit={criarEmpreendimento}>
-          <label style={{ fontSize: 12, fontWeight: 'bold', display: 'block' }}>Nome (ex: Lote 3)</label>
+          <label style={rotulo}>Nome (ex: Lote 3)</label>
           <input
             type="text"
             value={loteNome}
             onChange={(e) => setLoteNome(e.target.value)}
             required
-            style={{ width: '100%', padding: 8, marginBottom: 8 }}
+            style={campo}
           />
-          <label style={{ fontSize: 12, fontWeight: 'bold', display: 'block' }}>Data de receção provisória</label>
+          <label style={rotulo}>Data de receção provisória</label>
           <input
             type="date"
             value={dataRececao}
             onChange={(e) => setDataRececao(e.target.value)}
             required
-            style={{ width: '100%', padding: 8, marginBottom: 8 }}
+            style={campo}
           />
-          {erroEmp && <p style={{ color: 'red', fontSize: 13 }}>{erroEmp}</p>}
-          {sucessoEmp && <p style={{ color: 'green', fontSize: 13 }}>{sucessoEmp}</p>}
-          <button type="submit" style={{ padding: 8, width: '100%' }}>Criar empreendimento</button>
+          {erroEmp && <p style={{ color: '#B4462F', fontSize: 13 }}>{erroEmp}</p>}
+          {sucessoEmp && <p style={{ color: '#4B7A51', fontSize: 13 }}>{sucessoEmp}</p>}
+          <button type="submit">Criar empreendimento</button>
         </form>
       </div>
 
-      <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16, marginBottom: 20 }}>
-        <h3 style={{ marginTop: 0, fontSize: 14 }}>Criar nova fração</h3>
+      <div style={cartao}>
+        <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 14, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Criar nova fração</h3>
         <form onSubmit={criarFracao}>
-          <label style={{ fontSize: 12, fontWeight: 'bold', display: 'block' }}>Empreendimento</label>
+          <label style={rotulo}>Empreendimento</label>
           <select
             value={empreendimentoId}
             onChange={(e) => setEmpreendimentoId(e.target.value)}
-            style={{ width: '100%', padding: 8, marginBottom: 8 }}
+            style={campo}
           >
             <option value="">Escolhe o empreendimento...</option>
             {empreendimentos.map((e) => (
@@ -112,55 +119,44 @@ export default function GerirEmpreendimentos() {
               </option>
             ))}
           </select>
-          <label style={{ fontSize: 12, fontWeight: 'bold', display: 'block' }}>Código da fração (ex: ACC)</label>
+          <label style={rotulo}>Código da fração (ex: ACC)</label>
           <input
             type="text"
             value={codigoFracaoNova}
             onChange={(e) => setCodigoFracaoNova(e.target.value)}
             required
-            style={{ width: '100%', padding: 8, marginBottom: 8 }}
+            style={campo}
           />
-          {erroFracao && <p style={{ color: 'red', fontSize: 13 }}>{erroFracao}</p>}
-          {sucessoFracao && <p style={{ color: 'green', fontSize: 13 }}>{sucessoFracao}</p>}
-          <button type="submit" style={{ padding: 8, width: '100%' }}>Criar fração</button>
+          {erroFracao && <p style={{ color: '#B4462F', fontSize: 13 }}>{erroFracao}</p>}
+          {sucessoFracao && <p style={{ color: '#4B7A51', fontSize: 13 }}>{sucessoFracao}</p>}
+          <button type="submit">Criar fração</button>
         </form>
       </div>
 
       <h2 style={{ fontSize: 16 }}>Empreendimentos existentes</h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 24 }}>
-        <thead>
-          <tr style={{ textAlign: 'left', borderBottom: '2px solid #ddd' }}>
-            <th style={{ padding: 6 }}>Lote</th>
-            <th style={{ padding: 6 }}>Data de receção</th>
-          </tr>
-        </thead>
-        <tbody>
-          {empreendimentos.map((e) => (
-            <tr key={e.id} style={{ borderBottom: '1px solid #eee' }}>
-              <td style={{ padding: 6 }}>{e.lote}</td>
-              <td style={{ padding: 6 }}>{new Date(e.data_rececao_provisoria).toLocaleDateString('pt-PT')}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
+        {empreendimentos.map((e) => (
+          <div key={e.id} style={{
+            background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: '12px 16px',
+            boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#16344A' }}>{e.lote}</span>
+            <span style={{ fontSize: 12, color: '#6B7178' }}>Receção: {new Date(e.data_rececao_provisoria).toLocaleDateString('pt-PT')}</span>
+          </div>
+        ))}
+      </div>
 
       <h2 style={{ fontSize: 16 }}>Frações existentes ({fracoes.length})</h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ textAlign: 'left', borderBottom: '2px solid #ddd' }}>
-            <th style={{ padding: 6 }}>Código</th>
-            <th style={{ padding: 6 }}>Empreendimento</th>
-          </tr>
-        </thead>
-        <tbody>
-          {fracoes.map((f) => (
-            <tr key={f.id} style={{ borderBottom: '1px solid #eee' }}>
-              <td style={{ padding: 6 }}>{f.codigo_fracao}</td>
-              <td style={{ padding: 6 }}>{f.empreendimentos?.lote}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {fracoes.map((f) => (
+          <span key={f.id} style={{
+            fontSize: 12, background: '#F3F1EA', color: '#16344A', padding: '5px 12px', borderRadius: 20, fontWeight: 500,
+          }}>
+            {f.codigo_fracao} <span style={{ color: '#6B7178' }}>· {f.empreendimentos?.lote}</span>
+          </span>
+        ))}
+      </div>
     </main>
   )
 }
