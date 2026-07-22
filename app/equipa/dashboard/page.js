@@ -15,21 +15,29 @@ const WIDGETS_DEFAULT = {
   evolucao: true,
 }
 
+const cartao = {
+  background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 20, marginBottom: 20,
+  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+}
+const rotuloFiltro = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
+const campoFiltro = { padding: '7px 10px', border: '1px solid #E7E4DA', borderRadius: 8, fontSize: 13 }
+
 function BarraContagem({ itens, total }) {
-  if (itens.length === 0) return <p style={{ fontSize: 13, color: '#888' }}>Sem dados para os filtros escolhidos.</p>
+  if (itens.length === 0) return <p style={{ fontSize: 13, color: '#6B7178' }}>Sem dados para os filtros escolhidos.</p>
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {itens.map((item, i) => (
         <div key={item.nome}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span>{item.nome}</span>
-            <span style={{ color: '#888' }}>{item.count}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
+            <span style={{ color: '#16344A' }}>{item.nome}</span>
+            <span style={{ color: '#6B7178' }}>{item.count}</span>
           </div>
-          <div style={{ background: '#eee', borderRadius: 4, height: 8, overflow: 'hidden' }}>
+          <div style={{ background: '#F3F1EA', borderRadius: 6, height: 8, overflow: 'hidden' }}>
             <div style={{
               width: `${total ? (item.count / total) * 100 : 0}%`,
               background: CORES[i % CORES.length],
               height: '100%',
+              borderRadius: 6,
             }} />
           </div>
         </div>
@@ -40,17 +48,17 @@ function BarraContagem({ itens, total }) {
 
 function Cartao({ titulo, valor, cor, fundo }) {
   return (
-    <div style={{ flex: '1 1 140px', background: fundo, borderRadius: 8, padding: 16, textAlign: 'center' }}>
-      <div style={{ fontSize: 26, fontWeight: 'bold', color: cor }}>{valor}</div>
-      <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{titulo}</div>
+    <div style={{ flex: '1 1 140px', background: fundo, borderRadius: 12, padding: '16px 18px' }}>
+      <div style={{ fontSize: 26, fontWeight: 700, color: cor }}>{valor}</div>
+      <div style={{ fontSize: 12, color: '#6B7178', marginTop: 4 }}>{titulo}</div>
     </div>
   )
 }
 
 function Painel({ titulo, children }) {
   return (
-    <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16, marginBottom: 20 }}>
-      <h2 style={{ fontSize: 15, marginTop: 0, marginBottom: 14 }}>{titulo}</h2>
+    <div style={cartao}>
+      <h2 style={{ fontSize: 13, marginTop: 0, marginBottom: 16, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>{titulo}</h2>
       {children}
     </div>
   )
@@ -79,7 +87,6 @@ export default function Dashboard() {
   const [desempenhoEmpresas, setDesempenhoEmpresas] = useState([])
   const [porMes, setPorMes] = useState([])
 
-  // carregar preferências guardadas + listas de referência, uma vez
   useEffect(() => {
     const guardado = typeof window !== 'undefined' && window.localStorage.getItem('dashboardWidgets')
     if (guardado) {
@@ -115,7 +122,6 @@ export default function Dashboard() {
 
     const fracaoIds = await idsFracoesDoLote(filtroLote)
     if (fracaoIds !== null && fracaoIds.length === 0) {
-      // lote sem frações -- não há nada a mostrar, evita continuar com filtros inválidos
       setSemAcesso(false)
       setKpis({ total: 0, abertas: 0, resolvidas: 0, semClassificar: 0, aExpirar: 0 })
       setPorCategoria([]); setPorEstado([]); setPorLote([]); setPorEmpresa([]); setDesempenhoEmpresas([]); setPorMes([])
@@ -132,7 +138,6 @@ export default function Dashboard() {
       return query
     }
 
-    // --- KPIs ---
     const { count: totalCount, error: erroTotal } = await aplicarFiltrosBase(
       supabase.from('anomalias').select('id', { count: 'exact', head: true })
     )
@@ -164,7 +169,6 @@ export default function Dashboard() {
       aExpirar: expirarCount || 0,
     })
 
-    // --- por categoria ---
     const contagensCategoria = []
     for (const cat of categorias) {
       const { count } = await aplicarFiltrosBase(
@@ -175,7 +179,6 @@ export default function Dashboard() {
     contagensCategoria.sort((a, b) => b.count - a.count)
     setPorCategoria(contagensCategoria)
 
-    // --- por estado ---
     const contagensEstado = []
     for (const est of estados) {
       const { count } = await aplicarFiltrosBase(
@@ -185,7 +188,6 @@ export default function Dashboard() {
     }
     setPorEstado(contagensEstado)
 
-    // --- por lote ---
     const { data: empreendimentos } = await supabase.from('empreendimentos').select('id, lote')
     const contagensLote = []
     for (const emp of empreendimentos || []) {
@@ -202,7 +204,6 @@ export default function Dashboard() {
     }
     setPorLote(contagensLote)
 
-    // --- top empresas (respeita apenas o intervalo de datas, para simplificar) ---
     let queryEmpresas = supabase
       .from('anomalia_empresas')
       .select('empresa_id, empresas ( nome ), anomalias!inner ( id, criado_em )')
@@ -227,7 +228,6 @@ export default function Dashboard() {
       setPorEmpresa([])
     }
 
-    // --- desempenho por empresa: abertas vs resolvidas ---
     let queryDesempenho = supabase
       .from('anomalia_empresas')
       .select('empresa_id, empresas ( nome ), anomalias!inner ( id, estado_id, criado_em )')
@@ -255,7 +255,6 @@ export default function Dashboard() {
       setDesempenhoEmpresas([])
     }
 
-    // --- evolução mensal (respeita apenas o intervalo de datas) ---
     let queryMensal = supabase.from('anomalias').select('criado_em').limit(200000)
     if (dataInicio) queryMensal = queryMensal.gte('criado_em', dataInicio)
     if (dataFim) queryMensal = queryMensal.lte('criado_em', dataFim + 'T23:59:59')
@@ -264,7 +263,7 @@ export default function Dashboard() {
     const contagemMes = {}
     for (const a of datasAnomalias || []) {
       if (!a.criado_em) continue
-      const chave = a.criado_em.slice(0, 7) // "AAAA-MM"
+      const chave = a.criado_em.slice(0, 7)
       contagemMes[chave] = (contagemMes[chave] || 0) + 1
     }
     const mesesOrdenados = Object.keys(contagemMes).sort().slice(-12)
@@ -280,71 +279,71 @@ export default function Dashboard() {
   return (
     <main style={{ maxWidth: 900, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-        <h1 style={{ marginBottom: 0 }}>Dashboard</h1>
-        <div style={{ display: 'flex', gap: 14 }}>
-          <button onClick={() => setMostrarPersonalizar((v) => !v)} style={{ background: 'transparent', color: '#2B5876', padding: 0, fontSize: 14 }}>
+        <h1 style={{ marginBottom: 2 }}>Dashboard</h1>
+        <div style={{ display: 'flex', gap: 16 }}>
+          <button onClick={() => setMostrarPersonalizar((v) => !v)} style={{ background: 'transparent', color: '#2B5876', padding: 0, fontSize: 14, boxShadow: 'none', fontWeight: 600 }}>
             ⚙ Personalizar
           </button>
-          <Link href="/equipa" style={{ fontSize: 14 }}>← Ver lista de reclamações</Link>
+          <Link href="/equipa" style={{ fontSize: 14, fontWeight: 600 }}>← Ver lista de reclamações</Link>
         </div>
       </div>
 
       {mostrarPersonalizar && (
-        <div style={{ border: '1px dashed #ccc', borderRadius: 8, padding: 12, marginTop: 12, marginBottom: 10, display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 13 }}>
-          <label><input type="checkbox" checked={widgets.kpis} onChange={() => alternarWidget('kpis')} /> Indicadores</label>
-          <label><input type="checkbox" checked={widgets.categoria} onChange={() => alternarWidget('categoria')} /> Por categoria</label>
-          <label><input type="checkbox" checked={widgets.estado} onChange={() => alternarWidget('estado')} /> Por estado</label>
-          <label><input type="checkbox" checked={widgets.lote} onChange={() => alternarWidget('lote')} /> Por lote</label>
-          <label><input type="checkbox" checked={widgets.empresas} onChange={() => alternarWidget('empresas')} /> Empresas</label>
-          <label><input type="checkbox" checked={widgets.desempenhoEmpresas} onChange={() => alternarWidget('desempenhoEmpresas')} /> Desempenho por empresa</label>
-          <label><input type="checkbox" checked={widgets.evolucao} onChange={() => alternarWidget('evolucao')} /> Evolução mensal</label>
+        <div style={{ ...cartao, borderStyle: 'dashed', display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 13, marginTop: 14, marginBottom: 4 }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={widgets.kpis} onChange={() => alternarWidget('kpis')} /> Indicadores</label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={widgets.categoria} onChange={() => alternarWidget('categoria')} /> Por categoria</label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={widgets.estado} onChange={() => alternarWidget('estado')} /> Por estado</label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={widgets.lote} onChange={() => alternarWidget('lote')} /> Por lote</label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={widgets.empresas} onChange={() => alternarWidget('empresas')} /> Empresas</label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={widgets.desempenhoEmpresas} onChange={() => alternarWidget('desempenhoEmpresas')} /> Desempenho por empresa</label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={widgets.evolucao} onChange={() => alternarWidget('evolucao')} /> Evolução mensal</label>
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '16px 0', alignItems: 'flex-end' }}>
+      <div style={{ ...cartao, display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-end', marginTop: 18 }}>
         <div>
-          <label style={{ fontSize: 12, display: 'block' }}>Categoria</label>
-          <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} style={{ padding: 6 }}>
+          <label style={rotuloFiltro}>Categoria</label>
+          <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} style={campoFiltro}>
             <option value="">Todas</option>
             {categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select>
         </div>
         <div>
-          <label style={{ fontSize: 12, display: 'block' }}>Estado</label>
-          <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} style={{ padding: 6 }}>
+          <label style={rotuloFiltro}>Estado</label>
+          <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} style={campoFiltro}>
             <option value="">Todos</option>
             {estados.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
           </select>
         </div>
         <div>
-          <label style={{ fontSize: 12, display: 'block' }}>Lote</label>
-          <select value={filtroLote} onChange={(e) => setFiltroLote(e.target.value)} style={{ padding: 6 }}>
+          <label style={rotuloFiltro}>Lote</label>
+          <select value={filtroLote} onChange={(e) => setFiltroLote(e.target.value)} style={campoFiltro}>
             <option value="">Todos</option>
             <option value="Lote 1">Lote 1</option>
             <option value="Lote 2">Lote 2</option>
           </select>
         </div>
         <div>
-          <label style={{ fontSize: 12, display: 'block' }}>De</label>
-          <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} style={{ padding: 6 }} />
+          <label style={rotuloFiltro}>De</label>
+          <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} style={campoFiltro} />
         </div>
         <div>
-          <label style={{ fontSize: 12, display: 'block' }}>Até</label>
-          <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} style={{ padding: 6 }} />
+          <label style={rotuloFiltro}>Até</label>
+          <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} style={campoFiltro} />
         </div>
       </div>
 
       {carregando ? (
-        <p>A carregar estatísticas...</p>
+        <p style={{ color: '#6B7178' }}>A carregar estatísticas...</p>
       ) : (
         <>
           {widgets.kpis && (
             <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
               <Cartao titulo="Total" valor={kpis.total} cor="#16344A" fundo="#F3F1EA" />
-              <Cartao titulo="Abertas" valor={kpis.abertas} cor="#B4462F" fundo="#F4DFD8" />
-              <Cartao titulo="Resolvidas" valor={kpis.resolvidas} cor="#4B7A51" fundo="#DCE9DD" />
-              <Cartao titulo="Por classificar" valor={kpis.semClassificar} cor="#C8862B" fundo="#F5E6CC" />
-              <Cartao titulo="Garantia a expirar (≤3 meses)" valor={kpis.aExpirar} cor="#C8862B" fundo="#F5E6CC" />
+              <Cartao titulo="Abertas" valor={kpis.abertas} cor="#B4462F" fundo="#F6E4DF" />
+              <Cartao titulo="Resolvidas" valor={kpis.resolvidas} cor="#4B7A51" fundo="#E5EEE6" />
+              <Cartao titulo="Por classificar" valor={kpis.semClassificar} cor="#C8862B" fundo="#F7EBD6" />
+              <Cartao titulo="Garantia a expirar (≤3 meses)" valor={kpis.aExpirar} cor="#C8862B" fundo="#F7EBD6" />
             </div>
           )}
 
@@ -375,31 +374,31 @@ export default function Dashboard() {
           {widgets.desempenhoEmpresas && (
             <Painel titulo="Desempenho por empresa">
               {desempenhoEmpresas.length === 0 ? (
-                <p style={{ fontSize: 13, color: '#888' }}>Sem dados para os filtros escolhidos.</p>
+                <p style={{ fontSize: 13, color: '#6B7178' }}>Sem dados para os filtros escolhidos.</p>
               ) : (
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
-                    <tr style={{ textAlign: 'left', borderBottom: '2px solid #ddd' }}>
-                      <th style={{ padding: 6 }}>Empresa</th>
-                      <th style={{ padding: 6 }}>Total</th>
-                      <th style={{ padding: 6 }}>Abertas</th>
-                      <th style={{ padding: 6 }}>Resolvidas</th>
-                      <th style={{ padding: 6 }}>Taxa de resolução</th>
+                    <tr style={{ textAlign: 'left', borderBottom: '2px solid #F0EEE7' }}>
+                      <th style={{ padding: '6px 8px 10px 0', color: '#6B7178', fontWeight: 600, fontSize: 11, textTransform: 'uppercase' }}>Empresa</th>
+                      <th style={{ padding: '6px 8px 10px', color: '#6B7178', fontWeight: 600, fontSize: 11, textTransform: 'uppercase' }}>Total</th>
+                      <th style={{ padding: '6px 8px 10px', color: '#6B7178', fontWeight: 600, fontSize: 11, textTransform: 'uppercase' }}>Abertas</th>
+                      <th style={{ padding: '6px 8px 10px', color: '#6B7178', fontWeight: 600, fontSize: 11, textTransform: 'uppercase' }}>Resolvidas</th>
+                      <th style={{ padding: '6px 8px 10px', color: '#6B7178', fontWeight: 600, fontSize: 11, textTransform: 'uppercase' }}>Taxa</th>
                     </tr>
                   </thead>
                   <tbody>
                     {desempenhoEmpresas.map((e) => (
-                      <tr key={e.nome} style={{ borderBottom: '1px solid #eee' }}>
-                        <td style={{ padding: 6 }}>{e.nome}</td>
-                        <td style={{ padding: 6 }}>{e.total}</td>
-                        <td style={{ padding: 6, color: '#B4462F' }}>{e.abertas}</td>
-                        <td style={{ padding: 6, color: '#4B7A51' }}>{e.resolvidas}</td>
-                        <td style={{ padding: 6 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div style={{ flex: 1, background: '#eee', borderRadius: 4, height: 6, maxWidth: 80 }}>
-                              <div style={{ width: `${e.taxa}%`, background: '#4B7A51', height: '100%', borderRadius: 4 }} />
+                      <tr key={e.nome} style={{ borderBottom: '1px solid #F0EEE7' }}>
+                        <td style={{ padding: '10px 8px 10px 0', color: '#16344A', fontWeight: 500 }}>{e.nome}</td>
+                        <td style={{ padding: '10px 8px' }}>{e.total}</td>
+                        <td style={{ padding: '10px 8px', color: '#B4462F' }}>{e.abertas}</td>
+                        <td style={{ padding: '10px 8px', color: '#4B7A51' }}>{e.resolvidas}</td>
+                        <td style={{ padding: '10px 8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{ flex: 1, background: '#F3F1EA', borderRadius: 6, height: 6, maxWidth: 70 }}>
+                              <div style={{ width: `${e.taxa}%`, background: '#4B7A51', height: '100%', borderRadius: 6 }} />
                             </div>
-                            <span style={{ color: '#666' }}>{e.taxa}%</span>
+                            <span style={{ color: '#6B7178', fontSize: 12 }}>{e.taxa}%</span>
                           </div>
                         </td>
                       </tr>
