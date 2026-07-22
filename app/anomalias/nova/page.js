@@ -25,6 +25,13 @@ function Planta({ url }) {
   return <PlantaSVG />
 }
 
+const cartao = {
+  background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 22,
+  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+}
+const rotulo = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
+const campo = { padding: '10px 12px', border: '1px solid #E7E4DA', borderRadius: 9, fontSize: 14, width: '100%', marginBottom: 14, boxSizing: 'border-box' }
+
 export default function NovaAnomalia() {
   const [categorias, setCategorias] = useState([])
   const [elementos, setElementos] = useState([])
@@ -176,131 +183,134 @@ export default function NovaAnomalia() {
   }
 
   return (
-    <main style={{ maxWidth: 500, margin: '40px auto', fontFamily: 'sans-serif' }}>
+    <main style={{ maxWidth: 560, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>Nova reclamação</h1>
-      {erro && <p style={{ color: 'red' }}>{erro}</p>}
-      <form onSubmit={submeter}>
-        {fracoesDisponiveis.length > 1 && (
-          <div style={{ marginBottom: 14 }}>
-            <label style={{ fontSize: 13, fontWeight: 'bold' }}>Qual fração?</label>
-            <select
-              value={fracaoEscolhida}
-              onChange={(e) => { setFracaoEscolhida(e.target.value); carregarPlanta(e.target.value) }}
-              required
-              style={{ width: '100%', padding: 10, display: 'block' }}
-            >
-              <option value="">Escolhe a fração...</option>
-              {fracoesDisponiveis.map((f) => (
-                <option key={f.id} value={f.id}>{f.codigo_fracao}</option>
-              ))}
-            </select>
-          </div>
-        )}
+      {erro && <p style={{ color: '#B4462F', fontSize: 13 }}>{erro}</p>}
 
-        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Categoria</label>
-        <select
-          value={categoriaId}
-          onChange={(e) => { setCategoriaId(e.target.value); setElementoId('') }}
-          required
-          style={{ width: '100%', padding: 10, marginBottom: 10, display: 'block' }}
-        >
-          <option value="">Escolhe uma categoria...</option>
-          {categorias.map((c) => (
-            <option key={c.id} value={c.id}>{c.nome}</option>
-          ))}
-        </select>
-
-        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Elemento</label>
-        <select
-          value={elementoId}
-          onChange={(e) => setElementoId(e.target.value)}
-          required
-          disabled={!categoriaId}
-          style={{ width: '100%', padding: 10, marginBottom: 10, display: 'block' }}
-        >
-          <option value="">Escolhe um elemento...</option>
-          {elementosFiltrados.map((el) => (
-            <option key={el.id} value={el.id}>{el.nome}</option>
-          ))}
-        </select>
-
-        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Tipo de anomalia</label>
-        <select
-          value={tipoId}
-          onChange={(e) => setTipoId(e.target.value)}
-          required
-          style={{ width: '100%', padding: 10, marginBottom: 10, display: 'block' }}
-        >
-          <option value="">Escolhe o tipo...</option>
-          {tipos.map((t) => (
-            <option key={t.id} value={t.id}>{t.nome}</option>
-          ))}
-        </select>
-
-        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Onde ocorreu — clica na planta</label>
-        <div
-          onClick={clicarPlanta}
-          style={{ position: 'relative', border: '1px solid #ddd', borderRadius: 8, cursor: 'crosshair', marginBottom: 6 }}
-        >
-          <Planta url={plantaUrl} />
-          {pin && (
-            <div
-              style={{
-                position: 'absolute',
-                left: `${pin.x}%`,
-                top: `${pin.y}%`,
-                width: 16,
-                height: 16,
-                marginLeft: -8,
-                marginTop: -16,
-                background: '#C8862B',
-                borderRadius: '50% 50% 50% 0',
-                transform: 'rotate(45deg)',
-                border: '2px solid #fff',
-                boxShadow: '0 0 2px rgba(0,0,0,0.4)',
-              }}
-            />
+      <div style={cartao}>
+        <form onSubmit={submeter}>
+          {fracoesDisponiveis.length > 1 && (
+            <>
+              <label style={rotulo}>Qual fração?</label>
+              <select
+                value={fracaoEscolhida}
+                onChange={(e) => { setFracaoEscolhida(e.target.value); carregarPlanta(e.target.value) }}
+                required
+                style={campo}
+              >
+                <option value="">Escolhe a fração...</option>
+                {fracoesDisponiveis.map((f) => (
+                  <option key={f.id} value={f.id}>{f.codigo_fracao}</option>
+                ))}
+              </select>
+            </>
           )}
-        </div>
-        <p style={{ fontSize: 11, color: '#888', marginTop: 0, marginBottom: 14 }}>
-          {pin ? 'Local selecionado — clica outra vez para ajustar.' : 'Ainda não selecionaste um local (opcional).'}
-        </p>
 
-        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Descrição</label>
-        <textarea
-          placeholder="Descreva o problema..."
-          value={descricao}
-          onChange={(e) => setDescricao(e.target.value)}
-          required
-          style={{ width: '100%', minHeight: 100, padding: 10, marginBottom: 10 }}
-        />
+          <label style={rotulo}>Categoria</label>
+          <select
+            value={categoriaId}
+            onChange={(e) => { setCategoriaId(e.target.value); setElementoId('') }}
+            required
+            style={campo}
+          >
+            <option value="">Escolhe uma categoria...</option>
+            {categorias.map((c) => (
+              <option key={c.id} value={c.id}>{c.nome}</option>
+            ))}
+          </select>
 
-        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Fotos (opcional, podes escolher várias)</label>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) => setFotos(Array.from(e.target.files || []))}
-          style={{ display: 'block', marginBottom: 6 }}
-        />
-        {fotos.length > 0 && (
-          <ul style={{ fontSize: 12, color: '#666', marginTop: 0, marginBottom: 10 }}>
-            {fotos.map((f, i) => <li key={i}>{f.name}</li>)}
-          </ul>
-        )}
+          <label style={rotulo}>Elemento</label>
+          <select
+            value={elementoId}
+            onChange={(e) => setElementoId(e.target.value)}
+            required
+            disabled={!categoriaId}
+            style={campo}
+          >
+            <option value="">Escolhe um elemento...</option>
+            {elementosFiltrados.map((el) => (
+              <option key={el.id} value={el.id}>{el.nome}</option>
+            ))}
+          </select>
 
-        <label style={{ fontSize: 13, fontWeight: 'bold' }}>Urgência</label>
-        <select value={urgencia} onChange={(e) => setUrgencia(e.target.value)} style={{ marginBottom: 10, display: 'block', padding: 10, width: '100%' }}>
-          <option>Baixa</option>
-          <option>Média</option>
-          <option>Alta</option>
-          <option>Emergência</option>
-        </select>
+          <label style={rotulo}>Tipo de anomalia</label>
+          <select
+            value={tipoId}
+            onChange={(e) => setTipoId(e.target.value)}
+            required
+            style={campo}
+          >
+            <option value="">Escolhe o tipo...</option>
+            {tipos.map((t) => (
+              <option key={t.id} value={t.id}>{t.nome}</option>
+            ))}
+          </select>
 
-        <button type="submit" disabled={aEnviar} style={{ padding: 10, width: '100%' }}>
-          {aEnviar ? 'A submeter...' : 'Submeter'}
-        </button>
-      </form>
+          <label style={rotulo}>Onde ocorreu — clica na planta</label>
+          <div
+            onClick={clicarPlanta}
+            style={{ position: 'relative', border: '1px solid #E7E4DA', borderRadius: 10, cursor: 'crosshair', marginBottom: 6, overflow: 'hidden' }}
+          >
+            <Planta url={plantaUrl} />
+            {pin && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: `${pin.x}%`,
+                  top: `${pin.y}%`,
+                  width: 16,
+                  height: 16,
+                  marginLeft: -8,
+                  marginTop: -16,
+                  background: '#C8862B',
+                  borderRadius: '50% 50% 50% 0',
+                  transform: 'rotate(45deg)',
+                  border: '2px solid #fff',
+                  boxShadow: '0 0 2px rgba(0,0,0,0.4)',
+                }}
+              />
+            )}
+          </div>
+          <p style={{ fontSize: 11, color: '#6B7178', marginTop: 0, marginBottom: 16 }}>
+            {pin ? 'Local selecionado — clica outra vez para ajustar.' : 'Ainda não selecionaste um local (opcional).'}
+          </p>
+
+          <label style={rotulo}>Descrição</label>
+          <textarea
+            placeholder="Descreva o problema..."
+            value={descricao}
+            onChange={(e) => setDescricao(e.target.value)}
+            required
+            style={{ ...campo, minHeight: 100 }}
+          />
+
+          <label style={rotulo}>Fotos (opcional, podes escolher várias)</label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => setFotos(Array.from(e.target.files || []))}
+            style={{ display: 'block', marginBottom: 6, fontSize: 13 }}
+          />
+          {fotos.length > 0 && (
+            <ul style={{ fontSize: 12, color: '#6B7178', marginTop: 0, marginBottom: 14 }}>
+              {fotos.map((f, i) => <li key={i}>{f.name}</li>)}
+            </ul>
+          )}
+
+          <label style={rotulo}>Urgência</label>
+          <select value={urgencia} onChange={(e) => setUrgencia(e.target.value)} style={campo}>
+            <option>Baixa</option>
+            <option>Média</option>
+            <option>Alta</option>
+            <option>Emergência</option>
+          </select>
+
+          <button type="submit" disabled={aEnviar} style={{ width: '100%', padding: 13, fontSize: 14, marginTop: 4 }}>
+            {aEnviar ? 'A submeter...' : 'Submeter'}
+          </button>
+        </form>
+      </div>
     </main>
   )
 }
