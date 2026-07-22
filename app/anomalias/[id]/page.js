@@ -49,6 +49,7 @@ export default function DetalheAnomalia() {
   const [aContrapropor, setAContrapropor] = useState(false)
   const [novaDataProposta, setNovaDataProposta] = useState('')
   const [empresasDaAnomalia, setEmpresasDaAnomalia] = useState([])
+  const [plantaUrl, setPlantaUrl] = useState(null)
   const [texto, setTexto] = useState('')
   const [anexo, setAnexo] = useState(null)
   const [aEnviar, setAEnviar] = useState(false)
@@ -59,7 +60,7 @@ export default function DetalheAnomalia() {
     const { data: a } = await supabase
       .from('anomalias')
       .select(`
-        id, descricao, urgencia, criado_em, pin_x, pin_y,
+        id, descricao, urgencia, criado_em, pin_x, pin_y, fracao_id,
         estados ( nome ),
         elementos ( nome ),
         categorias ( nome )
@@ -67,6 +68,18 @@ export default function DetalheAnomalia() {
       .eq('id', id)
       .single()
     setAnomalia(a)
+
+    if (a?.fracao_id) {
+      const { data: docPlanta } = await supabase
+        .from('documentos')
+        .select('ficheiro_url')
+        .eq('fracao_id', a.fracao_id)
+        .eq('tipo', 'planta')
+        .order('carregado_em', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      setPlantaUrl(docPlanta?.ficheiro_url || null)
+    }
 
     const { data: evs } = await supabase
       .from('timeline_eventos')
@@ -298,7 +311,11 @@ export default function DetalheAnomalia() {
 
       {anomalia.pin_x != null && (
         <div style={{ position: 'relative', maxWidth: 320, ...cartao, padding: 0, overflow: 'hidden' }}>
-          <PlantaSVG />
+          {plantaUrl ? (
+            <img src={plantaUrl} alt="Planta da fração" style={{ width: '100%', display: 'block' }} />
+          ) : (
+            <PlantaSVG />
+          )}
           <div
             style={{
               position: 'absolute',
