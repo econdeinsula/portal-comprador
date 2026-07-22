@@ -169,7 +169,7 @@ export default function NovaAnomalia() {
         const nomeElemento = elementos.find((e) => e.id === elementoId)?.nome || ''
         const nomeTipo = tipos.find((t) => t.id === tipoId)?.nome || ''
 
-        fetch('/api/notificar', {
+        await fetch('/api/notificar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
