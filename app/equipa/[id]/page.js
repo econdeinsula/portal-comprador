@@ -194,6 +194,34 @@ export default function DetalheEquipa() {
     }
   }
 
+  async function notificarConclusao() {
+    try {
+      if (!anomalia?.fracao_id) return
+
+      const { data: ligacao } = await supabase
+        .from('fracao_proprietarios')
+        .select('proprietarios ( email )')
+        .eq('fracao_id', anomalia.fracao_id)
+        .limit(1)
+        .maybeSingle()
+
+      const emailProprietario = ligacao?.proprietarios?.email
+      if (!emailProprietario) return
+
+      await fetch('/api/notificar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          destinatario: emailProprietario,
+          assunto: 'A tua reclamação foi resolvida',
+          mensagem: `A tua reclamação "${descricaoEditavel}" foi marcada como resolvida.\n\nGuarda este email como comprovativo. Consulta os detalhes em https://portal-comprador.vercel.app/anomalias/${id}`,
+        }),
+      })
+    } catch {
+      // notificação é um extra -- nunca deve travar o fluxo principal
+    }
+  }
+
   async function enviarMensagem(e) {
     e.preventDefault()
     setErro('')
@@ -246,6 +274,11 @@ export default function DetalheEquipa() {
       texto: `Estado alterado para "${novoEstadoNome}"${user?.user_metadata?.full_name ? ` por ${user.user_metadata.full_name}` : ''}`,
       ocorrido_em: new Date().toISOString(),
     })
+
+    if (novoEstadoNome === 'Resolvida') {
+      await notificarConclusao()
+    }
+
     carregar()
   }
 
