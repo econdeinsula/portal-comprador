@@ -18,6 +18,29 @@ const PlantaSVG = () => (
   </svg>
 )
 
+function EtiquetaEstado({ nome }) {
+  const cores = {
+    'Aberta': { bg: '#F6E4DF', cor: '#B4462F' },
+    'Resolvida': { bg: '#E5EEE6', cor: '#4B7A51' },
+    'Em análise': { bg: '#F7EBD6', cor: '#C8862B' },
+    'Agendada': { bg: '#E4EEF3', cor: '#2B5876' },
+  }
+  const c = cores[nome] || { bg: '#F3F1EA', cor: '#6B7178' }
+  return (
+    <span style={{
+      fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 20, whiteSpace: 'nowrap',
+      background: c.bg, color: c.cor,
+    }}>
+      {nome}
+    </span>
+  )
+}
+
+const cartao = {
+  background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 18, marginBottom: 18,
+  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+}
+
 export default function DetalheAnomalia() {
   const { id } = useParams()
   const [anomalia, setAnomalia] = useState(null)
@@ -190,46 +213,50 @@ export default function DetalheAnomalia() {
     carregar()
   }
 
-  if (carregando) return <p>A carregar...</p>
-  if (!anomalia) return <p>Reclamação não encontrada (ou sem acesso).</p>
+  if (carregando) return <p style={{ padding: 40 }}>A carregar...</p>
+  if (!anomalia) return <p style={{ padding: 40 }}>Reclamação não encontrada (ou sem acesso).</p>
 
   return (
-    <main style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
-      <h1>{anomalia.categorias?.nome ? `${anomalia.categorias.nome} — ${anomalia.elementos?.nome}` : 'Reclamação por classificar'}</h1>
-      <p>{anomalia.descricao}</p>
-      <p style={{ fontSize: 13, color: '#666' }}>
-        Estado: <strong>{anomalia.estados?.nome}</strong> · Urgência: {anomalia.urgencia || 'não definida'}
+    <main style={{ maxWidth: 720, margin: '40px auto', fontFamily: 'sans-serif' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 4 }}>
+        <h1 style={{ marginBottom: 2 }}>
+          {anomalia.categorias?.nome ? `${anomalia.categorias.nome} — ${anomalia.elementos?.nome}` : 'Reclamação por classificar'}
+        </h1>
+        <EtiquetaEstado nome={anomalia.estados?.nome} />
+      </div>
+      <p style={{ color: '#6B7178', marginTop: 0, marginBottom: 20, fontSize: 14 }}>
+        {anomalia.descricao} · Urgência: {anomalia.urgencia || 'não definida'}
       </p>
 
       {visita && (
-        <div style={{ fontSize: 13, background: '#F5E6CC', padding: 10, borderRadius: 6, marginBottom: 10 }}>
+        <div style={{ ...cartao, background: '#FBF6EC' }}>
           {visita.estado === 'confirmada' && new Date(visita.data_proposta) >= new Date() && (
             <div>
-              <p style={{ margin: '0 0 8px' }}>
-                Visita marcada para <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
+              <p style={{ margin: '0 0 10px', fontSize: 14 }}>
+                📅 Visita marcada para <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
                 {visita.tecnico ? ` com ${visita.tecnico}` : ''}
               </p>
-              <button type="button" onClick={cancelarVisita} style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 12 }}>
+              <button type="button" onClick={cancelarVisita} style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 12, boxShadow: 'none' }}>
                 Cancelar visita
               </button>
             </div>
           )}
 
           {visita.estado === 'cancelada' && (
-            <p style={{ margin: 0, color: '#B4462F' }}>Visita cancelada. A equipa vai propor uma nova data.</p>
+            <p style={{ margin: 0, color: '#B4462F', fontSize: 14 }}>Visita cancelada. A equipa vai propor uma nova data.</p>
           )}
 
           {visita.estado === 'proposta' && visita.proposta_por === 'equipa' && (
             <>
-              <p style={{ margin: '0 0 8px' }}>
-                Visita proposta para <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
+              <p style={{ margin: '0 0 10px', fontSize: 14 }}>
+                📅 Visita proposta para <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
                 {visita.tecnico ? ` com ${visita.tecnico}` : ''}
               </p>
               {!aContrapropor ? (
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <button type="button" onClick={() => responderVisita('confirmada')}>Aceitar</button>
                   <button type="button" onClick={() => responderVisita('recusada')} style={{ background: '#B4462F' }}>Recusar</button>
-                  <button type="button" onClick={() => setAContrapropor(true)} style={{ background: 'transparent', color: '#2B5876', padding: '8px 0' }}>
+                  <button type="button" onClick={() => setAContrapropor(true)} style={{ background: 'transparent', color: '#2B5876', padding: '8px 0', boxShadow: 'none' }}>
                     Propor outra data
                   </button>
                 </div>
@@ -243,7 +270,7 @@ export default function DetalheAnomalia() {
                     style={{ padding: 8 }}
                   />
                   <button type="submit">Enviar</button>
-                  <button type="button" onClick={() => setAContrapropor(false)} style={{ background: 'transparent', color: '#2B5876' }}>
+                  <button type="button" onClick={() => setAContrapropor(false)} style={{ background: 'transparent', color: '#2B5876', boxShadow: 'none' }}>
                     Cancelar
                   </button>
                 </form>
@@ -252,25 +279,25 @@ export default function DetalheAnomalia() {
           )}
 
           {visita.estado === 'proposta' && visita.proposta_por === 'proprietario' && (
-            <p style={{ margin: 0 }}>
+            <p style={{ margin: 0, fontSize: 14 }}>
               Aguardas resposta da equipa à data que propuseste: <strong>{new Date(visita.data_proposta).toLocaleString('pt-PT')}</strong>
             </p>
           )}
 
           {visita.estado === 'recusada' && (
-            <p style={{ margin: 0, color: '#B4462F' }}>Recusaste a última data proposta. A equipa vai propor outra.</p>
+            <p style={{ margin: 0, color: '#B4462F', fontSize: 14 }}>Recusaste a última data proposta. A equipa vai propor outra.</p>
           )}
         </div>
       )}
 
       {empresasDaAnomalia.length > 0 && (
-        <p style={{ fontSize: 13, color: '#666' }}>
-          Empresa(s) responsável(eis): <strong>{empresasDaAnomalia.join(', ')}</strong>
+        <p style={{ fontSize: 13, color: '#6B7178', marginBottom: 18 }}>
+          Empresa(s) responsável(eis): <strong style={{ color: '#16344A' }}>{empresasDaAnomalia.join(', ')}</strong>
         </p>
       )}
 
       {anomalia.pin_x != null && (
-        <div style={{ position: 'relative', maxWidth: 300, border: '1px solid #ddd', borderRadius: 8, marginTop: 16 }}>
+        <div style={{ position: 'relative', maxWidth: 320, ...cartao, padding: 0, overflow: 'hidden' }}>
           <PlantaSVG />
           <div
             style={{
@@ -290,30 +317,30 @@ export default function DetalheAnomalia() {
         </div>
       )}
 
-      <h2 style={{ fontSize: 16, marginTop: 30 }}>Histórico</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {eventos.length === 0 && <p>Sem eventos registados ainda.</p>}
+      <h2 style={{ fontSize: 16, marginTop: 8 }}>Histórico</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+        {eventos.length === 0 && <p style={{ color: '#6B7178', fontSize: 13 }}>Sem eventos registados ainda.</p>}
         {eventos.map((ev) => (
           <div
             key={ev.id}
             style={{
               alignSelf: ev.autor_tipo === 'proprietario' ? 'flex-start' : ev.autor_tipo === 'equipa' ? 'flex-end' : 'center',
-              background: ev.autor_tipo === 'proprietario' ? '#DCEAF0' : ev.autor_tipo === 'equipa' ? '#DCE9DD' : 'transparent',
-              border: ev.autor_tipo === 'sistema' ? '1px dashed #ccc' : 'none',
-              borderRadius: 10,
-              padding: '8px 12px',
+              background: ev.autor_tipo === 'proprietario' ? '#E4EEF3' : ev.autor_tipo === 'equipa' ? '#E5EEE6' : 'transparent',
+              border: ev.autor_tipo === 'sistema' ? '1px dashed #D8D5CB' : 'none',
+              borderRadius: 12,
+              padding: '10px 14px',
               maxWidth: '80%',
               fontSize: 13,
             }}
           >
             {ev.autor_tipo !== 'sistema' && (
-              <div style={{ fontSize: 11, fontWeight: 'bold', opacity: 0.7 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, opacity: 0.65, marginBottom: 2 }}>
                 {ev.autor_tipo === 'proprietario' ? 'Tu' : 'Equipa'}
               </div>
             )}
             <div>{ev.texto}</div>
             {ev.tipo_evento === 'anexo' && ev.anexo_url && (
-              <img src={ev.anexo_url} alt="Anexo" style={{ maxWidth: 200, borderRadius: 6, marginTop: 6, display: 'block' }} />
+              <img src={ev.anexo_url} alt="Anexo" style={{ maxWidth: 200, borderRadius: 8, marginTop: 6, display: 'block' }} />
             )}
             <div style={{ fontSize: 10, color: '#888', marginTop: 4 }}>
               {new Date(ev.ocorrido_em).toLocaleString('pt-PT')}
@@ -323,13 +350,16 @@ export default function DetalheAnomalia() {
         ))}
       </div>
 
-      {erro && <p style={{ color: 'red' }}>{erro}</p>}
+      {erro && <p style={{ color: 'red', fontSize: 13 }}>{erro}</p>}
       {anexo && (
-        <p style={{ fontSize: 12, color: '#666', marginTop: 12, marginBottom: 0 }}>
+        <p style={{ fontSize: 12, color: '#6B7178', marginTop: 8, marginBottom: 0 }}>
           📎 {anexo.name} <a href="#" onClick={(e) => { e.preventDefault(); setAnexo(null) }}>remover</a>
         </p>
       )}
-      <form onSubmit={enviarMensagem} style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
+      <form onSubmit={enviarMensagem} style={{
+        display: 'flex', gap: 8, marginTop: 8, alignItems: 'center',
+        background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: 8,
+      }}>
         <label style={{ cursor: 'pointer', fontSize: 20, padding: '4px 8px' }}>
           📎
           <input
@@ -344,9 +374,9 @@ export default function DetalheAnomalia() {
           placeholder="Escreve uma mensagem..."
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
-          style={{ flex: 1, padding: 10 }}
+          style={{ flex: 1, padding: 10, border: 'none' }}
         />
-        <button type="submit" disabled={aEnviar || (!texto && !anexo)} style={{ padding: '0 16px' }}>
+        <button type="submit" disabled={aEnviar || (!texto && !anexo)} style={{ padding: '8px 18px' }}>
           {aEnviar ? 'A enviar...' : 'Enviar'}
         </button>
       </form>
