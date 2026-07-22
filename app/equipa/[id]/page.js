@@ -3,6 +3,31 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabaseClient'
 
+function EtiquetaEstado({ nome }) {
+  const cores = {
+    'Aberta': { bg: '#F6E4DF', cor: '#B4462F' },
+    'Resolvida': { bg: '#E5EEE6', cor: '#4B7A51' },
+    'Em análise': { bg: '#F7EBD6', cor: '#C8862B' },
+    'Agendada': { bg: '#E4EEF3', cor: '#2B5876' },
+  }
+  const c = cores[nome] || { bg: '#F3F1EA', cor: '#6B7178' }
+  return (
+    <span style={{
+      fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 20, whiteSpace: 'nowrap',
+      background: c.bg, color: c.cor,
+    }}>
+      {nome}
+    </span>
+  )
+}
+
+const cartao = {
+  background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 18, marginBottom: 18,
+  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+}
+const rotulo = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
+const campo = { padding: '8px 10px', border: '1px solid #E7E4DA', borderRadius: 8, fontSize: 13, width: '100%', marginBottom: 10 }
+
 export default function DetalheEquipa() {
   const { id } = useParams()
   const [anomalia, setAnomalia] = useState(null)
@@ -337,8 +362,8 @@ export default function DetalheEquipa() {
     carregar()
   }
 
-  if (carregando) return <p>A carregar...</p>
-  if (!anomalia) return <p>Reclamação não encontrada (ou sem acesso).</p>
+  if (carregando) return <p style={{ padding: 40 }}>A carregar...</p>
+  if (!anomalia) return <p style={{ padding: 40 }}>Reclamação não encontrada (ou sem acesso).</p>
 
   let textoGarantia = 'Garantia por calcular (falta classificar por elemento construtivo)'
   let corGarantia = '#888'
@@ -360,99 +385,110 @@ export default function DetalheEquipa() {
   }
 
   return (
-    <main style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
-      <h1>{anomalia.categorias?.nome ? `${anomalia.categorias.nome} — ${anomalia.elementos?.nome}` : 'Reclamação por classificar'}</h1>
-      <p>Fração: <strong>{anomalia.fracoes?.codigo_fracao}</strong></p>
-      <p style={{ fontSize: 13, fontWeight: 'bold', color: corGarantia }}>
+    <main style={{ maxWidth: 720, margin: '40px auto', fontFamily: 'sans-serif' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 2 }}>
+        <h1 style={{ marginBottom: 2 }}>
+          {anomalia.categorias?.nome ? `${anomalia.categorias.nome} — ${anomalia.elementos?.nome}` : 'Reclamação por classificar'}
+        </h1>
+        <span style={{ fontSize: 12, background: '#E4EEF3', color: '#2B5876', padding: '4px 10px', borderRadius: 20, fontWeight: 600, whiteSpace: 'nowrap' }}>
+          {anomalia.fracoes?.codigo_fracao}
+        </span>
+      </div>
+      <p style={{ fontSize: 13, fontWeight: 700, color: corGarantia, marginTop: 0, marginBottom: 18 }}>
         {textoGarantia}
       </p>
 
-      <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginBottom: 20 }}>
-        <h3 style={{ fontSize: 14, marginTop: 0 }}>Descrição e urgência</h3>
+      <div style={cartao}>
+        <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 12, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Descrição e urgência</h3>
         <form onSubmit={guardarDescricao}>
-          <label style={{ fontSize: 12, display: 'block' }}>Descrição</label>
+          <label style={rotulo}>Descrição</label>
           <textarea
             value={descricaoEditavel}
             onChange={(e) => setDescricaoEditavel(e.target.value)}
-            style={{ width: '100%', minHeight: 80, padding: 8, marginBottom: 8 }}
+            style={{ ...campo, minHeight: 80 }}
           />
-          <label style={{ fontSize: 12, display: 'block' }}>Urgência</label>
+          <label style={rotulo}>Urgência</label>
           <select
             value={urgenciaEditavel}
             onChange={(e) => setUrgenciaEditavel(e.target.value)}
-            style={{ padding: 6, marginBottom: 8, display: 'block' }}
+            style={{ ...campo, width: 'auto' }}
           >
             <option>Baixa</option>
             <option>Média</option>
             <option>Alta</option>
             <option>Emergência</option>
           </select>
-          {sucessoDescricao && <p style={{ color: 'green', fontSize: 13 }}>{sucessoDescricao}</p>}
-          <button type="submit" style={{ padding: '8px 16px' }}>Guardar alterações</button>
+          {sucessoDescricao && <p style={{ color: '#4B7A51', fontSize: 13 }}>{sucessoDescricao}</p>}
+          <button type="submit">Guardar alterações</button>
         </form>
       </div>
 
-      <label style={{ fontSize: 13, fontWeight: 'bold' }}>Estado</label>
-      <select
-        value={anomalia.estado_id}
-        onChange={(e) => mudarEstado(e.target.value)}
-        style={{ display: 'block', padding: 8, marginBottom: 20 }}
-      >
-        {estados.map((e) => (
-          <option key={e.id} value={e.id}>{e.nome}</option>
-        ))}
-      </select>
+      <div style={{ ...cartao, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <div style={rotulo}>Estado</div>
+          <EtiquetaEstado nome={estados.find((e) => e.id === anomalia.estado_id)?.nome} />
+        </div>
+        <select
+          value={anomalia.estado_id}
+          onChange={(e) => mudarEstado(e.target.value)}
+          style={{ ...campo, width: 'auto', margin: 0 }}
+        >
+          {estados.map((e) => (
+            <option key={e.id} value={e.id}>{e.nome}</option>
+          ))}
+        </select>
+      </div>
 
-      <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginBottom: 20 }}>
-        <h3 style={{ fontSize: 14, marginTop: 0 }}>Classificação</h3>
+      <div style={cartao}>
+        <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 12, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Classificação</h3>
         <form onSubmit={guardarClassificacao}>
-          <label style={{ fontSize: 12, display: 'block' }}>Categoria</label>
+          <label style={rotulo}>Categoria</label>
           <select
             value={categoriaId}
             onChange={(e) => { setCategoriaId(e.target.value); setElementoId('') }}
-            style={{ padding: 6, marginBottom: 8, display: 'block', width: '100%' }}
+            style={campo}
           >
             <option value="">Por classificar</option>
             {categorias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select>
 
-          <label style={{ fontSize: 12, display: 'block' }}>Elemento</label>
+          <label style={rotulo}>Elemento</label>
           <select
             value={elementoId}
             onChange={(e) => setElementoId(e.target.value)}
             disabled={!categoriaId}
-            style={{ padding: 6, marginBottom: 8, display: 'block', width: '100%' }}
+            style={campo}
           >
             <option value="">—</option>
             {elementosFiltrados.map((el) => <option key={el.id} value={el.id}>{el.nome}</option>)}
           </select>
 
-          <label style={{ fontSize: 12, display: 'block' }}>Tipo de anomalia</label>
+          <label style={rotulo}>Tipo de anomalia</label>
           <select
             value={tipoId}
             onChange={(e) => setTipoId(e.target.value)}
-            style={{ padding: 6, marginBottom: 8, display: 'block', width: '100%' }}
+            style={campo}
           >
             <option value="">—</option>
             {tipos.map((t) => <option key={t.id} value={t.id}>{t.nome}</option>)}
           </select>
 
-          {sucesso && <p style={{ color: 'green', fontSize: 13 }}>{sucesso}</p>}
-          <button type="submit" style={{ padding: '8px 16px' }}>Guardar classificação</button>
+          {sucesso && <p style={{ color: '#4B7A51', fontSize: 13 }}>{sucesso}</p>}
+          <button type="submit">Guardar classificação</button>
         </form>
       </div>
 
-      <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginBottom: 20 }}>
-        <h3 style={{ fontSize: 14, marginTop: 0 }}>Empresa(s) responsável(eis)</h3>
-        {empresasDaAnomalia.length === 0 && <p style={{ fontSize: 13, color: '#888' }}>Nenhuma empresa atribuída ainda.</p>}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+      <div style={cartao}>
+        <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 12, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Empresa(s) responsável(eis)</h3>
+        {empresasDaAnomalia.length === 0 && <p style={{ fontSize: 13, color: '#6B7178' }}>Nenhuma empresa atribuída ainda.</p>}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
           {empresasDaAnomalia.map((e) => (
-            <span key={e.id} style={{ background: '#DCEAF0', color: '#2B5876', padding: '4px 10px', borderRadius: 20, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span key={e.id} style={{ background: '#E4EEF3', color: '#2B5876', padding: '5px 12px', borderRadius: 20, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, fontWeight: 500 }}>
               {e.nome}
               <button
                 type="button"
                 onClick={() => removerEmpresa(e.id)}
-                style={{ background: 'transparent', color: '#2B5876', padding: 0, fontSize: 13, lineHeight: 1 }}
+                style={{ background: 'transparent', color: '#2B5876', padding: 0, fontSize: 14, lineHeight: 1, boxShadow: 'none' }}
               >
                 ×
               </button>
@@ -461,13 +497,13 @@ export default function DetalheEquipa() {
         </div>
         {!aCriarEmpresa ? (
           <div style={{ display: 'flex', gap: 8 }}>
-            <select value={empresaParaAdicionar} onChange={(e) => setEmpresaParaAdicionar(e.target.value)} style={{ padding: 8, flex: 1 }}>
+            <select value={empresaParaAdicionar} onChange={(e) => setEmpresaParaAdicionar(e.target.value)} style={{ ...campo, marginBottom: 0, flex: 1 }}>
               <option value="">Escolhe uma empresa...</option>
               {empresas
                 .filter((e) => !empresasDaAnomalia.some((ea) => ea.id === e.id))
                 .map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
             </select>
-            <button type="button" onClick={adicionarEmpresa} style={{ padding: '8px 16px' }}>Adicionar</button>
+            <button type="button" onClick={adicionarEmpresa}>Adicionar</button>
           </div>
         ) : (
           <div style={{ display: 'flex', gap: 8 }}>
@@ -476,22 +512,22 @@ export default function DetalheEquipa() {
               placeholder="Nome da nova empresa"
               value={novaEmpresaNome}
               onChange={(e) => setNovaEmpresaNome(e.target.value)}
-              style={{ padding: 8, flex: 1 }}
+              style={{ ...campo, marginBottom: 0, flex: 1 }}
             />
-            <button type="button" onClick={criarEEmpresa} style={{ padding: '8px 16px' }}>Criar e adicionar</button>
+            <button type="button" onClick={criarEEmpresa}>Criar e adicionar</button>
           </div>
         )}
         <button
           type="button"
           onClick={() => setACriarEmpresa((v) => !v)}
-          style={{ background: 'transparent', color: '#2B5876', padding: 0, fontSize: 12, marginTop: 8 }}
+          style={{ background: 'transparent', color: '#2B5876', padding: 0, fontSize: 12, marginTop: 10, boxShadow: 'none' }}
         >
           {aCriarEmpresa ? '← Escolher de entre as existentes' : '+ Empresa não está na lista? Criar nova'}
         </button>
       </div>
 
-      <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 14, marginBottom: 20 }}>
-        <h3 style={{ fontSize: 14, marginTop: 0 }}>Visita</h3>
+      <div style={cartao}>
+        <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 12, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Visita</h3>
         {visita ? (
           <>
             <p style={{ fontSize: 13 }}>
@@ -501,62 +537,62 @@ export default function DetalheEquipa() {
               {visita.proposta_por === 'proprietario' && visita.estado === 'proposta' ? ' (data proposta pelo proprietário)' : ''}
             </p>
             {visita.estado === 'proposta' && visita.proposta_por === 'proprietario' && (
-              <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
                 <button type="button" onClick={() => responderVisitaProprietario('confirmada')}>Aceitar</button>
                 <button type="button" onClick={() => responderVisitaProprietario('recusada')} style={{ background: '#B4462F' }}>Recusar</button>
               </div>
             )}
             {visita.estado === 'confirmada' && (
-              <button type="button" onClick={cancelarVisita} style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 12, marginBottom: 10 }}>
+              <button type="button" onClick={cancelarVisita} style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 12, marginBottom: 12, boxShadow: 'none' }}>
                 Cancelar visita
               </button>
             )}
           </>
         ) : (
-          <p style={{ fontSize: 13, color: '#888' }}>Nenhuma visita agendada ainda.</p>
+          <p style={{ fontSize: 13, color: '#6B7178' }}>Nenhuma visita agendada ainda.</p>
         )}
-        <form onSubmit={agendarVisita} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+        <form onSubmit={agendarVisita} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <input
             type="datetime-local"
             value={dataVisita}
             onChange={(e) => setDataVisita(e.target.value)}
             required
-            style={{ padding: 8 }}
+            style={{ ...campo, marginBottom: 0, width: 'auto' }}
           />
           <input
             type="text"
             placeholder="Técnico (opcional)"
             value={tecnico}
             onChange={(e) => setTecnico(e.target.value)}
-            style={{ padding: 8, flex: 1, minWidth: 120 }}
+            style={{ ...campo, marginBottom: 0, flex: 1, minWidth: 120 }}
           />
-          <button type="submit" style={{ padding: '8px 16px' }}>Propor visita</button>
+          <button type="submit">Propor visita</button>
         </form>
       </div>
 
       <h2 style={{ fontSize: 16 }}>Histórico</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
         {eventos.map((ev) => (
           <div
             key={ev.id}
             style={{
               alignSelf: ev.autor_tipo === 'proprietario' ? 'flex-start' : ev.autor_tipo === 'equipa' ? 'flex-end' : 'center',
-              background: ev.autor_tipo === 'proprietario' ? '#DCEAF0' : ev.autor_tipo === 'equipa' ? '#DCE9DD' : 'transparent',
-              border: ev.autor_tipo === 'sistema' ? '1px dashed #ccc' : 'none',
-              borderRadius: 10,
-              padding: '8px 12px',
+              background: ev.autor_tipo === 'proprietario' ? '#E4EEF3' : ev.autor_tipo === 'equipa' ? '#E5EEE6' : 'transparent',
+              border: ev.autor_tipo === 'sistema' ? '1px dashed #D8D5CB' : 'none',
+              borderRadius: 12,
+              padding: '10px 14px',
               maxWidth: '80%',
               fontSize: 13,
             }}
           >
             {ev.autor_tipo !== 'sistema' && (
-              <div style={{ fontSize: 11, fontWeight: 'bold', opacity: 0.7 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, opacity: 0.65, marginBottom: 2 }}>
                 {ev.autor_tipo === 'proprietario' ? 'Proprietário' : (ev.autor_nome || 'Equipa')}
               </div>
             )}
             <div>{ev.texto}</div>
             {ev.tipo_evento === 'anexo' && ev.anexo_url && (
-              <img src={ev.anexo_url} alt="Anexo" style={{ maxWidth: 200, borderRadius: 6, marginTop: 6, display: 'block' }} />
+              <img src={ev.anexo_url} alt="Anexo" style={{ maxWidth: 200, borderRadius: 8, marginTop: 6, display: 'block' }} />
             )}
             <div style={{ fontSize: 10, color: '#888', marginTop: 4 }}>
               {new Date(ev.ocorrido_em).toLocaleString('pt-PT')}
@@ -566,13 +602,16 @@ export default function DetalheEquipa() {
         ))}
       </div>
 
-      {erro && <p style={{ color: 'red' }}>{erro}</p>}
+      {erro && <p style={{ color: 'red', fontSize: 13 }}>{erro}</p>}
       {anexo && (
-        <p style={{ fontSize: 12, color: '#666', marginTop: 12, marginBottom: 0 }}>
+        <p style={{ fontSize: 12, color: '#6B7178', marginTop: 8, marginBottom: 0 }}>
           📎 {anexo.name} <a href="#" onClick={(e) => { e.preventDefault(); setAnexo(null) }}>remover</a>
         </p>
       )}
-      <form onSubmit={enviarMensagem} style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
+      <form onSubmit={enviarMensagem} style={{
+        display: 'flex', gap: 8, marginTop: 8, alignItems: 'center',
+        background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: 8,
+      }}>
         <label style={{ cursor: 'pointer', fontSize: 20, padding: '4px 8px' }}>
           📎
           <input
@@ -587,9 +626,9 @@ export default function DetalheEquipa() {
           placeholder="Responder como equipa..."
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
-          style={{ flex: 1, padding: 10 }}
+          style={{ flex: 1, padding: 10, border: 'none' }}
         />
-        <button type="submit" disabled={aEnviar || (!texto && !anexo)} style={{ padding: '0 16px' }}>
+        <button type="submit" disabled={aEnviar || (!texto && !anexo)} style={{ padding: '8px 18px' }}>
           {aEnviar ? 'A enviar...' : 'Enviar'}
         </button>
       </form>
