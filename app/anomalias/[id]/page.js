@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabaseClient'
+import { exportarComoPDF } from '../../../lib/exportarPdf'
 
 const PlantaSVG = () => (
   <svg viewBox="0 0 400 260" style={{ width: '100%', display: 'block', background: '#fff' }}>
@@ -236,6 +237,15 @@ export default function DetalheAnomalia() {
 
   return (
     <main style={{ maxWidth: 720, margin: '40px auto', fontFamily: 'sans-serif' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+        <button
+          onClick={() => exportarComoPDF('conteudo-reclamacao-proprietario', 'reclamacao.pdf')}
+          style={{ fontSize: 13, padding: '7px 14px' }}
+        >
+          ⬇ Exportar PDF
+        </button>
+      </div>
+      <div id="conteudo-reclamacao-proprietario">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 4 }}>
         <h1 style={{ marginBottom: 2 }}>
           {anomalia.categorias?.nome ? `${anomalia.categorias.nome} — ${anomalia.elementos?.nome}` : 'Reclamação por classificar'}
@@ -370,6 +380,7 @@ export default function DetalheAnomalia() {
             </div>
           </div>
         ))}
+      </div>
       </div>
 
       {erro && <p style={{ color: 'red', fontSize: 13 }}>{erro}</p>}
