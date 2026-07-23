@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabaseClient'
 import Link from 'next/link'
@@ -32,7 +32,7 @@ function EtiquetaEstado({ nome }) {
   )
 }
 
-export default function DetalheFracao() {
+function ConteudoDetalheFracao() {
   const searchParams = useSearchParams()
   const [codigo, setCodigo] = useState('')
   const [fracao, setFracao] = useState(null)
@@ -188,5 +188,13 @@ export default function DetalheFracao() {
         </>
       )}
     </main>
+  )
+}
+
+export default function DetalheFracao() {
+  return (
+    <Suspense fallback={<p style={{ padding: 40 }}>A carregar...</p>}>
+      <ConteudoDetalheFracao />
+    </Suspense>
   )
 }
