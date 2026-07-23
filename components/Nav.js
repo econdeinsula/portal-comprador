@@ -15,6 +15,18 @@ function Iniciais(user) {
   return user?.email?.[0]?.toUpperCase() || '?'
 }
 
+function Bolinha({ numero }) {
+  if (!numero) return null
+  return (
+    <span style={{
+      background: '#C8862B', color: '#fff', fontSize: 10, fontWeight: 700,
+      borderRadius: 20, padding: '1px 7px', marginLeft: 8,
+    }}>
+      {numero}
+    </span>
+  )
+}
+
 function ItemMenu({ href, children, ativo }) {
   return (
     <Link
@@ -40,6 +52,8 @@ export default function Nav() {
   const [user, setUser] = useState(null)
   const [ehEquipa, setEhEquipa] = useState(false)
   const [ehProprietario, setEhProprietario] = useState(false)
+  const [naoLidasProprietario, setNaoLidasProprietario] = useState(0)
+  const [naoLidasEquipa, setNaoLidasEquipa] = useState(0)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -53,12 +67,65 @@ export default function Nav() {
     const { data: proprietario } = await supabase
       .from('proprietarios').select('id').eq('email', currentUser.email).maybeSingle()
 
+    let fracaoIds = []
     if (proprietario) {
-      const { data: ligacao } = await supabase
-        .from('fracao_proprietarios').select('fracao_id').eq('proprietario_id', proprietario.id).limit(1).maybeSingle()
-      setEhProprietario(!!ligacao)
+      const { data: ligacoes } = await supabase
+        .from('fracao_proprietarios').select('fracao_id').eq('proprietario_id', proprietario.id)
+      fracaoIds = (ligacoes || []).map((l) => l.fracao_id)
+      setEhProprietario(fracaoIds.length > 0)
     } else {
       setEhProprietario(false)
+    }
+
+    if (fracaoIds.length > 0) {
+      const { data: anomaliasProprio } = await supabase
+        .from('anomalias')
+        .select('id')
+        .in('fracao_id', fracaoIds)
+
+      let contador = 0
+      for (const a of anomaliasProprio || []) {
+        const { data: ultimoEvento } = await supabase
+          .from('timeline_eventos')
+          .select('ocorrido_em')
+          .eq('anomalia_id', a.id)
+          .order('ocorrido_em', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        const visto = typeof window !== 'undefined' && window.localStorage.getItem(`visto_${a.id}`)
+        if (ultimoEvento && (!visto || new Date(ultimoEvento.ocorrido_em) > new Date(visto))) {
+          contador++
+        }
+      }
+      setNaoLidasProprietario(contador)
+    }
+
+    if (equipa) {
+      const { data: anomaliasRecentes } = await supabase
+        .from('anomalias')
+        .select('id')
+        .order('criado_em', { ascending: false })
+        .limit(100)
+
+      let contador = 0
+      for (const a of anomaliasRecentes || []) {
+        const { data: ultimoEvento } = await supabase
+          .from('timeline_eventos')
+          .select('ocorrido_em, autor_tipo')
+          .eq('anomalia_id', a.id)
+          .order('ocorrido_em', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (!ultimoEvento || ultimoEvento.autor_tipo !== 'proprietario') continue
+
+        const visto = typeof window !== 'undefined' && window.localStorage.getItem(`visto_equipa_${a.id}`)
+        if (!visto || new Date(ultimoEvento.ocorrido_em) > new Date(visto)) {
+          contador++
+        }
+      }
+      setNaoLidasEquipa(contador)
     }
   }
 
@@ -115,7 +182,9 @@ export default function Nav() {
             <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'rgba(255,255,255,0.4)', padding: '0 16px', marginBottom: 6 }}>
               Proprietário
             </div>
-            <ItemMenu href="/anomalias" ativo={pathname === '/anomalias'}>As minhas reclamações</ItemMenu>
+            <ItemMenu href="/anomalias" ativo={pathname === '/anomalias'}>
+              As minhas reclamações <Bolinha numero={naoLidasProprietario} />
+            </ItemMenu>
             <ItemMenu href="/anomalias/nova" ativo={pathname === '/anomalias/nova'}>+ Nova reclamação</ItemMenu>
             <ItemMenu href="/documentos" ativo={pathname === '/documentos'}>Documentos</ItemMenu>
             <div style={{ height: 16 }} />
@@ -126,7 +195,9 @@ export default function Nav() {
             <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'rgba(255,255,255,0.4)', padding: '0 16px', marginBottom: 6 }}>
               Equipa
             </div>
-            <ItemMenu href="/equipa" ativo={pathname === '/equipa'}>Painel</ItemMenu>
+            <ItemMenu href="/equipa" ativo={pathname === '/equipa'}>
+              Painel <Bolinha numero={naoLidasEquipa} />
+            </ItemMenu>
             <ItemMenu href="/equipa/dashboard" ativo={pathname === '/equipa/dashboard'}>Dashboard</ItemMenu>
             <ItemMenu href="/equipa/fracoes" ativo={pathname === '/equipa/fracoes'}>Consultar fração</ItemMenu>
             <ItemMenu href="/equipa/empreendimentos" ativo={pathname === '/equipa/empreendimentos'}>Empreendimentos e frações</ItemMenu>

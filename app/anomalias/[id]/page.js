@@ -106,7 +106,12 @@ export default function DetalheAnomalia() {
     setCarregando(false)
   }
 
-  useEffect(() => { carregar() }, [id])
+  useEffect(() => {
+    carregar()
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(`visto_${id}`, new Date().toISOString())
+    }
+  }, [id])
 
   async function notificarEquipa(mensagemTexto) {
     try {

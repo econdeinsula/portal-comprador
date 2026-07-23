@@ -162,7 +162,12 @@ export default function DetalheEquipa() {
     setCarregando(false)
   }
 
-  useEffect(() => { carregar() }, [id])
+  useEffect(() => {
+    carregar()
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(`visto_equipa_${id}`, new Date().toISOString())
+    }
+  }, [id])
 
   const elementosFiltrados = elementos.filter((e) => e.categoria_id === categoriaId)
 
