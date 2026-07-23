@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import PesquisaGlobal from './PesquisaGlobal'
 
 function Iniciais(user) {
   const nome = user?.user_metadata?.full_name
@@ -126,6 +127,7 @@ export default function Nav() {
             <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'rgba(255,255,255,0.4)', padding: '0 16px', marginBottom: 6 }}>
               Equipa
             </div>
+            <PesquisaGlobal />
             <ItemMenu href="/equipa" ativo={pathname === '/equipa'}>Painel</ItemMenu>
             <ItemMenu href="/equipa/mensagens" ativo={pathname === '/equipa/mensagens'}>Mensagens</ItemMenu>
             <ItemMenu href="/equipa/dashboard" ativo={pathname === '/equipa/dashboard'}>Dashboard</ItemMenu>
