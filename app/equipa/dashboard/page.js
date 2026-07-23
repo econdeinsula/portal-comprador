@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
+import { exportarComoPDF } from '../../../lib/exportarPdf'
 import Link from 'next/link'
 
 const CORES = ['#2B5876', '#4B7A51', '#C8862B', '#B4462F', '#6E6A5E', '#8E6BAF', '#3C8DAD', '#A1683A']
@@ -280,9 +281,12 @@ export default function Dashboard() {
     <main style={{ maxWidth: 900, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
         <h1 style={{ marginBottom: 2 }}>Dashboard</h1>
-        <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
           <button onClick={() => setMostrarPersonalizar((v) => !v)} style={{ background: 'transparent', color: '#2B5876', padding: 0, fontSize: 14, boxShadow: 'none', fontWeight: 600 }}>
             ⚙ Personalizar
+          </button>
+          <button onClick={() => exportarComoPDF('conteudo-dashboard', 'dashboard.pdf')} style={{ fontSize: 13, padding: '8px 14px' }}>
+            ⬇ Exportar PDF
           </button>
           <Link href="/equipa" style={{ fontSize: 14, fontWeight: 600 }}>← Ver lista de reclamações</Link>
         </div>
@@ -336,7 +340,7 @@ export default function Dashboard() {
       {carregando ? (
         <p style={{ color: '#6B7178' }}>A carregar estatísticas...</p>
       ) : (
-        <>
+        <div id="conteudo-dashboard">
           {widgets.kpis && (
             <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
               <Cartao titulo="Total" valor={kpis.total} cor="#16344A" fundo="#F3F1EA" />
@@ -414,7 +418,7 @@ export default function Dashboard() {
               <BarraContagem itens={porMes} total={Math.max(...porMes.map((m) => m.count), 1)} />
             </Painel>
           )}
-        </>
+        </div>
       )}
     </main>
   )
