@@ -60,7 +60,23 @@ export default function ListaAnomalias() {
         .in('fracao_id', fracaoIds)
         .order('criado_em', { ascending: false })
 
-      if (!error) setAnomalias(data)
+      if (!error && data) {
+        const comIndicador = []
+        for (const a of data) {
+          const { data: ultimoEvento } = await supabase
+            .from('timeline_eventos')
+            .select('ocorrido_em')
+            .eq('anomalia_id', a.id)
+            .order('ocorrido_em', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+          const visto = typeof window !== 'undefined' && window.localStorage.getItem(`visto_${a.id}`)
+          const naoLida = ultimoEvento && (!visto || new Date(ultimoEvento.ocorrido_em) > new Date(visto))
+          comIndicador.push({ ...a, naoLida })
+        }
+        setAnomalias(comIndicador)
+      }
       setMostrarFracao(fracaoIds.length > 1)
       setCarregando(false)
     }
@@ -104,6 +120,9 @@ export default function ListaAnomalias() {
             }}>
               <div style={{ minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  {a.naoLida && (
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#C8862B', flexShrink: 0 }} />
+                  )}
                   <strong style={{ fontSize: 14 }}>
                     {a.categorias?.nome ? `${a.categorias.nome} — ${a.elementos?.nome}` : 'Por classificar'}
                   </strong>
