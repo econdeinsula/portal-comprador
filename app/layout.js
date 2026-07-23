@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Portal do Comprador",
+  title: "Portal do Cliente",
   description: "Gestão de reclamações e garantias — Hera Residences",
 };
 

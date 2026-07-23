@@ -63,13 +63,13 @@ export default function LoginPage() {
         boxShadow: '0 12px 32px rgba(20,41,58,0.12)',
         border: '1px solid #E7E4DA',
       }}>
-        <img src="/logo.png" alt="Portal do Comprador" style={{ height: 90, marginBottom: 24, display: 'block' }} />
+        <img src="/logo.png" alt="Portal do Cliente" style={{ height: 90, marginBottom: 24, display: 'block' }} />
 
         <h1 style={{
           fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, color: '#16344A',
           margin: '0 0 4px', fontWeight: 600,
         }}>
-          Portal do Comprador
+          Portal do Cliente
         </h1>
         <p style={{ color: '#6B7178', fontSize: 13, margin: '0 0 28px' }}>
           {aRecuperar ? 'Recupera o acesso à tua conta.' : 'Entra para acompanhar as tuas reclamações.'}

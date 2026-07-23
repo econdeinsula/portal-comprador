@@ -92,7 +92,7 @@ export default function Nav() {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'sans-serif',
       }}>
         <Link href="/" style={{ color: '#fff', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, textDecoration: 'none' }}>
-          Portal do Comprador
+          Portal do Cliente
         </Link>
         <Link href="/login" style={{ color: '#fff', fontSize: 14, textDecoration: 'none' }}>Entrar</Link>
       </div>
@@ -107,7 +107,7 @@ export default function Nav() {
       fontFamily: 'sans-serif', position: 'sticky', top: 0, alignSelf: 'flex-start',
     }}>
       <Link href="/" style={{ display: 'block', padding: '0 8px 24px', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, color: '#fff', textDecoration: 'none' }}>
-        Portal do<br />Comprador
+        Portal do<br />Cliente
       </Link>
 
       <nav style={{ flex: 1 }}>

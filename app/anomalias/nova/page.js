@@ -41,7 +41,6 @@ export default function NovaAnomalia() {
   const [elementoId, setElementoId] = useState('')
   const [tipoId, setTipoId] = useState('')
   const [descricao, setDescricao] = useState('')
-  const [urgencia, setUrgencia] = useState('Baixa')
   const [pin, setPin] = useState(null)
   const [fotos, setFotos] = useState([])
   const [fracoesDisponiveis, setFracoesDisponiveis] = useState([])
@@ -151,7 +150,6 @@ export default function NovaAnomalia() {
         elemento_id: elementoId || null,
         tipo_anomalia_id: tipoId || null,
         descricao,
-        urgencia,
         pin_x: pin?.x ?? null,
         pin_y: pin?.y ?? null,
         estado_id: estado.id,
@@ -175,7 +173,7 @@ export default function NovaAnomalia() {
           body: JSON.stringify({
             destinatario: user.email,
             assunto: 'Confirmação da tua reclamação',
-            mensagem: `A tua reclamação foi registada com sucesso.\n\nCategoria: ${nomeCategoria}\nElemento: ${nomeElemento}\nTipo: ${nomeTipo}\nUrgência: ${urgencia}\nDescrição: ${descricao}\n\nGuarda este email como comprovativo. Podes acompanhar o estado em https://portal-comprador.vercel.app/anomalias/${novaAnomalia.id}`,
+            mensagem: `A tua reclamação foi registada com sucesso.\n\nCategoria: ${nomeCategoria}\nElemento: ${nomeElemento}\nTipo: ${nomeTipo}\nDescrição: ${descricao}\n\nGuarda este email como comprovativo. Podes acompanhar o estado em https://portal-comprador.vercel.app/anomalias/${novaAnomalia.id}`,
           }),
         })
       }
@@ -318,14 +316,6 @@ export default function NovaAnomalia() {
               {fotos.map((f, i) => <li key={i}>{f.name}</li>)}
             </ul>
           )}
-
-          <label style={rotulo}>Urgência</label>
-          <select value={urgencia} onChange={(e) => setUrgencia(e.target.value)} style={campo}>
-            <option>Baixa</option>
-            <option>Média</option>
-            <option>Alta</option>
-            <option>Emergência</option>
-          </select>
 
           <button type="submit" disabled={aEnviar} style={{ width: '100%', padding: 13, fontSize: 14, marginTop: 4 }}>
             {aEnviar ? 'A submeter...' : 'Submeter'}

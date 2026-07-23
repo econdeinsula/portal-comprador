@@ -138,7 +138,7 @@ export default function Home() {
   if (!user) {
     return (
       <main style={{ maxWidth: 600, margin: '120px auto 80px', fontFamily: 'sans-serif', textAlign: 'center' }}>
-        <h1>Portal do Comprador</h1>
+        <h1>Portal do Cliente</h1>
         <p style={{ color: '#666', fontSize: 15 }}>
           Regista, acompanha e resolve reclamações de garantia da tua habitação —
           da abertura do processo até à visita técnica, tudo num só sítio.

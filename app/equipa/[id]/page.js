@@ -72,14 +72,13 @@ export default function DetalheEquipa() {
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState('')
   const [descricaoEditavel, setDescricaoEditavel] = useState('')
-  const [urgenciaEditavel, setUrgenciaEditavel] = useState('')
   const [sucessoDescricao, setSucessoDescricao] = useState('')
 
   async function carregar() {
     const { data: a } = await supabase
       .from('anomalias')
       .select(`
-        id, descricao, urgencia, estado_id, categoria_id, elemento_id, tipo_anomalia_id, fracao_id, pin_x, pin_y,
+        id, descricao, estado_id, categoria_id, elemento_id, tipo_anomalia_id, fracao_id, pin_x, pin_y,
         estados ( nome ),
         elementos ( nome ),
         categorias ( nome ),
@@ -92,7 +91,6 @@ export default function DetalheEquipa() {
     setElementoId(a?.elemento_id || '')
     setTipoId(a?.tipo_anomalia_id || '')
     setDescricaoEditavel(a?.descricao || '')
-    setUrgenciaEditavel(a?.urgencia || 'Baixa')
 
     if (a?.fracao_id) {
       const { data: docPlanta } = await supabase
@@ -313,11 +311,10 @@ export default function DetalheEquipa() {
       .from('anomalias')
       .update({
         descricao: descricaoEditavel,
-        urgencia: urgenciaEditavel,
       })
       .eq('id', id)
     if (error) { setErro(error.message); return }
-    setSucessoDescricao('Descrição e urgência atualizadas.')
+    setSucessoDescricao('Descrição atualizada.')
     carregar()
   }
 
@@ -500,7 +497,7 @@ export default function DetalheEquipa() {
       )}
 
       <div style={cartao}>
-        <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 12, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Descrição e urgência</h3>
+        <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 12, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Descrição</h3>
         <form onSubmit={guardarDescricao}>
           <label style={rotulo}>Descrição</label>
           <textarea
@@ -508,17 +505,6 @@ export default function DetalheEquipa() {
             onChange={(e) => setDescricaoEditavel(e.target.value)}
             style={{ ...campo, minHeight: 80 }}
           />
-          <label style={rotulo}>Urgência</label>
-          <select
-            value={urgenciaEditavel}
-            onChange={(e) => setUrgenciaEditavel(e.target.value)}
-            style={{ ...campo, width: 'auto' }}
-          >
-            <option>Baixa</option>
-            <option>Média</option>
-            <option>Alta</option>
-            <option>Emergência</option>
-          </select>
           {sucessoDescricao && <p style={{ color: '#4B7A51', fontSize: 13 }}>{sucessoDescricao}</p>}
           <button type="submit">Guardar alterações</button>
         </form>

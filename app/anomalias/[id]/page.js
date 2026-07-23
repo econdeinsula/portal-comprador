@@ -61,7 +61,7 @@ export default function DetalheAnomalia() {
     const { data: a } = await supabase
       .from('anomalias')
       .select(`
-        id, descricao, urgencia, criado_em, pin_x, pin_y, fracao_id,
+        id, descricao, criado_em, pin_x, pin_y, fracao_id,
         estados ( nome ),
         elementos ( nome ),
         categorias ( nome )
@@ -253,7 +253,7 @@ export default function DetalheAnomalia() {
         <EtiquetaEstado nome={anomalia.estados?.nome} />
       </div>
       <p style={{ color: '#6B7178', marginTop: 0, marginBottom: 20, fontSize: 14 }}>
-        {anomalia.descricao} · Urgência: {anomalia.urgencia || 'não definida'}
+        {anomalia.descricao}
       </p>
 
       {visita && (
