@@ -28,12 +28,30 @@ export default function GerirMembrosEquipa() {
     e.preventDefault()
     setErro('')
     setSucesso('')
+    const emailNormalizado = email.trim().toLowerCase()
+
     const { error } = await supabase
       .from('membros_equipa')
-      .insert({ email: email.trim().toLowerCase() })
+      .insert({ email: emailNormalizado })
 
     if (error) { setErro(error.message); return }
-    setSucesso(`${email} adicionado à equipa.`)
+
+    let mensagemConvite = 'Convite enviado por email.'
+    try {
+      const respostaConvite = await fetch('/api/convidar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailNormalizado }),
+      })
+      const dadosConvite = await respostaConvite.json()
+      if (!respostaConvite.ok) {
+        mensagemConvite = `Convite NÃO enviado: ${dadosConvite.erro}`
+      }
+    } catch (e) {
+      mensagemConvite = `Convite NÃO enviado (erro de rede): ${e.message}`
+    }
+
+    setSucesso(`${email} adicionado à equipa. ${mensagemConvite}`)
     setEmail('')
     carregar()
   }
