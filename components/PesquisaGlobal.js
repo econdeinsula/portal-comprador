@@ -85,9 +85,9 @@ export default function PesquisaGlobal() {
         onChange={(e) => procurar(e.target.value)}
         onFocus={() => termo.length >= 2 && setAberto(true)}
         style={{
-          width: '100%', padding: '9px 12px', borderRadius: 8, fontSize: 13,
-          border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.08)',
-          color: '#fff', boxSizing: 'border-box',
+          width: '100%', padding: '10px 12px', borderRadius: 8, fontSize: 13,
+          border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.14)',
+          color: '#fff', boxSizing: 'border-box', outline: 'none',
         }}
       />
 
@@ -163,7 +163,7 @@ export default function PesquisaGlobal() {
                   {resultados.fracoes.map((f) => (
                     <div
                       key={f.id}
-                      onClick={() => irPara('/equipa/fracoes')}
+                      onClick={() => irPara(`/equipa/fracoes?codigo=${encodeURIComponent(f.codigo_fracao)}`)}
                       style={{ padding: '8px', borderRadius: 6, cursor: 'pointer', fontSize: 13 }}
                       onMouseEnter={(e) => e.currentTarget.style.background = '#F3F1EA'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}

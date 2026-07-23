@@ -1,5 +1,6 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabaseClient'
 import Link from 'next/link'
 
@@ -32,6 +33,7 @@ function EtiquetaEstado({ nome }) {
 }
 
 export default function DetalheFracao() {
+  const searchParams = useSearchParams()
   const [codigo, setCodigo] = useState('')
   const [fracao, setFracao] = useState(null)
   const [proprietarios, setProprietarios] = useState([])
@@ -40,8 +42,18 @@ export default function DetalheFracao() {
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState('')
 
-  async function procurar(e) {
-    e.preventDefault()
+  useEffect(() => {
+    const codigoUrl = searchParams.get('codigo')
+    if (codigoUrl) {
+      setCodigo(codigoUrl)
+      procurar(null, codigoUrl)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  async function procurar(e, codigoForcado) {
+    if (e) e.preventDefault()
+    const codigoAProcurar = codigoForcado || codigo
     setErro('')
     setCarregando(true)
     setFracao(null)
@@ -49,11 +61,11 @@ export default function DetalheFracao() {
     const { data: f, error: erroFracao } = await supabase
       .from('fracoes')
       .select('id, codigo_fracao, empreendimentos ( lote )')
-      .ilike('codigo_fracao', codigo.trim())
+      .ilike('codigo_fracao', codigoAProcurar.trim())
       .maybeSingle()
 
     if (erroFracao || !f) {
-      setErro(`Fração "${codigo}" não encontrada.`)
+      setErro(`Fração "${codigoAProcurar}" não encontrada.`)
       setCarregando(false)
       return
     }
