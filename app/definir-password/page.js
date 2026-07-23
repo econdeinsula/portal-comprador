@@ -15,7 +15,7 @@ export default function DefinirPassword() {
     const { error } = await supabase.auth.updateUser({ password })
     if (error) { setErro(error.message); return }
     setSucesso(true)
-    setTimeout(() => router.push('/anomalias'), 1500)
+    setTimeout(() => router.push('/'), 1500)
   }
 
   return (
