@@ -58,6 +58,50 @@ h3 { font-size: 16px; }
   min-width: 0;
 }
 
+/* -------- barra lateral -------- */
+
+.nav-lateral {
+  width: 220px;
+  min-height: 100vh;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #14293A, #0D1D29);
+  display: flex;
+  flex-direction: column;
+  padding: 22px 14px;
+  font-family: sans-serif;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+}
+
+.nav-topo { display: block; }
+
+.nav-logo {
+  display: block;
+  padding: 0 8px 24px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.nav-hamburger { display: none; }
+
+.nav-corpo { flex: 1; }
+
+.nav-rodape {
+  border-top: 1px solid rgba(255,255,255,0.12);
+  padding-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+aside input::placeholder {
+  color: rgba(255,255,255,0.55);
+}
+
 /* -------- botões -------- */
 
 button {
@@ -127,8 +171,67 @@ main {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* -------- pesquisa global na barra lateral -------- */
+/* -------- telemóvel e ecrãs pequenos -------- */
 
-aside input::placeholder {
-  color: rgba(255,255,255,0.55);
+@media (max-width: 768px) {
+  .app-shell { flex-direction: column; }
+
+  .app-content { padding: 4px 14px 40px; }
+
+  .nav-lateral {
+    width: 100%;
+    min-height: 0;
+    padding: 10px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    align-self: stretch;
+  }
+
+  .nav-lateral.aberto {
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .nav-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-logo { padding: 4px 0; font-size: 17px; }
+  .nav-quebra { display: none; }
+
+  .nav-hamburger {
+    display: block;
+    background: transparent;
+    box-shadow: none;
+    color: #fff;
+    font-size: 24px;
+    line-height: 1;
+    padding: 6px 10px;
+  }
+
+  .nav-corpo,
+  .nav-rodape { display: none; }
+
+  .nav-lateral.aberto .nav-corpo { display: block; padding-top: 10px; }
+  .nav-lateral.aberto .nav-rodape { display: flex; margin-top: 10px; }
+
+  /* as páginas passam a ocupar a largura toda */
+  main {
+    max-width: 100% !important;
+    margin: 18px auto !important;
+  }
+
+  h1 { font-size: 23px; }
+
+  /* linhas com título, filtros e botões passam para a linha seguinte */
+  main div[style*="display: flex"] { flex-wrap: wrap; }
+
+  /* botões e campos mais fáceis de tocar */
+  button, select, input[type="text"], input[type="email"],
+  input[type="password"], input[type="date"], input[type="datetime-local"] {
+    min-height: 40px;
+  }
 }

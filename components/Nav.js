@@ -41,6 +41,7 @@ export default function Nav() {
   const [user, setUser] = useState(null)
   const [ehEquipa, setEhEquipa] = useState(false)
   const [ehProprietario, setEhProprietario] = useState(false)
+  const [aberto, setAberto] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -79,6 +80,9 @@ export default function Nav() {
     return () => listener.subscription.unsubscribe()
   }, [])
 
+  // fecha o menu ao mudar de página (telemóvel)
+  useEffect(() => { setAberto(false) }, [pathname])
+
   async function sair() {
     await supabase.auth.signOut()
     router.push('/login')
@@ -100,17 +104,22 @@ export default function Nav() {
   }
 
   return (
-    <aside style={{
-      width: 220, minHeight: '100vh', flexShrink: 0,
-      background: 'linear-gradient(180deg, #14293A, #0D1D29)',
-      display: 'flex', flexDirection: 'column', padding: '22px 14px',
-      fontFamily: 'sans-serif', position: 'sticky', top: 0, alignSelf: 'flex-start',
-    }}>
-      <Link href="/" style={{ display: 'block', padding: '0 8px 24px', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, color: '#fff', textDecoration: 'none' }}>
-        Portal do<br />Cliente
-      </Link>
+    <aside className={`nav-lateral${aberto ? ' aberto' : ''}`}>
+      <div className="nav-topo">
+        <Link href="/" className="nav-logo">
+          Portal do<br className="nav-quebra" /> Cliente
+        </Link>
+        <button
+          type="button"
+          className="nav-hamburger"
+          aria-label={aberto ? 'Fechar menu' : 'Abrir menu'}
+          onClick={() => setAberto((v) => !v)}
+        >
+          {aberto ? '✕' : '☰'}
+        </button>
+      </div>
 
-      <nav style={{ flex: 1 }}>
+      <nav className="nav-corpo">
         {ehProprietario && (
           <>
             <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'rgba(255,255,255,0.4)', padding: '0 16px', marginBottom: 6 }}>
@@ -140,7 +149,7 @@ export default function Nav() {
         )}
       </nav>
 
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: 14, display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div className="nav-rodape">
         <Link href="/definicoes" style={{ textDecoration: 'none' }}>
           <div style={{
             width: 32, height: 32, borderRadius: '50%', background: '#C8862B', color: '#2A1D08',
