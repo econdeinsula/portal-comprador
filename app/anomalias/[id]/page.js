@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabaseClient'
 import { exportarComoPDF } from '../../../lib/exportarPdf'
 import { novoCaminho } from '../../../lib/ficheirosPrivados'
-import { ImagemPrivada } from '../../../components/FicheiroPrivado'
+import { ImagemPrivada, AnexoPrivado } from '../../../components/FicheiroPrivado'
 
 const PlantaSVG = () => (
   <svg viewBox="0 0 400 260" style={{ width: '100%', display: 'block', background: '#fff' }}>
@@ -148,7 +148,7 @@ export default function DetalheAnomalia() {
       anexoUrl = caminho
     }
 
-    const textoFinal = texto || (anexoUrl ? 'Anexo enviado' : '')
+    const textoFinal = texto || (anexoUrl ? `Anexo: ${anexo.name}` : '')
 
     const { error } = await supabase.from('timeline_eventos').insert({
       anomalia_id: id,
@@ -372,7 +372,7 @@ export default function DetalheAnomalia() {
             )}
             <div>{ev.texto}</div>
             {ev.tipo_evento === 'anexo' && ev.anexo_url && (
-              <ImagemPrivada bucket="anexos" caminho={ev.anexo_url} alt="Anexo" style={{ maxWidth: 200, borderRadius: 8, marginTop: 6, display: 'block' }} />
+              <AnexoPrivado caminho={ev.anexo_url} />
             )}
             <div style={{ fontSize: 10, color: '#888', marginTop: 4 }}>
               {new Date(ev.ocorrido_em).toLocaleString('pt-PT')}
