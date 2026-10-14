@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
+import { LinkPrivado } from '../../components/FicheiroPrivado'
 
 const TIPOS_NOME = {
   planta: 'Planta',
@@ -75,10 +76,9 @@ export default function DocumentosProprietario() {
               </div>
               <div style={{ fontSize: 14, color: '#16344A', fontWeight: 500 }}>{d.nome}</div>
             </div>
-            <a
-              href={d.ficheiro_url}
-              target="_blank"
-              rel="noopener noreferrer"
+            <LinkPrivado
+              bucket="documentos"
+              caminho={d.ficheiro_url}
               style={{
                 padding: '7px 16px',
                 background: '#2B5876',
@@ -91,7 +91,7 @@ export default function DocumentosProprietario() {
               }}
             >
               Abrir
-            </a>
+            </LinkPrivado>
           </div>
         ))}
       </div>

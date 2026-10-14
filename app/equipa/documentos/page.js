@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
+import { novoCaminho, normalizarCaminho } from '../../../lib/ficheirosPrivados'
+import { LinkPrivado } from '../../../components/FicheiroPrivado'
 
 const TIPOS = [
   { valor: 'planta', nome: 'Planta' },
@@ -56,18 +58,17 @@ export default function DocumentosEquipa() {
     if (ambito === 'fracao' && !fracaoId) { setErro('Escolhe a fração.'); return }
 
     setAEnviar(true)
-    const caminho = `${Date.now()}-${ficheiro.name}`
+    const pasta = ambito === 'fracao' ? fracaoId : 'geral'
+    const caminho = novoCaminho(pasta, ficheiro.name)
     const { error: erroUpload } = await supabase.storage.from('documentos').upload(caminho, ficheiro)
     if (erroUpload) { setErro('Erro ao enviar ficheiro: ' + erroUpload.message); setAEnviar(false); return }
-
-    const { data: urlPublico } = supabase.storage.from('documentos').getPublicUrl(caminho)
 
     const { data: empreendimento } = await supabase.from('empreendimentos').select('id').limit(1).single()
 
     const { error } = await supabase.from('documentos').insert({
       tipo,
       nome: nome || ficheiro.name,
-      ficheiro_url: urlPublico.publicUrl,
+      ficheiro_url: caminho,
       fracao_id: ambito === 'fracao' ? fracaoId : null,
       empreendimento_id: ambito === 'empreendimento' ? empreendimento?.id : null,
     })
@@ -83,8 +84,7 @@ export default function DocumentosEquipa() {
   async function apagar(documento) {
     if (!confirm(`Apagar "${documento.nome}"? Esta ação não pode ser desfeita.`)) return
 
-    const partes = documento.ficheiro_url.split('/documentos/')
-    const caminho = partes[1]
+    const caminho = normalizarCaminho('documentos', documento.ficheiro_url)
 
     if (caminho) {
       await supabase.storage.from('documentos').remove([caminho])
@@ -185,7 +185,7 @@ export default function DocumentosEquipa() {
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0 }}>
-                <a href={d.ficheiro_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, fontWeight: 600 }}>Abrir</a>
+                <LinkPrivado bucket="documentos" caminho={d.ficheiro_url} style={{ fontSize: 13, fontWeight: 600 }}>Abrir</LinkPrivado>
                 <button
                   type="button"
                   onClick={() => apagar(d)}

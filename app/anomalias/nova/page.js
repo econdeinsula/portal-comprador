@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
 import { useRouter } from 'next/navigation'
+import { novoCaminho } from '../../../lib/ficheirosPrivados'
+import { ImagemPrivada } from '../../../components/FicheiroPrivado'
 
 const PlantaSVG = () => (
   <svg viewBox="0 0 400 260" style={{ width: '100%', display: 'block', background: '#fff' }}>
@@ -20,7 +22,7 @@ const PlantaSVG = () => (
 
 function Planta({ url }) {
   if (url) {
-    return <img src={url} alt="Planta da fração" style={{ width: '100%', display: 'block' }} />
+    return <ImagemPrivada bucket="documentos" caminho={url} alt="Planta da fração" style={{ width: '100%', display: 'block', minHeight: 160 }} />
   }
   return <PlantaSVG />
 }
@@ -182,17 +184,16 @@ export default function NovaAnomalia() {
     }
 
     for (const foto of fotos) {
-      const caminho = `${novaAnomalia.id}/${Date.now()}-${foto.name}`
+      const caminho = novoCaminho(novaAnomalia.id, foto.name)
       const { error: erroUpload } = await supabase.storage.from('anexos').upload(caminho, foto)
 
       if (!erroUpload) {
-        const { data: urlPublico } = supabase.storage.from('anexos').getPublicUrl(caminho)
         await supabase.from('timeline_eventos').insert({
           anomalia_id: novaAnomalia.id,
           autor_tipo: 'proprietario',
           tipo_evento: 'anexo',
           texto: `Foto anexada: ${foto.name}`,
-          anexo_url: urlPublico.publicUrl,
+          anexo_url: caminho,
           ocorrido_em: new Date().toISOString(),
         })
       }

@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabaseClient'
 import { exportarComoPDF } from '../../../lib/exportarPdf'
+import { novoCaminho } from '../../../lib/ficheirosPrivados'
+import { ImagemPrivada } from '../../../components/FicheiroPrivado'
 
 const PlantaSVG = () => (
   <svg viewBox="0 0 400 260" style={{ width: '100%', display: 'block', background: '#fff' }}>
@@ -140,12 +142,10 @@ export default function DetalheAnomalia() {
 
     let anexoUrl = null
     if (anexo) {
-      const extensao = anexo.name.split('.').pop()
-      const caminho = `${id}/${Date.now()}.${extensao}`
+      const caminho = novoCaminho(id, anexo.name)
       const { error: erroUpload } = await supabase.storage.from('anexos').upload(caminho, anexo)
       if (erroUpload) { setErro('Erro ao enviar anexo: ' + erroUpload.message); setAEnviar(false); return }
-      const { data: urlPublico } = supabase.storage.from('anexos').getPublicUrl(caminho)
-      anexoUrl = urlPublico.publicUrl
+      anexoUrl = caminho
     }
 
     const textoFinal = texto || (anexoUrl ? 'Anexo enviado' : '')
@@ -327,7 +327,7 @@ export default function DetalheAnomalia() {
       {anomalia.pin_x != null && (
         <div style={{ position: 'relative', maxWidth: 320, ...cartao, padding: 0, overflow: 'hidden' }}>
           {plantaUrl ? (
-            <img src={plantaUrl} alt="Planta da fração" style={{ width: '100%', display: 'block' }} />
+            <ImagemPrivada bucket="documentos" caminho={plantaUrl} alt="Planta da fração" style={{ width: '100%', display: 'block', minHeight: 160 }} />
           ) : (
             <PlantaSVG />
           )}
@@ -372,7 +372,7 @@ export default function DetalheAnomalia() {
             )}
             <div>{ev.texto}</div>
             {ev.tipo_evento === 'anexo' && ev.anexo_url && (
-              <img src={ev.anexo_url} alt="Anexo" style={{ maxWidth: 200, borderRadius: 8, marginTop: 6, display: 'block' }} />
+              <ImagemPrivada bucket="anexos" caminho={ev.anexo_url} alt="Anexo" style={{ maxWidth: 200, borderRadius: 8, marginTop: 6, display: 'block' }} />
             )}
             <div style={{ fontSize: 10, color: '#888', marginTop: 4 }}>
               {new Date(ev.ocorrido_em).toLocaleString('pt-PT')}

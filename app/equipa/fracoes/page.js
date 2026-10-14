@@ -2,6 +2,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabaseClient'
+import { ImagemPrivada, LinkPrivado } from '../../../components/FicheiroPrivado'
 import Link from 'next/link'
 
 const TIPOS_DOC = {
@@ -143,7 +144,7 @@ function ConteudoDetalheFracao() {
           {planta && (
             <div style={cartao}>
               <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 14, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Planta</h3>
-              <img src={planta.ficheiro_url} alt="Planta da fração" style={{ maxWidth: '100%', borderRadius: 10 }} />
+              <ImagemPrivada bucket="documentos" caminho={planta.ficheiro_url} alt="Planta da fração" style={{ maxWidth: '100%', borderRadius: 10, minHeight: 160 }} />
             </div>
           )}
 
@@ -154,7 +155,7 @@ function ConteudoDetalheFracao() {
               {outrosDocumentos.map((d) => (
                 <div key={d.id} style={{ fontSize: 13, display: 'flex', gap: 8 }}>
                   <span style={{ color: '#6B7178' }}>{TIPOS_DOC[d.tipo] || d.tipo}</span>
-                  <a href={d.ficheiro_url} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600 }}>{d.nome}</a>
+                  <LinkPrivado bucket="documentos" caminho={d.ficheiro_url} style={{ fontWeight: 600 }}>{d.nome}</LinkPrivado>
                 </div>
               ))}
             </div>
