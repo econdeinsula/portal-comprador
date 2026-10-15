@@ -48,35 +48,40 @@ export default function NovaAnomalia() {
   const [fracoesDisponiveis, setFracoesDisponiveis] = useState([])
   const [fracaoEscolhida, setFracaoEscolhida] = useState('')
   const [plantaUrl, setPlantaUrl] = useState(null)
+  const [aCarregar, setACarregar] = useState(true)
   const [aEnviar, setAEnviar] = useState(false)
   const [erro, setErro] = useState('')
   const router = useRouter()
 
   useEffect(() => {
     async function carregarListas() {
-      const { data: cats } = await supabase.from('categorias').select('id, nome').order('nome')
-      const { data: elems } = await supabase.from('elementos').select('id, nome, categoria_id').order('nome')
-      const { data: tps } = await supabase.from('tipos_anomalia').select('id, nome').order('ordem')
-      setCategorias(cats || [])
-      setElementos(elems || [])
-      setTipos(tps || [])
+      try {
+        const { data: cats } = await supabase.from('categorias').select('id, nome').order('nome')
+        const { data: elems } = await supabase.from('elementos').select('id, nome, categoria_id').order('nome')
+        const { data: tps } = await supabase.from('tipos_anomalia').select('id, nome').order('ordem')
+        setCategorias(cats || [])
+        setElementos(elems || [])
+        setTipos(tps || [])
 
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: proprietario } = await supabase
-          .from('proprietarios').select('id').eq('email', user.email).maybeSingle()
-        if (proprietario) {
-          const { data: ligacoes } = await supabase
-            .from('fracao_proprietarios')
-            .select('fracoes ( id, codigo_fracao )')
-            .eq('proprietario_id', proprietario.id)
-          const lista = (ligacoes || []).map((l) => l.fracoes).filter(Boolean)
-          setFracoesDisponiveis(lista)
-          if (lista.length === 1) {
-            setFracaoEscolhida(lista[0].id)
-            carregarPlanta(lista[0].id)
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: proprietario } = await supabase
+            .from('proprietarios').select('id').eq('email', user.email).maybeSingle()
+          if (proprietario) {
+            const { data: ligacoes } = await supabase
+              .from('fracao_proprietarios')
+              .select('fracoes ( id, codigo_fracao )')
+              .eq('proprietario_id', proprietario.id)
+            const lista = (ligacoes || []).map((l) => l.fracoes).filter(Boolean)
+            setFracoesDisponiveis(lista)
+            if (lista.length === 1) {
+              setFracaoEscolhida(lista[0].id)
+              carregarPlanta(lista[0].id)
+            }
           }
         }
+      } finally {
+        setACarregar(false)
       }
     }
     carregarListas()
@@ -106,39 +111,8 @@ export default function NovaAnomalia() {
   async function submeter(e) {
     e.preventDefault()
     setErro('')
+    if (!fracaoEscolhida) { setErro('Escolhe a fração.'); return }
     setAEnviar(true)
-
-    let { data: fracao } = await supabase.from('fracoes').select('id').limit(1).single()
-
-    if (!fracao) {
-      const { data: empreendimento, error: erroEmp } = await supabase
-        .from('empreendimentos').select('id').limit(1).single()
-      if (erroEmp) { setErro('Erro ao ler empreendimentos: ' + erroEmp.message); setAEnviar(false); return }
-
-      const { data: novaFracao, error: erroFracao } = await supabase
-        .from('fracoes')
-        .insert({ empreendimento_id: empreendimento.id, codigo_fracao: 'TESTE' })
-        .select().single()
-      if (erroFracao) { setErro('Erro ao criar fração: ' + erroFracao.message); setAEnviar(false); return }
-      fracao = novaFracao
-    }
-
-    let fracaoIdFinal = fracao.id
-    if (fracaoEscolhida) {
-      fracaoIdFinal = fracaoEscolhida
-    } else {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: proprietario } = await supabase
-          .from('proprietarios').select('id').eq('email', user.email).single()
-        if (proprietario) {
-          const { data: ligacao } = await supabase
-            .from('fracao_proprietarios').select('fracao_id')
-            .eq('proprietario_id', proprietario.id).limit(1).single()
-          if (ligacao) fracaoIdFinal = ligacao.fracao_id
-        }
-      }
-    }
 
     const { data: estado, error: erroEstado } = await supabase
       .from('estados').select('id').eq('nome', 'Aberta').single()
@@ -147,7 +121,7 @@ export default function NovaAnomalia() {
     const { data: novaAnomalia, error } = await supabase
       .from('anomalias')
       .insert({
-        fracao_id: fracaoIdFinal,
+        fracao_id: fracaoEscolhida,
         categoria_id: categoriaId || null,
         elemento_id: elementoId || null,
         tipo_anomalia_id: tipoId || null,
@@ -200,6 +174,22 @@ export default function NovaAnomalia() {
     }
 
     router.push('/anomalias')
+  }
+
+  if (aCarregar) return <p style={{ padding: 40 }}>A carregar...</p>
+
+  if (fracoesDisponiveis.length === 0) {
+    return (
+      <main style={{ maxWidth: 560, margin: '40px auto', fontFamily: 'sans-serif' }}>
+        <h1>Nova reclamação</h1>
+        <div style={cartao}>
+          <p style={{ margin: 0, fontSize: 14, color: '#16344A' }}>
+            A tua conta ainda não está associada a nenhuma fração, por isso não é possível registar uma reclamação.
+            Contacta a equipa para ligar a tua conta à tua fração.
+          </p>
+        </div>
+      </main>
+    )
   }
 
   return (

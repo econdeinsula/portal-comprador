@@ -19,6 +19,14 @@ export default function GerirProprietarios() {
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState('')
 
+  const [pessoas, setPessoas] = useState([])
+  const [painelApagar, setPainelApagar] = useState(null)
+  const [confirmacao, setConfirmacao] = useState('')
+  const [incluirReclamacoes, setIncluirReclamacoes] = useState(false)
+  const [msgRgpd, setMsgRgpd] = useState('')
+  const [erroRgpd, setErroRgpd] = useState('')
+  const [aTrabalhar, setATrabalhar] = useState(false)
+
   async function carregar() {
     const { data } = await supabase
       .from('fracao_proprietarios')
@@ -36,6 +44,12 @@ export default function GerirProprietarios() {
       .select('id, lote')
       .order('lote')
     setEmpreendimentos(emps || [])
+
+    const { data: todos } = await supabase
+      .from('proprietarios')
+      .select('id, nome, email')
+      .order('nome')
+    setPessoas(todos || [])
   }
 
   useEffect(() => { carregar() }, [])
@@ -106,6 +120,79 @@ export default function GerirProprietarios() {
     carregar()
   }
 
+  // ---------- RGPD ----------
+
+  async function chamarRgpd(corpo) {
+    const { data: { session } } = await supabase.auth.getSession()
+    const resposta = await fetch('/api/rgpd', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session?.access_token || ''}`,
+      },
+      body: JSON.stringify(corpo),
+    })
+    const dados = await resposta.json().catch(() => ({}))
+    if (!resposta.ok) throw new Error(dados.erro || 'Erro no pedido')
+    return dados
+  }
+
+  async function exportar(pessoa) {
+    setErroRgpd('')
+    setMsgRgpd('')
+    setATrabalhar(true)
+    try {
+      const dados = await chamarRgpd({ acao: 'exportar', proprietarioId: pessoa.id })
+      const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `dados-proprietario-${pessoa.id.slice(0, 8)}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      setMsgRgpd('Dados exportados. Os links dos ficheiros dentro do ficheiro descarregado expiram em 24 horas.')
+    } catch (e) {
+      setErroRgpd(e.message)
+    }
+    setATrabalhar(false)
+  }
+
+  function abrirPainelApagar(pessoa) {
+    setErroRgpd('')
+    setMsgRgpd('')
+    setConfirmacao('')
+    setIncluirReclamacoes(false)
+    setPainelApagar(painelApagar === pessoa.id ? null : pessoa.id)
+  }
+
+  async function apagar(pessoa) {
+    setErroRgpd('')
+    setMsgRgpd('')
+    if (confirmacao.trim().toLowerCase() !== (pessoa.email || '').toLowerCase()) {
+      setErroRgpd('O email escrito não coincide com o do proprietário.')
+      return
+    }
+    setATrabalhar(true)
+    try {
+      const dados = await chamarRgpd({ acao: 'apagar', proprietarioId: pessoa.id, incluirReclamacoes })
+      const r = dados.relatorio
+      const partes = [
+        'Dados apagados.',
+        incluirReclamacoes ? `Reclamações apagadas: ${r.reclamacoes_apagadas}. Ficheiros apagados: ${r.ficheiros_apagados}.` : 'As reclamações das frações foram mantidas.',
+        r.conta_apagada ? 'Conta de login apagada.' : r.conta_mantida_motivo,
+        r.fracoes_partilhadas_ignoradas > 0 ? `${r.fracoes_partilhadas_ignoradas} fração(ões) com mais proprietários mantiveram as reclamações.` : null,
+      ].filter(Boolean)
+      setMsgRgpd(partes.join(' '))
+      setPainelApagar(null)
+      setConfirmacao('')
+      setIncluirReclamacoes(false)
+      carregar()
+    } catch (e) {
+      setErroRgpd(e.message)
+    }
+    setATrabalhar(false)
+  }
+
   return (
     <main style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1>Gerir proprietários</h1>
@@ -150,7 +237,7 @@ export default function GerirProprietarios() {
       </div>
 
       <h2 style={{ fontSize: 16 }}>Proprietários já ligados</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 32 }}>
         {ligacoes.map((l, i) => (
           <div key={i} style={{
             background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: '12px 16px',
@@ -173,6 +260,88 @@ export default function GerirProprietarios() {
             >
               Remover
             </button>
+          </div>
+        ))}
+      </div>
+
+      <h2 style={{ fontSize: 16 }}>Dados pessoais (RGPD)</h2>
+      <p style={{ fontSize: 13, color: '#6B7178', marginTop: 0, marginBottom: 14 }}>
+        Exporta os dados de um proprietário (pedido de acesso) ou apaga-os (pedido de eliminação).
+        Usa só quando houver um pedido da própria pessoa ou indicação de quem trata da proteção de dados.
+      </p>
+
+      {msgRgpd && <p style={{ color: '#4B7A51', fontSize: 13 }}>{msgRgpd}</p>}
+      {erroRgpd && <p style={{ color: '#B4462F', fontSize: 13 }}>{erroRgpd}</p>}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {pessoas.length === 0 && <p style={{ fontSize: 13, color: '#6B7178' }}>Ainda não há proprietários registados.</p>}
+        {pessoas.map((p) => (
+          <div key={p.id} style={{
+            background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: '12px 16px',
+            boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#16344A' }}>{p.nome}</div>
+                <div style={{ fontSize: 12, color: '#6B7178' }}>{p.email}</div>
+              </div>
+              <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => exportar(p)}
+                  disabled={aTrabalhar}
+                  style={{ fontSize: 12, padding: '6px 12px' }}
+                >
+                  Exportar dados
+                </button>
+                <button
+                  type="button"
+                  onClick={() => abrirPainelApagar(p)}
+                  style={{ background: 'transparent', color: '#B4462F', padding: 0, fontSize: 12, boxShadow: 'none' }}
+                >
+                  {painelApagar === p.id ? 'Cancelar' : 'Apagar dados…'}
+                </button>
+              </div>
+            </div>
+
+            {painelApagar === p.id && (
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #F0EEE7' }}>
+                <p style={{ fontSize: 13, color: '#16344A', marginTop: 0 }}>
+                  Vai apagar o registo de <strong>{p.nome}</strong>, as ligações às frações e a conta de login.
+                  Esta ação não se pode desfazer. Faz primeiro a exportação, se for preciso guardar uma cópia.
+                </p>
+
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, marginBottom: 12 }}>
+                  <input
+                    type="checkbox"
+                    checked={incluirReclamacoes}
+                    onChange={(e) => setIncluirReclamacoes(e.target.checked)}
+                    style={{ marginTop: 3 }}
+                  />
+                  <span>
+                    Apagar também as reclamações, mensagens e fotos das frações onde esta pessoa é a <strong>única</strong> proprietária.
+                    Se ficar desmarcado, as reclamações mantêm-se associadas à fração. As frações com mais proprietários nunca são apagadas.
+                  </span>
+                </label>
+
+                <label style={rotulo}>Para confirmar, escreve o email do proprietário</label>
+                <input
+                  type="text"
+                  value={confirmacao}
+                  onChange={(e) => setConfirmacao(e.target.value)}
+                  placeholder={p.email}
+                  style={campo}
+                />
+                <button
+                  type="button"
+                  onClick={() => apagar(p)}
+                  disabled={aTrabalhar}
+                  style={{ background: '#B4462F', fontSize: 13, padding: '8px 14px' }}
+                >
+                  {aTrabalhar ? 'A apagar...' : 'Apagar definitivamente'}
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
