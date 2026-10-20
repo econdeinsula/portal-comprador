@@ -27,12 +27,9 @@ export default function LoginPage() {
 
     const emailNormalizado = email.trim().toLowerCase()
 
-    const { data: proprietario } = await supabase
-      .from('proprietarios').select('id').eq('email', emailNormalizado).maybeSingle()
-    const { data: membro } = await supabase
-      .from('membros_equipa').select('email').eq('email', emailNormalizado).maybeSingle()
+    const { data: registado } = await supabase.rpc('email_registado', { p_email: emailNormalizado })
 
-    if (!proprietario && !membro) {
+    if (!registado) {
       setErro('Este email não está registado. Contacta a equipa se achas que devia ter acesso.')
       return
     }
