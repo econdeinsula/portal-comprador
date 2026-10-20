@@ -5,6 +5,7 @@ import { supabase } from '../../../lib/supabaseClient'
 import { exportarComoPDF } from '../../../lib/exportarPdf'
 import { novoCaminho } from '../../../lib/ficheirosPrivados'
 import { ImagemPrivada, AnexoPrivado } from '../../../components/FicheiroPrivado'
+import { avisar } from '../../../lib/avisar'
 
 const PlantaSVG = () => (
   <svg viewBox="0 0 400 260" style={{ width: '100%', display: 'block', background: '#fff' }}>
@@ -116,24 +117,6 @@ export default function DetalheAnomalia() {
     }
   }, [id])
 
-  async function notificarEquipa(mensagemTexto) {
-    try {
-      const { data: membros } = await supabase.from('membros_equipa').select('email')
-      for (const m of membros || []) {
-        fetch('/api/notificar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            destinatario: m.email,
-            assunto: 'Nova mensagem de um proprietário',
-            mensagem: `Um proprietário escreveu: "${mensagemTexto}". Consulta em https://portal-comprador.vercel.app/equipa/${id}`,
-          }),
-        })
-      }
-    } catch {
-      // notificação é um extra -- uma falha aqui nunca deve travar o fluxo principal
-    }
-  }
 
   async function enviarMensagem(e) {
     e.preventDefault()
@@ -160,7 +143,7 @@ export default function DetalheAnomalia() {
     })
     if (error) { setErro(error.message); setAEnviar(false); return }
 
-    await notificarEquipa(textoFinal)
+    await avisar('mensagem_proprietario', id)
 
     setTexto('')
     setAnexo(null)

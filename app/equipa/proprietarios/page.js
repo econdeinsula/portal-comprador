@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
+import { cabecalhoAuth } from '../../../lib/avisar'
 
 const cartao = {
   background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 20, marginBottom: 20,
@@ -88,7 +89,7 @@ export default function GerirProprietarios() {
     try {
       const respostaConvite = await fetch('/api/convidar', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(await cabecalhoAuth()) },
         body: JSON.stringify({ email: email.trim().toLowerCase() }),
       })
       const dadosConvite = await respostaConvite.json()

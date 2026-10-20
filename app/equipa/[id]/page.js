@@ -5,6 +5,7 @@ import { supabase } from '../../../lib/supabaseClient'
 import { exportarComoPDF } from '../../../lib/exportarPdf'
 import { novoCaminho } from '../../../lib/ficheirosPrivados'
 import { ImagemPrivada, AnexoPrivado } from '../../../components/FicheiroPrivado'
+import { avisar } from '../../../lib/avisar'
 
 const PlantaSVG = () => (
   <svg viewBox="0 0 400 260" style={{ width: '100%', display: 'block', background: '#fff' }}>
@@ -172,61 +173,6 @@ export default function DetalheEquipa() {
 
   const elementosFiltrados = elementos.filter((e) => e.categoria_id === categoriaId)
 
-  async function notificarProprietario(mensagemTexto) {
-    try {
-      if (!anomalia?.fracao_id) return
-
-      const { data: ligacao } = await supabase
-        .from('fracao_proprietarios')
-        .select('proprietarios ( email )')
-        .eq('fracao_id', anomalia.fracao_id)
-        .limit(1)
-        .maybeSingle()
-
-      const emailProprietario = ligacao?.proprietarios?.email
-      if (!emailProprietario) return
-
-      await fetch('/api/notificar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          destinatario: emailProprietario,
-          assunto: 'Nova resposta na tua reclamação',
-          mensagem: `A equipa respondeu à tua reclamação: "${mensagemTexto}". Consulta em https://portal-comprador.vercel.app/anomalias/${id}`,
-        }),
-      })
-    } catch {
-      // notificação é um extra -- uma falha aqui nunca deve travar o fluxo principal
-    }
-  }
-
-  async function notificarConclusao() {
-    try {
-      if (!anomalia?.fracao_id) return
-
-      const { data: ligacao } = await supabase
-        .from('fracao_proprietarios')
-        .select('proprietarios ( email )')
-        .eq('fracao_id', anomalia.fracao_id)
-        .limit(1)
-        .maybeSingle()
-
-      const emailProprietario = ligacao?.proprietarios?.email
-      if (!emailProprietario) return
-
-      await fetch('/api/notificar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          destinatario: emailProprietario,
-          assunto: 'A tua reclamação foi resolvida',
-          mensagem: `A tua reclamação "${descricaoEditavel}" foi marcada como resolvida.\n\nGuarda este email como comprovativo. Consulta os detalhes em https://portal-comprador.vercel.app/anomalias/${id}`,
-        }),
-      })
-    } catch {
-      // notificação é um extra -- nunca deve travar o fluxo principal
-    }
-  }
 
   async function enviarMensagem(e) {
     e.preventDefault()
@@ -256,7 +202,7 @@ export default function DetalheEquipa() {
     })
     if (error) { setErro(error.message); setAEnviar(false); return }
 
-    await notificarProprietario(textoFinal)
+    await avisar('mensagem_equipa', id)
 
     setTexto('')
     setAnexo(null)
@@ -280,7 +226,7 @@ export default function DetalheEquipa() {
     })
 
     if (novoEstadoNome === 'Resolvida') {
-      await notificarConclusao()
+      await avisar('resolvida', id)
     }
 
     carregar()

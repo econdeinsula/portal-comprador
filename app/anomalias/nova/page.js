@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import { novoCaminho } from '../../../lib/ficheirosPrivados'
+import { avisar } from '../../../lib/avisar'
 import { ImagemPrivada } from '../../../components/FicheiroPrivado'
 
 const PlantaSVG = () => (
@@ -136,26 +137,7 @@ export default function NovaAnomalia() {
 
     if (error) { setErro('Erro ao criar anomalia: ' + error.message); setAEnviar(false); return }
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user?.email) {
-        const nomeCategoria = categorias.find((c) => c.id === categoriaId)?.nome || 'Por classificar'
-        const nomeElemento = elementos.find((e) => e.id === elementoId)?.nome || ''
-        const nomeTipo = tipos.find((t) => t.id === tipoId)?.nome || ''
-
-        await fetch('/api/notificar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            destinatario: user.email,
-            assunto: 'Confirmação da tua reclamação',
-            mensagem: `A tua reclamação foi registada com sucesso.\n\nCategoria: ${nomeCategoria}\nElemento: ${nomeElemento}\nTipo: ${nomeTipo}\nDescrição: ${descricao}\n\nGuarda este email como comprovativo. Podes acompanhar o estado em https://portal-comprador.vercel.app/anomalias/${novaAnomalia.id}`,
-          }),
-        })
-      }
-    } catch {
-      // notificação é um extra -- nunca deve travar o fluxo principal
-    }
+    await avisar('confirmacao', novaAnomalia.id)
 
     for (const foto of fotos) {
       const caminho = novoCaminho(novaAnomalia.id, foto.name)
