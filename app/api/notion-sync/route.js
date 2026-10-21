@@ -13,7 +13,7 @@ function autorizado(req) {
 }
 
 // Atualizações feitas pelo próprio sync (colunas notion_*) não devem disparar novo sync
-const IGNORAR = new Set(['notion_page_id', 'notion_synced_at', 'notion_conteudo_ok', 'atualizado_em'])
+const IGNORAR = new Set(['notion_page_id', 'notion_synced_at', 'notion_conteudo_ok', 'notion_bloco_id', 'atualizado_em'])
 function soMudouNotion(novo, antigo) {
   if (!novo || !antigo) return false
   return Object.keys(novo).every((k) => IGNORAR.has(k) || JSON.stringify(novo[k]) === JSON.stringify(antigo[k]))
