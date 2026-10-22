@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { SITE, enviarEmails, emailsDosDonos, avisoMensagemEquipa, avisoResolvida } from '../../../lib/email'
+import { SITE, enviarEmails, emailsDosDonos, avisoMensagemEquipa, avisoResolvida, RODAPE_PROPRIETARIO } from '../../../lib/email'
 
 const JANELA_MS = 5 * 60 * 1000
 
@@ -105,7 +105,7 @@ export async function POST(req) {
 
       destinatarios = [emailUtilizador]
       assunto = 'Confirmação da sua reclamação'
-      mensagem = `A sua reclamação foi registada com sucesso.\n\nCategoria: ${a.categorias?.nome || 'Por classificar'}\nElemento: ${a.elementos?.nome || ''}\nTipo: ${nomeTipo}\nDescrição: ${a.descricao}\n\nGuarde este email como comprovativo. Pode acompanhar o estado em ${SITE}/anomalias/${a.id}`
+      mensagem = `A sua reclamação foi registada com sucesso.\n\nCategoria: ${a.categorias?.nome || 'Por classificar'}\nElemento: ${a.elementos?.nome || ''}\nTipo: ${nomeTipo}\nDescrição: ${a.descricao}\n\nGuarde este email como comprovativo. Pode acompanhar o estado em ${SITE}/anomalias/${a.id}` + RODAPE_PROPRIETARIO
     }
 
     const enviados = await enviarEmails(destinatarios, assunto, mensagem)
