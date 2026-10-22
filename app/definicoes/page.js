@@ -83,7 +83,7 @@ export default function Definicoes() {
             type="text"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
-            placeholder="O teu nome completo"
+            placeholder="O seu nome completo"
             style={campo}
           />
           {erro && <p style={{ color: '#B4462F', fontSize: 13 }}>{erro}</p>}

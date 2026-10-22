@@ -112,7 +112,7 @@ export default function NovaAnomalia() {
   async function submeter(e) {
     e.preventDefault()
     setErro('')
-    if (!fracaoEscolhida) { setErro('Escolhe a fração.'); return }
+    if (!fracaoEscolhida) { setErro('Escolha a fração.'); return }
     setAEnviar(true)
 
     const { data: estado, error: erroEstado } = await supabase
@@ -166,8 +166,8 @@ export default function NovaAnomalia() {
         <h1>Nova reclamação</h1>
         <div style={cartao}>
           <p style={{ margin: 0, fontSize: 14, color: '#16344A' }}>
-            A tua conta ainda não está associada a nenhuma fração, por isso não é possível registar uma reclamação.
-            Contacta a equipa para ligar a tua conta à tua fração.
+            A sua conta ainda não está associada a nenhuma fração, por isso não é possível registar uma reclamação.
+            Contacte a equipa para ligar a sua conta à sua fração.
           </p>
         </div>
       </main>
@@ -190,7 +190,7 @@ export default function NovaAnomalia() {
                 required
                 style={campo}
               >
-                <option value="">Escolhe a fração...</option>
+                <option value="">Escolha a fração...</option>
                 {fracoesDisponiveis.map((f) => (
                   <option key={f.id} value={f.id}>{f.codigo_fracao}</option>
                 ))}
@@ -205,7 +205,7 @@ export default function NovaAnomalia() {
             required
             style={campo}
           >
-            <option value="">Escolhe uma categoria...</option>
+            <option value="">Escolha uma categoria...</option>
             {categorias.map((c) => (
               <option key={c.id} value={c.id}>{c.nome}</option>
             ))}
@@ -219,7 +219,7 @@ export default function NovaAnomalia() {
             disabled={!categoriaId}
             style={campo}
           >
-            <option value="">Escolhe um elemento...</option>
+            <option value="">Escolha um elemento...</option>
             {elementosFiltrados.map((el) => (
               <option key={el.id} value={el.id}>{el.nome}</option>
             ))}
@@ -232,7 +232,7 @@ export default function NovaAnomalia() {
             required
             style={campo}
           >
-            <option value="">Escolhe o tipo...</option>
+            <option value="">Escolha o tipo...</option>
             {tipos.map((t) => (
               <option key={t.id} value={t.id}>{t.nome}</option>
             ))}
@@ -276,7 +276,7 @@ export default function NovaAnomalia() {
             style={{ ...campo, minHeight: 100 }}
           />
 
-          <label style={rotulo}>Fotos (opcional, podes escolher várias)</label>
+          <label style={rotulo}>Fotos (opcional, pode escolher várias)</label>
           <input
             type="file"
             accept="image/*"

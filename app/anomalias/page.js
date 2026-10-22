@@ -81,7 +81,7 @@ export default function ListaAnomalias() {
         </Link>
       </div>
       <p style={{ color: '#6B7178', marginTop: 0, marginBottom: 24, fontSize: 14 }}>
-        {anomalias.length} reclamaç{anomalias.length === 1 ? 'ão' : 'ões'} associada{anomalias.length === 1 ? '' : 's'} à tua fração.
+        {anomalias.length} reclamaç{anomalias.length === 1 ? 'ão' : 'ões'} associada{anomalias.length === 1 ? '' : 's'} à sua fração.
       </p>
 
       {anomalias.length === 0 && (
@@ -89,7 +89,7 @@ export default function ListaAnomalias() {
           background: '#fff', borderRadius: 14, padding: 32, textAlign: 'center',
           border: '1px solid #E7E4DA',
         }}>
-          <p style={{ color: '#6B7178', marginBottom: 16 }}>Ainda não tens nenhuma reclamação registada.</p>
+          <p style={{ color: '#6B7178', marginBottom: 16 }}>Ainda não tem nenhuma reclamação registada.</p>
           <Link href="/anomalias/nova" style={{ color: '#2B5876', fontWeight: 600 }}>Criar a primeira →</Link>
         </div>
       )}

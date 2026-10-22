@@ -30,7 +30,7 @@ export default function LoginPage() {
     const { data: registado } = await supabase.rpc('email_registado', { p_email: emailNormalizado })
 
     if (!registado) {
-      setErro('Este email não está registado. Contacta a equipa se achas que devia ter acesso.')
+      setErro('Este email não está registado. Contacte a equipa se acha que devia ter acesso.')
       return
     }
 
@@ -69,7 +69,7 @@ export default function LoginPage() {
           Portal do Cliente
         </h1>
         <p style={{ color: '#6B7178', fontSize: 13, margin: '0 0 28px' }}>
-          {aRecuperar ? 'Recupera o acesso à tua conta.' : 'Entra para acompanhar as tuas reclamações.'}
+          {aRecuperar ? 'Recupere o acesso à sua conta.' : 'Entre para acompanhar as suas reclamações.'}
         </p>
 
         {!aRecuperar ? (
@@ -78,7 +78,7 @@ export default function LoginPage() {
               <label style={{ fontSize: 11, color: '#6B7178', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3, display: 'block', marginBottom: 4 }}>Email</label>
               <input
                 type="email"
-                placeholder="o-teu-email@exemplo.com"
+                placeholder="o-seu-email@exemplo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -107,16 +107,16 @@ export default function LoginPage() {
         ) : (
           <>
             {enviado ? (
-              <p style={{ fontSize: 14, color: '#16344A' }}>Enviámos um link para <strong>{email}</strong> — abre-o para definires a tua password.</p>
+              <p style={{ fontSize: 14, color: '#16344A' }}>Enviámos um link para <strong>{email}</strong> — abra-o para definir a sua password.</p>
             ) : (
               <form onSubmit={pedirRecuperacao}>
                 <p style={{ fontSize: 13, color: '#6B7178', marginTop: 0 }}>
-                  Escreve o teu email — vais receber um link para definires (ou repores) a tua password.
+                  Escreva o seu email — vai receber um link para definir (ou repor) a sua password.
                 </p>
                 <label style={{ fontSize: 11, color: '#6B7178', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3, display: 'block', marginBottom: 4 }}>Email</label>
                 <input
                   type="email"
-                  placeholder="o-teu-email@exemplo.com"
+                  placeholder="o-seu-email@exemplo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

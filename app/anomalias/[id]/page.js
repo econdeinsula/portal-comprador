@@ -387,7 +387,7 @@ export default function DetalheAnomalia() {
         </label>
         <input
           type="text"
-          placeholder="Escreve uma mensagem..."
+          placeholder="Escreva uma mensagem..."
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
           style={{ flex: 1, padding: 10, border: 'none' }}

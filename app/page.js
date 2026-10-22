@@ -140,7 +140,7 @@ export default function Home() {
       <main style={{ maxWidth: 600, margin: '120px auto 80px', fontFamily: 'sans-serif', textAlign: 'center' }}>
         <h1>Portal do Cliente</h1>
         <p style={{ color: '#666', fontSize: 15 }}>
-          Regista, acompanha e resolve reclamações de garantia da tua habitação —
+          Registe, acompanhe e resolva reclamações de garantia da sua habitação —
           da abertura do processo até à visita técnica, tudo num só sítio.
         </p>
         <Link
@@ -161,7 +161,7 @@ export default function Home() {
     <main style={{ maxWidth: 780, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <h1 style={{ marginBottom: 2 }}>{saudacao}, {primeiroNome}</h1>
       <p style={{ color: '#6B7178', marginTop: 0, marginBottom: 28, fontSize: 14 }}>
-        Aqui tens um resumo do que se passa hoje.
+        Aqui tem um resumo do que se passa hoje.
       </p>
 
       {ehProprietario && (
@@ -169,7 +169,7 @@ export default function Home() {
           background: '#fff', borderRadius: 14, padding: 22, marginBottom: 24,
           border: '1px solid #E7E4DA', boxShadow: '0 1px 3px rgba(20,41,58,0.06)',
         }}>
-          <h3 style={{ marginTop: 0, fontSize: 15 }}>As tuas reclamações</h3>
+          <h3 style={{ marginTop: 0, fontSize: 15 }}>As suas reclamações</h3>
           <div style={{ display: 'flex', gap: 28, marginBottom: 16 }}>
             <div>
               <div style={{ fontSize: 28, fontWeight: 700, color: '#16344A' }}>{resumo?.totalProprietario ?? 0}</div>
@@ -248,7 +248,7 @@ export default function Home() {
       )}
 
       {!ehProprietario && !ehEquipa && (
-        <p style={{ color: '#666' }}>A tua conta ainda não está associada a nenhuma fração nem à equipa.</p>
+        <p style={{ color: '#666' }}>A sua conta ainda não está associada a nenhuma fração nem à equipa.</p>
       )}
     </main>
   )
