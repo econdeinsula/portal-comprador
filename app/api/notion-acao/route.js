@@ -1,4 +1,8 @@
-import { enviarResposta, mudarEstado, atualizarEmpresas, ErroAcao } from '../../../lib/notionAcoes'
+import {
+  enviarResposta, mudarEstado, atualizarEmpresas,
+  proporVisita, aceitarVisita, recusarVisita, cancelarVisita, criarReclamacao,
+  ErroAcao,
+} from '../../../lib/notionAcoes'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
@@ -15,10 +19,16 @@ const ACOES = {
   enviar: enviarResposta,
   estado: mudarEstado,
   empresas: atualizarEmpresas,
+  propor_visita: proporVisita,
+  aceitar_visita: aceitarVisita,
+  recusar_visita: recusarVisita,
+  cancelar_visita: cancelarVisita,
+  criar_reclamacao: criarReclamacao,
 }
 
 // Chamado pelos botões e automações do Notion ("Enviar webhook").
-// O URL indica a ação: /api/notion-acao?acao=enviar | estado | empresas
+// O URL indica a ação: /api/notion-acao?acao=enviar | estado | empresas |
+//   propor_visita | aceitar_visita | recusar_visita | cancelar_visita | criar_reclamacao
 export async function POST(req) {
   if (!autorizado(req)) return Response.json({ erro: 'Sem permissão' }, { status: 401 })
 
