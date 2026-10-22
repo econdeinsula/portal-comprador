@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
+import { SITE, enviarEmails, emailsDosDonos, avisoMensagemEquipa, avisoResolvida } from '../../../lib/email'
 
-const SITE = process.env.SITE_URL || 'https://portal-comprador.vercel.app'
 const JANELA_MS = 5 * 60 * 1000
 
 function clienteAdmin() {
@@ -9,47 +9,6 @@ function clienteAdmin() {
     process.env.SUPABASE_SERVICE_ROLE_KEY,
     { auth: { persistSession: false, autoRefreshToken: false } }
   )
-}
-
-function escapar(texto) {
-  return String(texto).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
-
-function paraHtml(texto) {
-  const seguro = escapar(texto).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1">$1</a>')
-  return seguro.replace(/\n/g, '<br>')
-}
-
-async function enviarEmails(destinatarios, assunto, mensagem) {
-  const chave = process.env.RESEND_API_KEY
-  if (!chave) throw new Error('Falta RESEND_API_KEY na Vercel')
-
-  const unicos = [...new Set(destinatarios.map((e) => (e || '').trim().toLowerCase()).filter(Boolean))]
-  if (unicos.length === 0) return 0
-
-  const from = process.env.EMAIL_FROM || 'Portal do Cliente <onboarding@resend.dev>'
-  const replyTo = process.env.EMAIL_REPLY_TO || undefined
-  const html = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#24292E;line-height:1.5">${paraHtml(mensagem)}</div>`
-
-  const corpo = unicos.map((para) => ({
-    from,
-    to: [para],
-    subject: assunto,
-    text: mensagem,
-    html,
-    ...(replyTo ? { reply_to: replyTo } : {}),
-  }))
-
-  const resposta = await fetch('https://api.resend.com/emails/batch', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${chave}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(corpo),
-  })
-  if (!resposta.ok) {
-    const dados = await resposta.json().catch(() => ({}))
-    throw new Error(dados?.message || 'Erro ao enviar email')
-  }
-  return unicos.length
 }
 
 async function utilizadorDoPedido(admin, req) {
@@ -102,11 +61,7 @@ export async function POST(req) {
     const emailsEquipa = (membros || []).map((m) => (m.email || '').toLowerCase()).filter(Boolean)
     const eEquipa = emailsEquipa.includes(emailUtilizador)
 
-    const { data: ligacoes } = await admin
-      .from('fracao_proprietarios')
-      .select('proprietarios ( email )')
-      .eq('fracao_id', a.fracao_id)
-    const emailsDonos = (ligacoes || []).map((l) => (l.proprietarios?.email || '').toLowerCase()).filter(Boolean)
+    const emailsDonos = await emailsDosDonos(admin, a.fracao_id)
     const eDono = emailsDonos.includes(emailUtilizador)
 
     let destinatarios = []
@@ -127,16 +82,14 @@ export async function POST(req) {
       const texto = await mensagemRecente(admin, a.id, 'equipa')
       if (!texto) return Response.json({ ignorado: 'Sem mensagem recente' })
       destinatarios = emailsDonos
-      assunto = 'Nova resposta na tua reclamação'
-      mensagem = `A equipa respondeu à tua reclamação: "${texto}".\n\nConsulta em ${SITE}/anomalias/${a.id}`
+      ;({ assunto, mensagem } = avisoMensagemEquipa(a.id, texto))
     }
 
     if (tipo === 'resolvida') {
       if (!eEquipa) return Response.json({ erro: 'Sem permissão' }, { status: 403 })
       if (a.estados?.nome !== 'Resolvida') return Response.json({ ignorado: 'A reclamação não está resolvida' })
       destinatarios = emailsDonos
-      assunto = 'A tua reclamação foi resolvida'
-      mensagem = `A tua reclamação "${a.descricao}" foi marcada como resolvida.\n\nGuarda este email como comprovativo. Consulta os detalhes em ${SITE}/anomalias/${a.id}`
+      ;({ assunto, mensagem } = avisoResolvida(a.id, a.descricao))
     }
 
     if (tipo === 'confirmacao') {
@@ -151,8 +104,8 @@ export async function POST(req) {
       }
 
       destinatarios = [emailUtilizador]
-      assunto = 'Confirmação da tua reclamação'
-      mensagem = `A tua reclamação foi registada com sucesso.\n\nCategoria: ${a.categorias?.nome || 'Por classificar'}\nElemento: ${a.elementos?.nome || ''}\nTipo: ${nomeTipo}\nDescrição: ${a.descricao}\n\nGuarda este email como comprovativo. Podes acompanhar o estado em ${SITE}/anomalias/${a.id}`
+      assunto = 'Confirmação da sua reclamação'
+      mensagem = `A sua reclamação foi registada com sucesso.\n\nCategoria: ${a.categorias?.nome || 'Por classificar'}\nElemento: ${a.elementos?.nome || ''}\nTipo: ${nomeTipo}\nDescrição: ${a.descricao}\n\nGuarde este email como comprovativo. Pode acompanhar o estado em ${SITE}/anomalias/${a.id}`
     }
 
     const enviados = await enviarEmails(destinatarios, assunto, mensagem)
