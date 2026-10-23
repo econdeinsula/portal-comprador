@@ -1,5 +1,6 @@
 import { after } from 'next/server'
 import { repararPendentes, atualizarGarantias } from '../../../lib/notionCron'
+import { gerarResumoDiario, gerarRelatorioSemanal } from '../../../lib/notionRelatorios'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -12,7 +13,17 @@ function autorizado(req) {
   return cabecalho === segredo || query === segredo
 }
 
-const correr = (modo) => (modo === 'diario' ? atualizarGarantias() : repararPendentes())
+const MODOS = {
+  reparar: repararPendentes,
+  diario: atualizarGarantias,
+  resumo: gerarResumoDiario,
+  semanal: gerarRelatorioSemanal,
+}
+const correr = (modo) => {
+  const f = MODOS[modo]
+  if (!f) throw new Error(`Modo desconhecido: ${modo}`)
+  return f()
+}
 
 // POST — chamado pelo pg_cron do Supabase. Responde logo e trabalha depois.
 export async function POST(req) {
@@ -33,6 +44,8 @@ export async function POST(req) {
 // GET — para testar à mão e ver o resultado:
 //   /api/notion-cron?segredo=...&modo=reparar
 //   /api/notion-cron?segredo=...&modo=diario
+//   /api/notion-cron?segredo=...&modo=resumo
+//   /api/notion-cron?segredo=...&modo=semanal
 export async function GET(req) {
   if (!autorizado(req)) return Response.json({ erro: 'Sem permissão' }, { status: 401 })
   const modo = new URL(req.url).searchParams.get('modo') || 'reparar'
