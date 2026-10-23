@@ -1,6 +1,6 @@
 import { after } from 'next/server'
-import { repararPendentes, atualizarGarantias } from '../../../lib/notionCron'
-import { gerarResumoDiario, gerarRelatorioSemanal, gerarPontoDeSituacao } from '../../../lib/notionRelatorios'
+import { repararPendentes, atualizarGarantias, recalcularMetricas } from '../../../lib/notionCron'
+import { gerarResumoDiario, gerarRelatorioSemanal, gerarPontoDeSituacao, gerarEstatisticas } from '../../../lib/notionRelatorios'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -19,6 +19,8 @@ const MODOS = {
   resumo: gerarResumoDiario,
   semanal: gerarRelatorioSemanal,
   situacao: gerarPontoDeSituacao,
+  estatisticas: gerarEstatisticas,
+  metricas: recalcularMetricas,
 }
 const correr = (modo) => {
   const f = MODOS[modo]
@@ -48,6 +50,8 @@ export async function POST(req) {
 //   /api/notion-cron?segredo=...&modo=resumo
 //   /api/notion-cron?segredo=...&modo=semanal
 //   /api/notion-cron?segredo=...&modo=situacao
+//   /api/notion-cron?segredo=...&modo=estatisticas
+//   /api/notion-cron?segredo=...&modo=metricas   (passagem única)
 export async function GET(req) {
   if (!autorizado(req)) return Response.json({ erro: 'Sem permissão' }, { status: 401 })
   const modo = new URL(req.url).searchParams.get('modo') || 'reparar'
