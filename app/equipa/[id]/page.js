@@ -74,8 +74,6 @@ export default function DetalheEquipa() {
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState('')
-  const [descricaoEditavel, setDescricaoEditavel] = useState('')
-  const [sucessoDescricao, setSucessoDescricao] = useState('')
 
   async function carregar() {
     const { data: a } = await supabase
@@ -93,7 +91,6 @@ export default function DetalheEquipa() {
     setCategoriaId(a?.categoria_id || '')
     setElementoId(a?.elemento_id || '')
     setTipoId(a?.tipo_anomalia_id || '')
-    setDescricaoEditavel(a?.descricao || '')
 
     if (a?.fracao_id) {
       const { data: docPlanta } = await supabase
@@ -246,21 +243,6 @@ export default function DetalheEquipa() {
       .eq('id', id)
     if (error) { setErro(error.message); return }
     setSucesso('Classificação guardada.')
-    carregar()
-  }
-
-  async function guardarDescricao(e) {
-    e.preventDefault()
-    setErro('')
-    setSucessoDescricao('')
-    const { error } = await supabase
-      .from('anomalias')
-      .update({
-        descricao: descricaoEditavel,
-      })
-      .eq('id', id)
-    if (error) { setErro(error.message); return }
-    setSucessoDescricao('Descrição atualizada.')
     carregar()
   }
 
@@ -444,16 +426,9 @@ export default function DetalheEquipa() {
 
       <div style={cartao}>
         <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 12, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Descrição</h3>
-        <form onSubmit={guardarDescricao}>
-          <label style={rotulo}>Descrição</label>
-          <textarea
-            value={descricaoEditavel}
-            onChange={(e) => setDescricaoEditavel(e.target.value)}
-            style={{ ...campo, minHeight: 80 }}
-          />
-          {sucessoDescricao && <p style={{ color: '#4B7A51', fontSize: 13 }}>{sucessoDescricao}</p>}
-          <button type="submit">Guardar alterações</button>
-        </form>
+        <p style={{ margin: 0, fontSize: 14, color: '#16344A', whiteSpace: 'pre-wrap' }}>
+          {anomalia.descricao}
+        </p>
       </div>
 
       <div style={{ ...cartao, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
