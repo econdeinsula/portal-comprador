@@ -15,7 +15,7 @@ const TIPOS_DOC = {
 
 const cartao = {
   background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 20, marginBottom: 20,
-  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+  boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
 }
 
 function EtiquetaEstado({ nome }) {
@@ -23,7 +23,7 @@ function EtiquetaEstado({ nome }) {
     'Aberta': { bg: '#F6E4DF', cor: '#B4462F' },
     'Resolvida': { bg: '#E5EEE6', cor: '#4B7A51' },
     'Em análise': { bg: '#F7EBD6', cor: '#C8862B' },
-    'Agendada': { bg: '#E4EEF3', cor: '#2B5876' },
+    'Agendada': { bg: '#ECE9FE', cor: '#543CF4' },
   }
   const c = cores[nome] || { bg: '#F3F1EA', cor: '#6B7178' }
   return (
@@ -131,11 +131,11 @@ function ConteudoDetalheFracao() {
             <div style={{ fontSize: 11, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3, fontWeight: 600, marginBottom: 6 }}>Proprietário(s)</div>
             {proprietarios.length === 0 && <p style={{ fontSize: 13, color: '#6B7178' }}>Nenhum proprietário ligado a esta fração.</p>}
             {proprietarios.map((p, i) => (
-              <p key={i} style={{ fontSize: 13, margin: '2px 0', color: '#16344A' }}>{p.nome} — {p.email}</p>
+              <p key={i} style={{ fontSize: 13, margin: '2px 0', color: '#2A1C8A' }}>{p.nome} — {p.email}</p>
             ))}
 
             <div style={{ display: 'flex', gap: 24, marginTop: 16 }}>
-              <div><strong style={{ fontSize: 22, color: '#16344A' }}>{anomalias.length}</strong><div style={{ fontSize: 12, color: '#6B7178' }}>reclamações</div></div>
+              <div><strong style={{ fontSize: 22, color: '#2A1C8A' }}>{anomalias.length}</strong><div style={{ fontSize: 12, color: '#6B7178' }}>reclamações</div></div>
               <div><strong style={{ fontSize: 22, color: '#B4462F' }}>{abertas}</strong><div style={{ fontSize: 12, color: '#6B7178' }}>abertas</div></div>
               <div><strong style={{ fontSize: 22, color: '#4B7A51' }}>{resolvidas}</strong><div style={{ fontSize: 12, color: '#6B7178' }}>resolvidas</div></div>
             </div>
@@ -176,7 +176,7 @@ function ConteudoDetalheFracao() {
                   }}
                 >
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#16344A' }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#2A1C8A' }}>
                       {a.categorias?.nome ? `${a.categorias.nome} — ${a.elementos?.nome}` : 'Por classificar'}
                     </div>
                     <div style={{ fontSize: 12, color: '#6B7178', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.descricao}</div>

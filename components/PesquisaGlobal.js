@@ -116,7 +116,7 @@ export default function PesquisaGlobal() {
                       onMouseEnter={(e) => e.currentTarget.style.background = '#F3F1EA'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                     >
-                      <div style={{ fontWeight: 600, color: '#16344A' }}>{p.nome}</div>
+                      <div style={{ fontWeight: 600, color: '#2A1C8A' }}>{p.nome}</div>
                       <div style={{ fontSize: 11, color: '#6B7178' }}>{p.email}</div>
                     </div>
                   ))}
@@ -134,7 +134,7 @@ export default function PesquisaGlobal() {
                       onMouseEnter={(e) => e.currentTarget.style.background = '#F3F1EA'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                     >
-                      <div style={{ fontWeight: 600, color: '#16344A' }}>{a.fracoes?.codigo_fracao} — {a.descricao}</div>
+                      <div style={{ fontWeight: 600, color: '#2A1C8A' }}>{a.fracoes?.codigo_fracao} — {a.descricao}</div>
                     </div>
                   ))}
                 </div>
@@ -151,7 +151,7 @@ export default function PesquisaGlobal() {
                       onMouseEnter={(e) => e.currentTarget.style.background = '#F3F1EA'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                     >
-                      <div style={{ fontWeight: 600, color: '#16344A' }}>{d.nome}</div>
+                      <div style={{ fontWeight: 600, color: '#2A1C8A' }}>{d.nome}</div>
                     </div>
                   ))}
                 </div>
@@ -168,7 +168,7 @@ export default function PesquisaGlobal() {
                       onMouseEnter={(e) => e.currentTarget.style.background = '#F3F1EA'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                     >
-                      <div style={{ fontWeight: 600, color: '#16344A' }}>{f.codigo_fracao}</div>
+                      <div style={{ fontWeight: 600, color: '#2A1C8A' }}>{f.codigo_fracao}</div>
                     </div>
                   ))}
                 </div>

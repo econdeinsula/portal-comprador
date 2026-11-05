@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 const cartao = {
   background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: '14px 18px',
-  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+  boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
 }
 
 export default function MensagensEquipa() {
@@ -60,10 +60,10 @@ export default function MensagensEquipa() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <span style={{ fontSize: 11, background: '#E4EEF3', color: '#2B5876', padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>
+                    <span style={{ fontSize: 11, background: '#ECE9FE', color: '#543CF4', padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>
                       {m.anomalias?.fracoes?.codigo_fracao}
                     </span>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#16344A' }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#2A1C8A' }}>
                       {m.anomalias?.categorias?.nome ? `${m.anomalias.categorias.nome} — ${m.anomalias.elementos?.nome}` : 'Por classificar'}
                     </span>
                   </div>

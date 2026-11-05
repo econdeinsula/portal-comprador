@@ -4,7 +4,7 @@ import { supabase } from '../../../lib/supabaseClient'
 
 const cartao = {
   background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 20, marginBottom: 20,
-  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+  boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
 }
 const rotulo = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
 const campo = { padding: '9px 12px', border: '1px solid #E7E4DA', borderRadius: 8, fontSize: 14, width: '100%', marginBottom: 12 }
@@ -138,10 +138,10 @@ export default function GerirEmpreendimentos() {
         {empreendimentos.map((e) => (
           <div key={e.id} style={{
             background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: '12px 16px',
-            boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+            boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#16344A' }}>{e.lote}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#2A1C8A' }}>{e.lote}</span>
             <span style={{ fontSize: 12, color: '#6B7178' }}>Receção: {new Date(e.data_rececao_provisoria).toLocaleDateString('pt-PT')}</span>
           </div>
         ))}
@@ -151,7 +151,7 @@ export default function GerirEmpreendimentos() {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {fracoes.map((f) => (
           <span key={f.id} style={{
-            fontSize: 12, background: '#F3F1EA', color: '#16344A', padding: '5px 12px', borderRadius: 20, fontWeight: 500,
+            fontSize: 12, background: '#F3F1EA', color: '#2A1C8A', padding: '5px 12px', borderRadius: 20, fontWeight: 500,
           }}>
             {f.codigo_fracao} <span style={{ color: '#6B7178' }}>· {f.empreendimentos?.lote}</span>
           </span>

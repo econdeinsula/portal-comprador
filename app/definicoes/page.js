@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 const cartao = {
   background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 20, marginBottom: 18,
-  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+  boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
 }
 const rotulo = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
 const campo = { padding: '9px 12px', border: '1px solid #E7E4DA', borderRadius: 8, fontSize: 14, width: '100%', marginBottom: 12 }
@@ -75,7 +75,7 @@ export default function Definicoes() {
         <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 14, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Perfil</h3>
 
         <label style={rotulo}>Email</label>
-        <p style={{ marginTop: 0, marginBottom: 14, fontSize: 14, color: '#16344A' }}>{email}</p>
+        <p style={{ marginTop: 0, marginBottom: 14, fontSize: 14, color: '#2A1C8A' }}>{email}</p>
 
         <form onSubmit={guardarNome}>
           <label style={rotulo}>Nome</label>
@@ -97,11 +97,11 @@ export default function Definicoes() {
       <div style={cartao}>
         <h3 style={{ fontSize: 13, marginTop: 0, marginBottom: 14, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3 }}>Acesso</h3>
         <p style={{ fontSize: 14 }}>
-          Perfil: <strong style={{ color: '#16344A' }}>{ehEquipa ? 'Equipa' : 'Proprietário'}</strong>
+          Perfil: <strong style={{ color: '#2A1C8A' }}>{ehEquipa ? 'Equipa' : 'Proprietário'}</strong>
         </p>
         {fracoes.length > 0 && (
           <p style={{ fontSize: 14, marginBottom: 0 }}>
-            Fração(ões) associada(s): <strong style={{ color: '#16344A' }}>{fracoes.join(', ')}</strong>
+            Fração(ões) associada(s): <strong style={{ color: '#2A1C8A' }}>{fracoes.join(', ')}</strong>
           </p>
         )}
       </div>

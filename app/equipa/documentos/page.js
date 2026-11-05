@@ -14,7 +14,7 @@ const TIPOS = [
 
 const cartao = {
   background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 20, marginBottom: 20,
-  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+  boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
 }
 const rotulo = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
 const campo = { padding: '9px 12px', border: '1px solid #E7E4DA', borderRadius: 8, fontSize: 14, width: '100%', marginBottom: 12 }
@@ -172,7 +172,7 @@ export default function DocumentosEquipa() {
           {documentosFiltrados.map((d) => (
             <div key={d.id} style={{
               background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: '12px 16px',
-              boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+              boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
@@ -180,7 +180,7 @@ export default function DocumentosEquipa() {
                   {TIPOS.find((t) => t.valor === d.tipo)?.nome || d.tipo}
                 </span>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#16344A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.nome}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#2A1C8A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.nome}</div>
                   <div style={{ fontSize: 12, color: '#6B7178' }}>{d.fracoes?.codigo_fracao || 'Todo o empreendimento'}</div>
                 </div>
               </div>

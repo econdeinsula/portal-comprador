@@ -46,7 +46,7 @@ export function AnexoPrivado({ caminho }) {
       style={{
         display: 'inline-block', marginTop: 6, padding: '6px 12px',
         background: '#fff', border: '1px solid #E7E4DA', borderRadius: 8,
-        fontSize: 12, fontWeight: 600, color: '#2B5876', textDecoration: 'none',
+        fontSize: 12, fontWeight: 600, color: '#543CF4', textDecoration: 'none',
       }}
     >
       📎 Abrir ficheiro{ext ? ` (${ext})` : ''}

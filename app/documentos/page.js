@@ -63,7 +63,7 @@ export default function DocumentosProprietario() {
               border: '1px solid #E7E4DA',
               borderRadius: 12,
               padding: '14px 18px',
-              boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+              boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -74,14 +74,14 @@ export default function DocumentosProprietario() {
               <div style={{ fontSize: 11, color: '#6B7178', textTransform: 'uppercase', letterSpacing: 0.3, fontWeight: 600, marginBottom: 2 }}>
                 {TIPOS_NOME[d.tipo] || d.tipo}
               </div>
-              <div style={{ fontSize: 14, color: '#16344A', fontWeight: 500 }}>{d.nome}</div>
+              <div style={{ fontSize: 14, color: '#2A1C8A', fontWeight: 500 }}>{d.nome}</div>
             </div>
             <LinkPrivado
               bucket="documentos"
               caminho={d.ficheiro_url}
               style={{
                 padding: '7px 16px',
-                background: '#2B5876',
+                background: '#543CF4',
                 color: '#fff',
                 borderRadius: 8,
                 textDecoration: 'none',

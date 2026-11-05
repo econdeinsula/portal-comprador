@@ -5,7 +5,7 @@ import { cabecalhoAuth } from '../../../lib/avisar'
 
 const cartao = {
   background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 20, marginBottom: 20,
-  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+  boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
 }
 const rotulo = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
 const campo = { padding: '9px 12px', border: '1px solid #E7E4DA', borderRadius: 8, fontSize: 14, width: '100%', marginBottom: 12 }
@@ -242,15 +242,15 @@ export default function GerirProprietarios() {
         {ligacoes.map((l, i) => (
           <div key={i} style={{
             background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: '12px 16px',
-            boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+            boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-              <span style={{ fontSize: 11, background: '#E4EEF3', color: '#2B5876', padding: '3px 9px', borderRadius: 20, fontWeight: 600, whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 11, background: '#ECE9FE', color: '#543CF4', padding: '3px 9px', borderRadius: 20, fontWeight: 600, whiteSpace: 'nowrap' }}>
                 {l.fracoes?.codigo_fracao} · {l.fracoes?.empreendimentos?.lote}
               </span>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#16344A' }}>{l.proprietarios?.nome}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#2A1C8A' }}>{l.proprietarios?.nome}</div>
                 <div style={{ fontSize: 12, color: '#6B7178' }}>{l.proprietarios?.email}</div>
               </div>
             </div>
@@ -279,11 +279,11 @@ export default function GerirProprietarios() {
         {pessoas.map((p) => (
           <div key={p.id} style={{
             background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: '12px 16px',
-            boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+            boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#16344A' }}>{p.nome}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#2A1C8A' }}>{p.nome}</div>
                 <div style={{ fontSize: 12, color: '#6B7178' }}>{p.email}</div>
               </div>
               <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
@@ -307,7 +307,7 @@ export default function GerirProprietarios() {
 
             {painelApagar === p.id && (
               <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #F0EEE7' }}>
-                <p style={{ fontSize: 13, color: '#16344A', marginTop: 0 }}>
+                <p style={{ fontSize: 13, color: '#2A1C8A', marginTop: 0 }}>
                   Vai apagar o registo de <strong>{p.nome}</strong>, as ligações às frações e a conta de login.
                   Esta ação não se pode desfazer. Faz primeiro a exportação, se for preciso guardar uma cópia.
                 </p>

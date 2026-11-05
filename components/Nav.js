@@ -92,7 +92,7 @@ export default function Nav() {
     return (
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 10,
-        padding: '16px 24px', background: 'linear-gradient(135deg, #14293A, #0D1D29)',
+        padding: '16px 24px', background: 'linear-gradient(135deg, #1A1240, #0F0A2A)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'sans-serif',
       }}>
         <Link href="/" style={{ color: '#fff', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 18, textDecoration: 'none' }}>

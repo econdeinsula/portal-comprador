@@ -1,8 +1,8 @@
 :root {
-  --navy: #14293A;
-  --navy-deep: #0D1D29;
-  --blue: #2B5876;
-  --blue-light: #E4EEF3;
+  --navy: #1A1240;
+  --navy-deep: #0F0A2A;
+  --blue: #543CF4;
+  --blue-light: #ECE9FE;
   --amber: #C8862B;
   --amber-light: #F7EBD6;
   --green: #4B7A51;
@@ -14,9 +14,9 @@
   --line: #E7E4DA;
   --ink: #24292E;
   --muted: #6B7178;
-  --shadow-sm: 0 1px 2px rgba(20, 41, 58, 0.06);
-  --shadow-md: 0 4px 16px rgba(20, 41, 58, 0.08);
-  --shadow-lg: 0 12px 32px rgba(20, 41, 58, 0.12);
+  --shadow-sm: 0 1px 2px rgba(26, 18, 64, 0.06);
+  --shadow-md: 0 4px 16px rgba(26, 18, 64, 0.08);
+  --shadow-lg: 0 12px 32px rgba(26, 18, 64, 0.12);
 }
 
 * { box-sizing: border-box; }
@@ -62,7 +62,7 @@ h3 { font-size: 16px; }
   width: 220px;
   min-height: 100vh;
   flex-shrink: 0;
-  background: linear-gradient(180deg, #14293A, #0D1D29);
+  background: linear-gradient(180deg, #1A1240, #0F0A2A);
   display: flex;
   flex-direction: column;
   padding: 22px 14px;
@@ -140,7 +140,7 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus {
   border-color: var(--blue) !important;
-  box-shadow: 0 0 0 4px rgba(43, 88, 118, 0.14);
+  box-shadow: 0 0 0 4px rgba(84, 60, 244, 0.14);
 }
 
 /* -------- cartões (aplica-se aos blocos já existentes com esta borda inline) -------- */

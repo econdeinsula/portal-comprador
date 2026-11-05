@@ -8,11 +8,11 @@ import { ImagemPrivada } from '../../../components/FicheiroPrivado'
 
 const PlantaSVG = () => (
   <svg viewBox="0 0 400 260" style={{ width: '100%', display: 'block', background: '#fff' }}>
-    <rect x="4" y="4" width="392" height="252" fill="none" stroke="#2B5876" strokeWidth="1.5" />
-    <line x1="180" y1="4" x2="180" y2="150" stroke="#2B5876" strokeWidth="1" />
-    <line x1="180" y1="150" x2="396" y2="150" stroke="#2B5876" strokeWidth="1" />
-    <line x1="260" y1="150" x2="260" y2="256" stroke="#2B5876" strokeWidth="1" />
-    <line x1="60" y1="150" x2="60" y2="256" stroke="#2B5876" strokeWidth="1" />
+    <rect x="4" y="4" width="392" height="252" fill="none" stroke="#543CF4" strokeWidth="1.5" />
+    <line x1="180" y1="4" x2="180" y2="150" stroke="#543CF4" strokeWidth="1" />
+    <line x1="180" y1="150" x2="396" y2="150" stroke="#543CF4" strokeWidth="1" />
+    <line x1="260" y1="150" x2="260" y2="256" stroke="#543CF4" strokeWidth="1" />
+    <line x1="60" y1="150" x2="60" y2="256" stroke="#543CF4" strokeWidth="1" />
     <text x="18" y="24" fontSize="10" fill="#6E6A5E">SALA</text>
     <text x="198" y="24" fontSize="10" fill="#6E6A5E">COZINHA</text>
     <text x="198" y="168" fontSize="10" fill="#6E6A5E">WC</text>
@@ -30,7 +30,7 @@ function Planta({ url }) {
 
 const cartao = {
   background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 22,
-  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+  boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
 }
 const rotulo = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
 const campo = { padding: '10px 12px', border: '1px solid #E7E4DA', borderRadius: 9, fontSize: 14, width: '100%', marginBottom: 14, boxSizing: 'border-box' }
@@ -165,7 +165,7 @@ export default function NovaAnomalia() {
       <main style={{ maxWidth: 560, margin: '40px auto', fontFamily: 'sans-serif' }}>
         <h1>Nova reclamação</h1>
         <div style={cartao}>
-          <p style={{ margin: 0, fontSize: 14, color: '#16344A' }}>
+          <p style={{ margin: 0, fontSize: 14, color: '#2A1C8A' }}>
             A sua conta ainda não está associada a nenhuma fração, por isso não é possível registar uma reclamação.
             Contacte a equipa para ligar a sua conta à sua fração.
           </p>

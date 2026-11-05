@@ -8,7 +8,7 @@ function EtiquetaEstado({ nome }) {
     'Aberta': { bg: '#F6E4DF', cor: '#B4462F' },
     'Resolvida': { bg: '#E5EEE6', cor: '#4B7A51' },
     'Em análise': { bg: '#F7EBD6', cor: '#C8862B' },
-    'Agendada': { bg: '#E4EEF3', cor: '#2B5876' },
+    'Agendada': { bg: '#ECE9FE', cor: '#543CF4' },
   }
   const c = cores[nome] || { bg: '#F3F1EA', cor: '#6B7178' }
   return (
@@ -75,7 +75,7 @@ export default function ListaAnomalias() {
         <h1 style={{ marginBottom: 2 }}>As minhas reclamações</h1>
         <Link
           href="/anomalias/nova"
-          style={{ padding: '9px 18px', background: '#2B5876', color: '#fff', borderRadius: 9, textDecoration: 'none', fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}
+          style={{ padding: '9px 18px', background: '#543CF4', color: '#fff', borderRadius: 9, textDecoration: 'none', fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}
         >
           + Nova reclamação
         </Link>
@@ -90,7 +90,7 @@ export default function ListaAnomalias() {
           border: '1px solid #E7E4DA',
         }}>
           <p style={{ color: '#6B7178', marginBottom: 16 }}>Ainda não tem nenhuma reclamação registada.</p>
-          <Link href="/anomalias/nova" style={{ color: '#2B5876', fontWeight: 600 }}>Criar a primeira →</Link>
+          <Link href="/anomalias/nova" style={{ color: '#543CF4', fontWeight: 600 }}>Criar a primeira →</Link>
         </div>
       )}
 
@@ -99,7 +99,7 @@ export default function ListaAnomalias() {
           <Link key={a.id} href={`/anomalias/${a.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
             <div style={{
               background: '#fff', border: '1px solid #E7E4DA', borderRadius: 12, padding: '16px 18px',
-              boxShadow: '0 1px 3px rgba(20,41,58,0.05)', transition: 'box-shadow 0.15s ease, transform 0.15s ease',
+              boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)', transition: 'box-shadow 0.15s ease, transform 0.15s ease',
               display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12,
             }}>
               <div style={{ minWidth: 0 }}>
@@ -108,7 +108,7 @@ export default function ListaAnomalias() {
                     {a.categorias?.nome ? `${a.categorias.nome} — ${a.elementos?.nome}` : 'Por classificar'}
                   </strong>
                   {mostrarFracao && (
-                    <span style={{ fontSize: 11, background: '#E4EEF3', color: '#2B5876', padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>
+                    <span style={{ fontSize: 11, background: '#ECE9FE', color: '#543CF4', padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>
                       {a.fracoes?.codigo_fracao}
                     </span>
                   )}

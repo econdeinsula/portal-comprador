@@ -9,11 +9,11 @@ import { avisar } from '../../../lib/avisar'
 
 const PlantaSVG = () => (
   <svg viewBox="0 0 400 260" style={{ width: '100%', display: 'block', background: '#fff' }}>
-    <rect x="4" y="4" width="392" height="252" fill="none" stroke="#2B5876" strokeWidth="1.5" />
-    <line x1="180" y1="4" x2="180" y2="150" stroke="#2B5876" strokeWidth="1" />
-    <line x1="180" y1="150" x2="396" y2="150" stroke="#2B5876" strokeWidth="1" />
-    <line x1="260" y1="150" x2="260" y2="256" stroke="#2B5876" strokeWidth="1" />
-    <line x1="60" y1="150" x2="60" y2="256" stroke="#2B5876" strokeWidth="1" />
+    <rect x="4" y="4" width="392" height="252" fill="none" stroke="#543CF4" strokeWidth="1.5" />
+    <line x1="180" y1="4" x2="180" y2="150" stroke="#543CF4" strokeWidth="1" />
+    <line x1="180" y1="150" x2="396" y2="150" stroke="#543CF4" strokeWidth="1" />
+    <line x1="260" y1="150" x2="260" y2="256" stroke="#543CF4" strokeWidth="1" />
+    <line x1="60" y1="150" x2="60" y2="256" stroke="#543CF4" strokeWidth="1" />
     <text x="18" y="24" fontSize="10" fill="#6E6A5E">SALA</text>
     <text x="198" y="24" fontSize="10" fill="#6E6A5E">COZINHA</text>
     <text x="198" y="168" fontSize="10" fill="#6E6A5E">WC</text>
@@ -27,7 +27,7 @@ function EtiquetaEstado({ nome }) {
     'Aberta': { bg: '#F6E4DF', cor: '#B4462F' },
     'Resolvida': { bg: '#E5EEE6', cor: '#4B7A51' },
     'Em análise': { bg: '#F7EBD6', cor: '#C8862B' },
-    'Agendada': { bg: '#E4EEF3', cor: '#2B5876' },
+    'Agendada': { bg: '#ECE9FE', cor: '#543CF4' },
   }
   const c = cores[nome] || { bg: '#F3F1EA', cor: '#6B7178' }
   return (
@@ -42,7 +42,7 @@ function EtiquetaEstado({ nome }) {
 
 const cartao = {
   background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 18, marginBottom: 18,
-  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+  boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
 }
 
 export default function DetalheAnomalia() {
@@ -267,7 +267,7 @@ export default function DetalheAnomalia() {
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <button type="button" onClick={() => responderVisita('confirmada')}>Aceitar</button>
                   <button type="button" onClick={() => responderVisita('recusada')} style={{ background: '#B4462F' }}>Recusar</button>
-                  <button type="button" onClick={() => setAContrapropor(true)} style={{ background: 'transparent', color: '#2B5876', padding: '8px 0', boxShadow: 'none' }}>
+                  <button type="button" onClick={() => setAContrapropor(true)} style={{ background: 'transparent', color: '#543CF4', padding: '8px 0', boxShadow: 'none' }}>
                     Propor outra data
                   </button>
                 </div>
@@ -281,7 +281,7 @@ export default function DetalheAnomalia() {
                     style={{ padding: 8 }}
                   />
                   <button type="submit">Enviar</button>
-                  <button type="button" onClick={() => setAContrapropor(false)} style={{ background: 'transparent', color: '#2B5876', boxShadow: 'none' }}>
+                  <button type="button" onClick={() => setAContrapropor(false)} style={{ background: 'transparent', color: '#543CF4', boxShadow: 'none' }}>
                     Cancelar
                   </button>
                 </form>
@@ -303,7 +303,7 @@ export default function DetalheAnomalia() {
 
       {empresasDaAnomalia.length > 0 && (
         <p style={{ fontSize: 13, color: '#6B7178', marginBottom: 18 }}>
-          Empresa(s) responsável(eis): <strong style={{ color: '#16344A' }}>{empresasDaAnomalia.join(', ')}</strong>
+          Empresa(s) responsável(eis): <strong style={{ color: '#2A1C8A' }}>{empresasDaAnomalia.join(', ')}</strong>
         </p>
       )}
 
@@ -323,7 +323,7 @@ export default function DetalheAnomalia() {
               height: 16,
               marginLeft: -8,
               marginTop: -16,
-              background: '#2B5876',
+              background: '#543CF4',
               borderRadius: '50% 50% 50% 0',
               transform: 'rotate(45deg)',
               border: '2px solid #fff',
@@ -340,7 +340,7 @@ export default function DetalheAnomalia() {
             key={ev.id}
             style={{
               alignSelf: ev.autor_tipo === 'proprietario' ? 'flex-start' : ev.autor_tipo === 'equipa' ? 'flex-end' : 'center',
-              background: ev.autor_tipo === 'proprietario' ? '#E4EEF3' : ev.autor_tipo === 'equipa' ? '#E5EEE6' : 'transparent',
+              background: ev.autor_tipo === 'proprietario' ? '#ECE9FE' : ev.autor_tipo === 'equipa' ? '#E5EEE6' : 'transparent',
               border: ev.autor_tipo === 'sistema' ? '1px dashed #D8D5CB' : 'none',
               borderRadius: 12,
               padding: '10px 14px',

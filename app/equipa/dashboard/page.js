@@ -4,7 +4,7 @@ import { supabase } from '../../../lib/supabaseClient'
 import { exportarComoPDF } from '../../../lib/exportarPdf'
 import Link from 'next/link'
 
-const CORES = ['#2B5876', '#4B7A51', '#C8862B', '#B4462F', '#6E6A5E', '#8E6BAF', '#3C8DAD', '#A1683A']
+const CORES = ['#543CF4', '#4B7A51', '#C8862B', '#B4462F', '#6E6A5E', '#8E6BAF', '#8B7BF8', '#A1683A']
 
 const WIDGETS_DEFAULT = {
   kpis: true,
@@ -18,7 +18,7 @@ const WIDGETS_DEFAULT = {
 
 const cartao = {
   background: '#fff', border: '1px solid #E7E4DA', borderRadius: 14, padding: 20, marginBottom: 20,
-  boxShadow: '0 1px 3px rgba(20,41,58,0.05)',
+  boxShadow: '0 1px 3px rgba(26, 18, 64,0.05)',
 }
 const rotuloFiltro = { fontSize: 11, color: '#6B7178', display: 'block', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }
 const campoFiltro = { padding: '7px 10px', border: '1px solid #E7E4DA', borderRadius: 8, fontSize: 13 }
@@ -30,7 +30,7 @@ function BarraContagem({ itens, total }) {
       {itens.map((item, i) => (
         <div key={item.nome}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
-            <span style={{ color: '#16344A' }}>{item.nome}</span>
+            <span style={{ color: '#2A1C8A' }}>{item.nome}</span>
             <span style={{ color: '#6B7178' }}>{item.count}</span>
           </div>
           <div style={{ background: '#F3F1EA', borderRadius: 6, height: 8, overflow: 'hidden' }}>
@@ -282,7 +282,7 @@ export default function Dashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
         <h1 style={{ marginBottom: 2 }}>Dashboard</h1>
         <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-          <button onClick={() => setMostrarPersonalizar((v) => !v)} style={{ background: 'transparent', color: '#2B5876', padding: 0, fontSize: 14, boxShadow: 'none', fontWeight: 600 }}>
+          <button onClick={() => setMostrarPersonalizar((v) => !v)} style={{ background: 'transparent', color: '#543CF4', padding: 0, fontSize: 14, boxShadow: 'none', fontWeight: 600 }}>
             ⚙ Personalizar
           </button>
           <button onClick={() => exportarComoPDF('conteudo-dashboard', 'dashboard.pdf')} style={{ fontSize: 13, padding: '8px 14px' }}>
@@ -343,7 +343,7 @@ export default function Dashboard() {
         <div id="conteudo-dashboard">
           {widgets.kpis && (
             <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-              <Cartao titulo="Total" valor={kpis.total} cor="#16344A" fundo="#F3F1EA" />
+              <Cartao titulo="Total" valor={kpis.total} cor="#2A1C8A" fundo="#F3F1EA" />
               <Cartao titulo="Abertas" valor={kpis.abertas} cor="#B4462F" fundo="#F6E4DF" />
               <Cartao titulo="Resolvidas" valor={kpis.resolvidas} cor="#4B7A51" fundo="#E5EEE6" />
               <Cartao titulo="Por classificar" valor={kpis.semClassificar} cor="#C8862B" fundo="#F7EBD6" />
@@ -393,7 +393,7 @@ export default function Dashboard() {
                   <tbody>
                     {desempenhoEmpresas.map((e) => (
                       <tr key={e.nome} style={{ borderBottom: '1px solid #F0EEE7' }}>
-                        <td style={{ padding: '10px 8px 10px 0', color: '#16344A', fontWeight: 500 }}>{e.nome}</td>
+                        <td style={{ padding: '10px 8px 10px 0', color: '#2A1C8A', fontWeight: 500 }}>{e.nome}</td>
                         <td style={{ padding: '10px 8px' }}>{e.total}</td>
                         <td style={{ padding: '10px 8px', color: '#B4462F' }}>{e.abertas}</td>
                         <td style={{ padding: '10px 8px', color: '#4B7A51' }}>{e.resolvidas}</td>

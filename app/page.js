@@ -19,7 +19,7 @@ function CartaoKpi({ titulo, valor, cor, icone }) {
     <div style={{
       flex: '1 1 140px', background: '#fff', borderRadius: 12, padding: '18px 20px',
       display: 'flex', alignItems: 'center', gap: 14,
-      border: '1px solid #E7E4DA', boxShadow: '0 1px 3px rgba(20,41,58,0.06)',
+      border: '1px solid #E7E4DA', boxShadow: '0 1px 3px rgba(26, 18, 64,0.06)',
     }}>
       <Icone>{icone}</Icone>
       <div>
@@ -145,7 +145,7 @@ export default function Home() {
         </p>
         <Link
           href="/login"
-          style={{ display: 'inline-block', marginTop: 20, padding: '10px 24px', background: '#2B5876', color: '#fff', borderRadius: 8, textDecoration: 'none', fontWeight: 600 }}
+          style={{ display: 'inline-block', marginTop: 20, padding: '10px 24px', background: '#543CF4', color: '#fff', borderRadius: 8, textDecoration: 'none', fontWeight: 600 }}
         >
           Entrar
         </Link>
@@ -167,12 +167,12 @@ export default function Home() {
       {ehProprietario && (
         <div style={{
           background: '#fff', borderRadius: 14, padding: 22, marginBottom: 24,
-          border: '1px solid #E7E4DA', boxShadow: '0 1px 3px rgba(20,41,58,0.06)',
+          border: '1px solid #E7E4DA', boxShadow: '0 1px 3px rgba(26, 18, 64,0.06)',
         }}>
           <h3 style={{ marginTop: 0, fontSize: 15 }}>As suas reclamações</h3>
           <div style={{ display: 'flex', gap: 28, marginBottom: 16 }}>
             <div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: '#16344A' }}>{resumo?.totalProprietario ?? 0}</div>
+              <div style={{ fontSize: 28, fontWeight: 700, color: '#2A1C8A' }}>{resumo?.totalProprietario ?? 0}</div>
               <div style={{ fontSize: 12, color: '#6B7178' }}>total</div>
             </div>
             <div>
@@ -181,10 +181,10 @@ export default function Home() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <Link href="/anomalias/nova" style={{ padding: '9px 18px', background: '#2B5876', color: '#fff', borderRadius: 9, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
+            <Link href="/anomalias/nova" style={{ padding: '9px 18px', background: '#543CF4', color: '#fff', borderRadius: 9, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
               + Nova reclamação
             </Link>
-            <Link href="/anomalias" style={{ padding: '9px 18px', border: '1px solid #E7E4DA', borderRadius: 9, textDecoration: 'none', fontSize: 14, color: '#16344A', fontWeight: 500 }}>
+            <Link href="/anomalias" style={{ padding: '9px 18px', border: '1px solid #E7E4DA', borderRadius: 9, textDecoration: 'none', fontSize: 14, color: '#2A1C8A', fontWeight: 500 }}>
               Ver todas
             </Link>
           </div>
@@ -194,7 +194,7 @@ export default function Home() {
       {ehEquipa && (
         <>
           <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-            <CartaoKpi titulo="Total" valor={resumo?.totalEquipa ?? 0} cor="#16344A" icone="📋" />
+            <CartaoKpi titulo="Total" valor={resumo?.totalEquipa ?? 0} cor="#2A1C8A" icone="📋" />
             <CartaoKpi titulo="Abertas" valor={resumo?.abertasEquipa ?? 0} cor="#B4462F" icone="🔴" />
             <CartaoKpi titulo="Resolvidas" valor={resumo?.resolvidasEquipa ?? 0} cor="#4B7A51" icone="✅" />
             <CartaoKpi titulo="Por classificar" valor={resumo?.semClassEquipa ?? 0} cor="#C8862B" icone="🏷️" />
@@ -202,7 +202,7 @@ export default function Home() {
 
           <div style={{
             background: '#fff', borderRadius: 14, padding: 22,
-            border: '1px solid #E7E4DA', boxShadow: '0 1px 3px rgba(20,41,58,0.06)',
+            border: '1px solid #E7E4DA', boxShadow: '0 1px 3px rgba(26, 18, 64,0.06)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
               <h3 style={{ margin: 0, fontSize: 15 }}>Atividade recente</h3>
@@ -226,7 +226,7 @@ export default function Home() {
                   }}
                 >
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#16344A' }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#2A1C8A' }}>
                       {a.fracoes?.codigo_fracao} · {a.categorias?.nome ? `${a.categorias.nome} — ${a.elementos?.nome}` : 'Por classificar'}
                     </div>
                     <div style={{ fontSize: 12, color: '#6B7178', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

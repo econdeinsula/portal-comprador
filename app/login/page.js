@@ -47,7 +47,7 @@ export default function LoginPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'radial-gradient(circle at 20% 20%, #E4EEF3 0%, #F7F5F0 45%)',
+      background: 'radial-gradient(circle at 20% 20%, #ECE9FE 0%, #F7F5F0 45%)',
       fontFamily: 'sans-serif',
       padding: 20,
     }}>
@@ -57,13 +57,13 @@ export default function LoginPage() {
         background: '#fff',
         borderRadius: 18,
         padding: '38px 36px',
-        boxShadow: '0 12px 32px rgba(20,41,58,0.12)',
+        boxShadow: '0 12px 32px rgba(26, 18, 64,0.12)',
         border: '1px solid #E7E4DA',
       }}>
         <img src="/logo.png" alt="Portal do Cliente" style={{ height: 90, marginBottom: 24, display: 'block' }} />
 
         <h1 style={{
-          fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, color: '#16344A',
+          fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, color: '#2A1C8A',
           margin: '0 0 4px', fontWeight: 600,
         }}>
           Portal do Cliente
@@ -99,7 +99,7 @@ export default function LoginPage() {
               </button>
             </form>
             <p style={{ fontSize: 13, marginTop: 18, textAlign: 'center' }}>
-              <a href="#" onClick={(e) => { e.preventDefault(); setARecuperar(true); setErro('') }} style={{ color: '#2B5876', fontWeight: 500 }}>
+              <a href="#" onClick={(e) => { e.preventDefault(); setARecuperar(true); setErro('') }} style={{ color: '#543CF4', fontWeight: 500 }}>
                 Esqueci-me da password
               </a>
             </p>
@@ -107,7 +107,7 @@ export default function LoginPage() {
         ) : (
           <>
             {enviado ? (
-              <p style={{ fontSize: 14, color: '#16344A' }}>Enviámos um link para <strong>{email}</strong> — abra-o para definir a sua password.</p>
+              <p style={{ fontSize: 14, color: '#2A1C8A' }}>Enviámos um link para <strong>{email}</strong> — abra-o para definir a sua password.</p>
             ) : (
               <form onSubmit={pedirRecuperacao}>
                 <p style={{ fontSize: 13, color: '#6B7178', marginTop: 0 }}>
@@ -129,7 +129,7 @@ export default function LoginPage() {
               </form>
             )}
             <p style={{ fontSize: 13, marginTop: 18, textAlign: 'center' }}>
-              <a href="#" onClick={(e) => { e.preventDefault(); setARecuperar(false); setErro('') }} style={{ color: '#2B5876', fontWeight: 500 }}>
+              <a href="#" onClick={(e) => { e.preventDefault(); setARecuperar(false); setErro('') }} style={{ color: '#543CF4', fontWeight: 500 }}>
                 ← Voltar ao login
               </a>
             </p>
