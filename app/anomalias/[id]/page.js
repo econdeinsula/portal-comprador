@@ -52,7 +52,6 @@ export default function DetalheAnomalia() {
   const [visita, setVisita] = useState(null)
   const [aContrapropor, setAContrapropor] = useState(false)
   const [novaDataProposta, setNovaDataProposta] = useState('')
-  const [empresasDaAnomalia, setEmpresasDaAnomalia] = useState([])
   const [plantaUrl, setPlantaUrl] = useState(null)
   const [texto, setTexto] = useState('')
   const [anexo, setAnexo] = useState(null)
@@ -100,12 +99,6 @@ export default function DetalheAnomalia() {
       .limit(1)
       .maybeSingle()
     setVisita(v)
-
-    const { data: ligacoesEmpresa } = await supabase
-      .from('anomalia_empresas')
-      .select('empresas ( nome )')
-      .eq('anomalia_id', id)
-    setEmpresasDaAnomalia((ligacoesEmpresa || []).map((l) => l.empresas?.nome).filter(Boolean))
 
     setCarregando(false)
   }
@@ -299,12 +292,6 @@ export default function DetalheAnomalia() {
             <p style={{ margin: 0, color: '#B4462F', fontSize: 14 }}>Recusaste a última data proposta. A equipa vai propor outra.</p>
           )}
         </div>
-      )}
-
-      {empresasDaAnomalia.length > 0 && (
-        <p style={{ fontSize: 13, color: '#6B7178', marginBottom: 18 }}>
-          Empresa(s) responsável(eis): <strong style={{ color: '#2A1C8A' }}>{empresasDaAnomalia.join(', ')}</strong>
-        </p>
       )}
 
       {anomalia.pin_x != null && (
