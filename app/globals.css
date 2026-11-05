@@ -62,7 +62,7 @@ h3 { font-size: 16px; }
   width: 220px;
   min-height: 100vh;
   flex-shrink: 0;
-  background: linear-gradient(180deg, #1A1240, #0F0A2A);
+  background: linear-gradient(180deg, #543CF4, #3A24C2);
   display: flex;
   flex-direction: column;
   padding: 22px 14px;
