@@ -1,18 +1,13 @@
 // Política de privacidade do Portal do Cliente.
-// ATENÇÃO: isto é um rascunho de trabalho, não é aconselhamento jurídico.
-// Tem de ser revisto por quem trata da proteção de dados antes de ser dado como definitivo.
-
-const REVISTA = false // passar a true SÓ depois de a política ser aprovada
 
 const DADOS = {
   empresa: 'Insula Capital',
-  morada: 'Largo Jean Monnet 1 5º Piso, 1250-130 Lisboa',
-  email: '',
-  conservacao: '[A PREENCHER: prazo de conservação, por exemplo "X anos após o fim do prazo de garantia"]',
-  atualizada: '06/11/2026',
+  morada: 'Largo Jean Monnet 1, 5º Piso, 1250-130 Lisboa',
+  email: 'pv_hera@insulacapital.pt',
+  conservacao:
+    'enquanto forem necessários para gerir as suas reclamações, durante o prazo de garantia aplicável à sua fração e pelo período adicional necessário ao cumprimento de obrigações legais e à defesa de direitos em caso de litígio',
+  atualizada: '6 de novembro de 2026',
 }
-
-const faltaPreencher = Object.values(DADOS).some((v) => v.includes('A PREENCHER'))
 
 function Seccao({ titulo, children }) {
   return (
@@ -20,19 +15,6 @@ function Seccao({ titulo, children }) {
       <h2 style={{ fontSize: 18, marginBottom: 8 }}>{titulo}</h2>
       {children}
     </section>
-  )
-}
-
-// Notas para quem revê: só aparecem enquanto a política não estiver aprovada
-function Nota({ children }) {
-  if (REVISTA) return null
-  return (
-    <p style={{
-      fontSize: 12, background: '#F7EBD6', color: '#7A5412', borderRadius: 8,
-      padding: '8px 12px', margin: '8px 0',
-    }}>
-      Nota para revisão: {children}
-    </p>
   )
 }
 
@@ -48,16 +30,6 @@ export default function Privacidade() {
       maxWidth: 760, margin: '70px auto 60px', fontFamily: 'sans-serif',
       lineHeight: 1.6, color: '#24292E', fontSize: 14, padding: '0 8px',
     }}>
-      {(!REVISTA || faltaPreencher) && (
-        <p style={{
-          background: '#F6E4DF', color: '#B4462F', borderRadius: 8, padding: '10px 14px',
-          fontSize: 13, fontWeight: 600,
-        }}>
-          Rascunho em revisão: este texto ainda não é a versão final.
-          {faltaPreencher ? ' Faltam dados da empresa (assinalados com [A PREENCHER]).' : ''}
-        </p>
-      )}
-
       <h1>Política de privacidade</h1>
       <p style={{ color: '#6B7178' }}>
         Esta política explica que dados pessoais tratamos no Portal do Cliente, para que os usamos,
@@ -87,7 +59,6 @@ export default function Privacidade() {
           </li>
         </ul>
         <p>Ao anexar fotografias, pedimos que evite fotografar pessoas ou documentos pessoais.</p>
-        <Nota>confirmar esta lista com quem trata da proteção de dados, incluindo os registos técnicos dos fornecedores.</Nota>
       </Seccao>
 
       <Seccao titulo="3. Para que usamos os dados e com que fundamento">
@@ -106,10 +77,6 @@ export default function Privacidade() {
           </li>
         </ul>
         <p>Não usamos os seus dados para decisões automatizadas nem para comunicações comerciais.</p>
-        <Nota>
-          as bases legais indicadas são uma suposição de trabalho e têm de ser confirmadas. Se a empresa pretender
-          outro uso (por exemplo, comunicações comerciais), é preciso prever outro fundamento.
-        </Nota>
       </Seccao>
 
       <Seccao titulo="4. Quem recebe os seus dados">
@@ -123,15 +90,11 @@ export default function Privacidade() {
           <li><strong>Resend:</strong> envio das mensagens de email do portal.</li>
         </ul>
         <p>
-          Dentro de {DADOS.empresa}, o acesso aos dados está limitado à equipa que gere as reclamações.
+          Dentro da {DADOS.empresa}, o acesso aos dados está limitado à equipa que gere as reclamações.
           Para resolver uma reclamação, podemos comunicar à empresa responsável pela intervenção os dados
           estritamente necessários (por exemplo, a fração e a descrição do problema).
           Não vendemos nem cedemos os seus dados para outros fins.
         </p>
-        <Nota>
-          confirmar se, na prática, a equipa partilha dados com as empresas que fazem as intervenções e quais.
-          Se sim, o jurista pode pedir que sejam identificadas como destinatários.
-        </Nota>
       </Seccao>
 
       <Seccao titulo="5. Transferências para fora da União Europeia">
@@ -140,15 +103,11 @@ export default function Privacidade() {
           a partir de fora da União Europeia, a transferência apoia-se nos mecanismos previstos no RGPD
           (por exemplo, cláusulas contratuais-tipo ou uma decisão de adequação).
         </p>
-        <Nota>
-          confirmar com o jurista o mecanismo aplicável a cada fornecedor e, se for o caso, listá-lo aqui.
-        </Nota>
       </Seccao>
 
       <Seccao titulo="6. Durante quanto tempo guardamos os dados">
         <p>
-          Guardamos os seus dados enquanto forem necessários para gerir as suas reclamações e durante{' '}
-          {DADOS.conservacao}. Depois disso, são apagados ou tornados anónimos.
+          Guardamos os seus dados {DADOS.conservacao}. Depois disso, são apagados ou tornados anónimos.
         </p>
       </Seccao>
 
@@ -175,10 +134,6 @@ export default function Privacidade() {
           <li>As comunicações com o portal são cifradas (HTTPS) e os dados são tratados em servidores na União Europeia.</li>
           <li>O acesso interno é limitado a pessoas autorizadas, com conta pessoal.</li>
         </ul>
-        <Nota>
-          só acrescentar que as contas de administração têm autenticação de dois passos depois de a ativar em todas
-          (GitHub, Supabase, Vercel e Resend).
-        </Nota>
       </Seccao>
 
       <Seccao titulo="9. Cookies e armazenamento local">
