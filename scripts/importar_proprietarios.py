@@ -42,6 +42,22 @@ def limpar_email(s):
     return s.lower().strip(".,;'")
 
 
+TEL_NO_NOME = re.compile(r"\+?\d[\d\s().\-/]{6,}\d")
+
+
+def limpar_nome(s):
+    """tira telefones colados ao nome (os telefones não se importam)"""
+    s = TEL_NO_NOME.sub(" ", s)
+    return re.sub(r"\s+", " ", s).strip(" -–,;:/")
+
+
+def pontuar(nome, email):
+    """quantas palavras do nome aparecem na parte do email antes do @"""
+    local = re.sub(r"[^a-z0-9]", "", sem_acentos(email.split("@")[0]))
+    palavras = [p for p in re.split(r"\W+", sem_acentos(nome)) if len(p) >= 3 and p.isalpha()]
+    return sum(1 for p in palavras if p in local)
+
+
 def classificar(v):
     """nome | email | invalido | tel | None (vazio)"""
     s = limpar(v)
@@ -54,6 +70,9 @@ def classificar(v):
     if "@" in s:
         return "invalido"
     if TEL_RE.match(s):
+        return "tel"
+    sem_tel = re.sub(r"\b(ou|e)\b", " ", TEL_NO_NOME.sub(" ", s), flags=re.I)
+    if TEL_NO_NOME.search(s) and not re.search(r"[A-Za-zÀ-ÿ]{2,}", sem_tel):
         return "tel"
     return "nome"
 
@@ -127,9 +146,9 @@ def ler_lote1(linhas):
                 nota = "email inválido"
                 break
             email = limpar_email(m.group(0))
-            nome = limpar(r[c[k_nome]])
+            nome = limpar_nome(limpar(r[c[k_nome]]))
             if not nome and ordem == 2:
-                nome = limpar(r[c["n1"]])
+                nome = limpar_nome(limpar(r[c["n1"]]))
                 if nome:
                     conf, nota = "rever", "nome do cliente 1 (o 2 está vazio)"
             break
@@ -190,7 +209,11 @@ def ler_lote2(linhas):
             if len(antes) == 1:
                 nome = antes[0]
             elif len(antes) > 1:
-                nome, conf, nota = antes[0], "rever", f"{len(antes)} textos antes do email (usei o primeiro)"
+                pontos = [pontuar(a, email) for a in antes]
+                melhor = max(pontos)
+                nome = antes[max(i for i, p in enumerate(pontos) if p == melhor)]
+                conf = "rever"
+                nota = f"{len(antes)} textos antes do email (escolhi o " + ("mais parecido com o email)" if melhor else "mais próximo do email)")
             elif depois:
                 nome, conf, nota = depois[0], "rever", "o nome vem depois do email"
             else:
@@ -200,6 +223,12 @@ def ler_lote2(linhas):
                     nome, conf, nota = resto, "rever", "nome na mesma célula do email"
                 else:
                     nome, conf, nota = NOME_EM_FALTA, "rever", "sem nome"
+            limpo = limpar_nome(nome)
+            if limpo != nome:
+                nome = limpo or NOME_EM_FALTA
+                nota = (nota + "; " if nota else "") + "telefone retirado do nome"
+                if nome == NOME_EM_FALTA:
+                    conf = "rever"
             base.update(email=email, nome=nome, confianca=conf, nota=nota)
         entradas.append(base)
     return entradas, duplicadas, sem_codigo
