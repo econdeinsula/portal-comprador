@@ -41,16 +41,21 @@ export default function Nav() {
   const [user, setUser] = useState(null)
   const [ehEquipa, setEhEquipa] = useState(false)
   const [ehProprietario, setEhProprietario] = useState(false)
+  const [ehAuditor, setEhAuditor] = useState(false)
   const [aberto, setAberto] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
 
   async function verificarPerfis(currentUser) {
-    if (!currentUser) { setEhEquipa(false); setEhProprietario(false); return }
+    if (!currentUser) { setEhEquipa(false); setEhProprietario(false); setEhAuditor(false); return }
 
     const { data: equipa } = await supabase
       .from('membros_equipa').select('email').eq('email', currentUser.email).maybeSingle()
     setEhEquipa(!!equipa)
+
+    const { data: auditor } = await supabase
+      .from('auditores').select('email').eq('email', currentUser.email).maybeSingle()
+    setEhAuditor(!!auditor && !equipa)
 
     const { data: proprietario } = await supabase
       .from('proprietarios').select('id').eq('email', currentUser.email).maybeSingle()
@@ -147,6 +152,17 @@ export default function Nav() {
             <ItemMenu href="/equipa/membros" ativo={pathname === '/equipa/membros'}>Membros da equipa</ItemMenu>
           </>
         )}
+        {ehAuditor && (
+          <>
+            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'rgba(255,255,255,0.4)', padding: '0 16px', marginBottom: 6 }}>
+              Consulta (só leitura)
+            </div>
+            <ItemMenu href="/equipa" ativo={pathname === '/equipa'}>Painel</ItemMenu>
+            <ItemMenu href="/equipa/mensagens" ativo={pathname === '/equipa/mensagens'}>Mensagens</ItemMenu>
+            <ItemMenu href="/equipa/dashboard" ativo={pathname === '/equipa/dashboard'}>Dashboard</ItemMenu>
+            <ItemMenu href="/equipa/fracoes" ativo={pathname === '/equipa/fracoes'}>Consultar fração</ItemMenu>
+          </>
+        )}
       </nav>
 
       <div className="nav-rodape">
@@ -165,6 +181,9 @@ export default function Nav() {
           <button onClick={sair} style={{ background: 'transparent', boxShadow: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 11, padding: 0, fontWeight: 500 }}>
             Sair
           </button>
+          <Link href="/privacidade" style={{ display: 'block', marginTop: 6, color: 'rgba(255,255,255,0.5)', fontSize: 11, textDecoration: 'none' }}>
+            Privacidade
+          </Link>
         </div>
       </div>
     </aside>

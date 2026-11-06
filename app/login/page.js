@@ -135,6 +135,10 @@ export default function LoginPage() {
             </p>
           </>
         )}
+
+        <p style={{ fontSize: 12, marginTop: 22, textAlign: 'center' }}>
+          <a href="/privacidade" style={{ color: '#6B7178' }}>Política de privacidade</a>
+        </p>
       </div>
     </div>
   )

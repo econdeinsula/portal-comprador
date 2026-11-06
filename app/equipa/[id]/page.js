@@ -74,6 +74,7 @@ export default function DetalheEquipa() {
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState('')
+  const [somenteLeitura, setSomenteLeitura] = useState(false)
 
   async function carregar() {
     const { data: a } = await supabase
@@ -167,6 +168,21 @@ export default function DetalheEquipa() {
       window.localStorage.setItem(`visto_equipa_${id}`, new Date().toISOString())
     }
   }, [id])
+
+  // contas de auditor (não são da equipa) só podem ler
+  useEffect(() => {
+    async function verificar() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user?.email) return
+      const { data: membro } = await supabase
+        .from('membros_equipa').select('email').eq('email', user.email).maybeSingle()
+      if (membro) return
+      const { data: auditor } = await supabase
+        .from('auditores').select('email').eq('email', user.email).maybeSingle()
+      setSomenteLeitura(!!auditor)
+    }
+    verificar()
+  }, [])
 
   const elementosFiltrados = elementos.filter((e) => e.categoria_id === categoriaId)
 
@@ -386,6 +402,12 @@ export default function DetalheEquipa() {
           ⬇ Exportar PDF
         </button>
       </div>
+      {somenteLeitura && (
+        <p style={{ fontSize: 12, color: '#6B7178', background: '#F3F1EA', borderRadius: 8, padding: '8px 12px', marginTop: 0 }}>
+          Modo de consulta: esta conta só pode ler.
+        </p>
+      )}
+      <fieldset disabled={somenteLeitura} style={{ border: 'none', padding: 0, margin: 0, minWidth: 0 }}>
       <div id="conteudo-reclamacao">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 2 }}>
         <h1 style={{ marginBottom: 2 }}>
@@ -641,6 +663,7 @@ export default function DetalheEquipa() {
           {aEnviar ? 'A enviar...' : 'Enviar'}
         </button>
       </form>
+      </fieldset>
     </main>
   )
 }
