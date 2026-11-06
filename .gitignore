@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+dados_privados/
+revisao_importacao.csv
+*.xlsb
